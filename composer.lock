@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "dbb17d046a7056c905ff3ca73e3de01e",
+    "hash": "5bb83d2d518921398c98334c3a99f0c1",
     "packages": [
         {
             "name": "guzzle/guzzle",
@@ -98,6 +98,56 @@
             "time": "2014-01-28 22:29:15"
         },
         {
+            "name": "mihaeu/sub-collector",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mihaeu/sub-collector.git",
+                "reference": "b44245e0809da2137ea395a836fe9b42b7120645"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mihaeu/sub-collector/zipball/b44245e0809da2137ea395a836fe9b42b7120645",
+                "reference": "b44245e0809da2137ea395a836fe9b42b7120645",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "symfony/console": "2.*"
+            },
+            "require-dev": {
+                "mikey179/vfsstream": "1.*",
+                "mockery/mockery": "dev-master@dev",
+                "phpunit/phpunit": "4.*"
+            },
+            "bin": [
+                "bin/sub-collector"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Mihaeu": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Haeuslmann",
+                    "email": "haeuslmann@gmail.com"
+                }
+            ],
+            "description": "Sub-Collector is a console based app written in PHP, its main purpose is to help batch collecting of subtitles.",
+            "keywords": [
+                "SubDB",
+                "movie",
+                "subtitle"
+            ],
+            "time": "2014-03-11 04:41:56"
+        },
+        {
             "name": "psr/log",
             "version": "1.0.0",
             "source": {
@@ -180,6 +230,61 @@
                 "router"
             ],
             "time": "2014-02-16 18:18:25"
+        },
+        {
+            "name": "symfony/console",
+            "version": "v2.4.2",
+            "target-dir": "Symfony/Component/Console",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/Console.git",
+                "reference": "940f217cbc3c8a33e5403e7c595495c4884400fe"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/Console/zipball/940f217cbc3c8a33e5403e7c595495c4884400fe",
+                "reference": "940f217cbc3c8a33e5403e7c595495c4884400fe",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "symfony/event-dispatcher": "~2.1"
+            },
+            "suggest": {
+                "symfony/event-dispatcher": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\Console\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Console Component",
+            "homepage": "http://symfony.com",
+            "time": "2014-02-11 13:52:09"
         },
         {
             "name": "symfony/event-dispatcher",
@@ -1025,7 +1130,8 @@
     ],
     "minimum-stability": "stable",
     "stability-flags": {
-        "wtfzdotnet/php-tmdb-api": 20
+        "wtfzdotnet/php-tmdb-api": 20,
+        "mihaeu/sub-collector": 20
     },
     "platform": [
 

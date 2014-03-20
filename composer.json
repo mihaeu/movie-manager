@@ -3,7 +3,8 @@
     "description": "Web-based movie manager (requires local PHP server).",
     "require": {
         "wtfzdotnet/php-tmdb-api": "dev-master",
-        "slim/slim": "2.*"
+        "slim/slim": "2.*",
+        "mihaeu/sub-collector": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",
@@ -17,5 +18,10 @@
             "email": "haeuslmann@gmail.com"
         }
     ],
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-0": {
+            "Mihaeu": "src"
+        }
+    }
 }
