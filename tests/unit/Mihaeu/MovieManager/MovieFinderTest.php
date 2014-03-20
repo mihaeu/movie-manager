@@ -14,6 +14,7 @@ class MovieFinderTest extends PHPUnit_Framework_TestCase
 {
     public function testPHPUnitWorks()
     {
-        $this->assertTrue(false);
+        $movieFinder = new Mihaeu\MovieManager\MovieFinder();
+        $this->assertNotNull($movieFinder);
     }
 }

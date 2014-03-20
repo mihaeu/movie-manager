@@ -47,20 +47,20 @@ What I want to store:
 
 Find all movies in the given directory by
 
-- file extension
-- file size
-- filters (e.g. no sample movie files)
+- [x] file extension (using my movie finder from the sub-collector)
+- [ ] file size
+- [ ] filters (e.g. no sample movie files)
 
 and gather information about:
 
-- is the movie in a separate folder or a plain file under the root directory (because we want to have all the movies in a separate folder) (*)
-- is the movie deeply nested (because then the movie needs to be moved down)
-- does the movie has one or more subtitles
-- does the movie have a release info file (.nfo)
-- does the movie have a .url file and is it in our format with all the information (*)
-- does the movie have a poster (*)
-- what resolution is the movie in
-- what other files are in the movie folder
+- [ ] is the movie in a separate folder or a plain file under the root directory (because we want to have all the movies in a separate folder) (*)
+- [ ] is the movie deeply nested (because then the movie needs to be moved down)
+- [ ] does the movie has one or more subtitles
+- [ ] does the movie have a release info file (.nfo)
+- [ ] does the movie have a .url file and is it in our format with all the information (*)
+- [ ] does the movie have a poster (*)
+- [ ] what resolution is the movie in
+- [ ] what other files are in the movie folder
 
 (*) if these criterias are met, then the file has already been processed
 
