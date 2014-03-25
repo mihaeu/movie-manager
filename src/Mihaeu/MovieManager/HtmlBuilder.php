@@ -9,9 +9,9 @@ class HtmlBuilder
     public function __construct()
     {
         $loader = new \Twig_Loader_Filesystem([
-            __DIR__.'/../../templates',
-            __DIR__.'/../../templates/assets/css',
-            __DIR__.'/../../templates/assets/js'
+            __DIR__.'/../../../templates/movie-collection',
+            __DIR__.'/../../../templates/movie-collection/assets/css',
+            __DIR__.'/../../../templates/movie-collection/assets/js'
         ]);
         $this->templating = new \Twig_Environment($loader, ['debug' => true]);
         $this->templating->addExtension(new \Twig_Extension_Debug());
