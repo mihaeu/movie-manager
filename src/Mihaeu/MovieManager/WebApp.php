@@ -22,19 +22,20 @@ class WebApp
     {
         // @TODO move this to a separate route
         $this->app->get('/', function () {
-            $dir = Input::get('dir', '/mnt/usb-passport/videos/movies');
+            $dir = '/media/media/videos/movies';
 
-            $movieHandler = new Moab\MovieHandler;
+            $movieHandler = new MovieHandler;
             $movieFiles = $movieHandler->findMoviesInDir($dir);
 
             // @TODO adjust to slim
-            return View::make('index', ['files' => $movieFiles]);
+            // return View::make('index', ['files' => $movieFiles]);
+            $loader = new \Twig_Loader_Filesystem(__DIR__.'/../../../templates/movie-manager');
+            $twig = new \Twig_Environment($loader);
+            echo $twig->render('index.html.twig', ['files' => $movieFiles]);
         });
 
         // @TODO should be get
-        $this->app->post('/imdb', function() {
-            $query = urldecode(Input::get('query'));
-
+        $this->app->post('/imdb/:query', function($query) {
             $movieHandler = new Moab\MovieHandler;
             $result = $movieHandler->searchMoviesOnTMDb($query);
 
@@ -45,16 +46,13 @@ class WebApp
             }
 
             // @TODO adjust to slim
-            return View::make('imdb', ['suggestions' => $suggestions]);
+            return $suggestions;
         });
 
         // @TODO should be get
-        $this->app->post('/movie', function() {
-            $file = Input::get('file');
-            $imdbId = Input::get('id');
-
+        $this->app->post('/movie/:file/:id', function() {
             $movieHandler = new Moab\MovieHandler;
-            $success = $movieHandler->handleMovie($file, $imdbId);
+            $success = $movieHandler->handleMovie($file, $id);
 
             // @TODO adjust to slim
             return Response::json(['success' => $success]);

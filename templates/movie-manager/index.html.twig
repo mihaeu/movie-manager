@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Manager</title>
+    <link rel="stylesheet" href="/media/styles.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="span2">
+                <img class="" src="/media/logo.png" alt="Movie Helper Logo" width="128" height="128"></img>
+            </div>
+            <div class="span6 title">
+                <h1>Movie Helper</h1>
+            </div>
+            <p class="span4 center searchbar">
+                <form method="GET" class="form-search">
+                    <input name="dir" type="text" class="input-large search-query" placeholder="Enter full path to directory ..." />
+                    <button type="submit" class="btn">Search</button>
+                </form>
+            </p>
+        </div>
+        <div class="row">
+            <div class="span12">
+                {% if files is not empty %}
+                    <table class="table table-hover movies">
+                        <thead>
+                            <tr>
+                                <th class="index">#</th>
+                                <th class="filename">Filename</th>
+                                <th class="chunks">Chunks</th>
+                                <th class="folder">Folder</th>
+                                <th class="link">IMDb Link</th>
+                                <th class="screenshot">IMDb Screen shot</th>
+                                <th class="poster">IMDb Poster</th>
+                                <th class="format">IMDb Format</th>
+                                <th class="action"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for file in files %}
+                                <tr>
+                                    <td class="index">?</td>
+                                    <td class="filename">
+                                        {{ file.name }}
+                                    </td>
+                                    <td class="chunks">
+                                        {% for chunk in file.chunks %}
+                                            <span class='btn btn-mini chunk'>
+                                                {{ chunk }}
+                                            </span>
+                                        {% endfor %}
+                                    </td>
+                                    <td class="folder">
+                                        {% if file.folder %}
+                                            <i class="icon-ok"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td class="link">
+                                        {% if file.link %}
+                                            <i class="icon-ok"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td class="screenshot">
+                                        {% if file.screenshot %}
+                                            <i class="icon-ok"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td class="poster">
+                                        {% if file.poster %}
+                                            <i class="icon-ok"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td class="format">
+                                        {% if file.format %}
+                                            <i class="icon-ok"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td class="action">
+                                        <button class="btn btn-small btn-info go-imdb" value="{{ file.path }}">GO</button>
+                                    </td>
+                                </tr>
+                                <tr class="suggestionsRow">
+                                    <td colspan="9">
+                                        <h2>IMDb Movie Search Results:</h2>
+                                        <ul class="suggestions"></ul>
+                                        <input type="hidden" value="{{ file.fullname }}" class="file" />
+                                        <div class="center">
+                                            <button class="btn btn-danger hide-suggestions">Cancel</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-warning center">Please, choose a folder.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script src="/media/scripts.min.js"></script>
+</body>
+</html>
