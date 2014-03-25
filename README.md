@@ -54,8 +54,7 @@ Find all movies in the given directory by
 and gather information about:
 
 - [ ] is the movie in a separate folder or a plain file under the root directory (because we want to have all the movies in a separate folder) (*)
-- [ ] is the movie deeply nested (because then the movie needs to be moved down)
-- [ ] does the movie has one or more subtitles
+- [ ] does the movie have one or more subtitles
 - [ ] does the movie have a release info file (.nfo)
 - [ ] does the movie have a .url file and is it in our format with all the information (*)
 - [ ] does the movie have a poster (*)
