@@ -1,0 +1,20 @@
+{
+  "name": "templates",
+  "version": "0.0.0",
+  "authors": [
+    "Michael Haeuslmann <haeuslmann@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "tinysort": "*",
+    "fancybox": "~2.1.5"
+  }
+}

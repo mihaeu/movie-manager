@@ -1,0 +1,119 @@
+{{ filedump('templates/bower_components/bootstrap/dist/css/bootstrap.min.css') }}
+{{ filedump('templates/bower_components/fancybox/source/jquery.fancybox.css') }}
+
+{########################}
+{# Header 				#}
+{########################}
+
+html, body {
+	background: url(data:image/jpg;base64,{{ base64filedump('templates/assets/img/movie-bg.jpg') }})
+	no-repeat center center fixed;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+
+#title h1 {
+	font-size: 50px;
+	line-height: 54px;
+}
+
+#title, #subtitle {
+	display: inline-block;
+	margin-left: 10px;
+}
+
+.header, .movie {
+	margin: 15px 0 15px 0;
+	background: #FFF;
+	border-radius: 5px;
+	padding: 5px 0 5px 0;
+}
+
+.filters {
+	margin: 0;
+}
+
+{########################}
+{# Movies 				#}
+{########################}
+
+.movie {
+	padding: 10px 0 10px 0;
+	max-height: 420px;
+	overflow: auto;
+}
+
+.info {
+	padding: 0;
+	margin: 0;
+}
+
+.genre, .length, .countries, .rating, .directors {
+	font-size: 18px;
+	line-height: 20px;
+	font-weight: bold;
+}
+
+.title {
+	font-size: 34px;
+	line-height: 38px;
+	margin-bottom: 5px;
+}
+
+.year {
+	font-size: 34px;
+	line-height: 38px;
+	text-align: right;
+	font-weight: bold;
+}
+
+.full-title {
+	border-bottom-width: 2px;
+	border-bottom-style: solid;
+	margin-bottom: 10px;
+}
+
+.cast {
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+h4 {
+	margin: 0 0 3px 0;
+	font-weight: bold;
+}
+
+{########################}
+{# Filters 				#}
+{########################}
+#filters {
+	text-align: center;
+}
+
+.order, .direction, #genre, #rating, .languages, #country {
+	display: inline-block;
+}
+
+.year-from, .year-to {
+	width: 80px;
+}
+
+.languages, #genre, #country, #rating {
+	width: 150px;
+}
+
+.filter {
+	width: 450px;
+	margin-left: 10px;
+}
+
+label[for="genre"],
+label[for="languages"],
+label[for="filter"],
+label[for="year-from"],
+label[for="year-to"] {
+	margin-left: 5px;
+	display: inline-block;
+}

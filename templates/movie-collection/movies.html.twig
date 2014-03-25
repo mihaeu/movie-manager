@@ -1,0 +1,101 @@
+{% for movie in movies %}
+	<div class="row movie" id="{{ movie.id }}">
+		<div class="col-md-3">
+			<div class="poster">
+				<a class="fancybox fancybox.iframe" href="http://imdb.com/title/{{ movie.id }}"> 
+					<img class="img-rounded" src="data:image/jpg;base64,{{ movie.poster }}" />
+				</a>
+			</div>
+		</div>
+		<div class="col-md-9">
+			<div class="full-title">
+				<span class="title pull-left">
+					<a href="http://imdb.com/title/{{ movie.id }}"> 
+						{{ movie.title }} 
+					</a>
+				</span>
+				<span class="year pull-right">
+				{{ movie.year }}
+				</span>
+				<div class="clearfix"></div>
+			</div>
+			<div class="col-md-6 info">
+				<p class="lead">
+				{{ movie.tagline }}
+				</p>
+				<table class="table table-striped">
+					<tbody>
+						<tr>
+							<td>Rating:</td>
+							<td class="rating">
+								{{ movie.rating }}
+							</td>
+						</tr>
+						<tr>
+							<td>Genre:</td>
+							<td class="genre">
+								{{ movie.genre|join(', ') }}
+							</td>
+						</tr>
+						<tr>
+							<td>Length:</td>
+							<td class="length">
+								{{ movie.length }} min
+							</td>
+						</tr>
+						<tr>
+							<td>Directors:</td>
+							<td class="directors">
+								{% if movie.directors is not empty %}
+									{{ movie.directors|join(', ') }}
+								{% else %}
+								    -
+								{% endif %}
+							</td>
+						</tr>
+						<tr>
+							<td>Countries:</td>
+							<td class="countries">
+								{% if movie.countries is not empty %}
+									{{ movie.countries|join(', ') }}
+								{% else %}
+								    -
+								{% endif %}
+							</td>
+						</tr>
+						<tr>
+							<td>Languages:</td>
+							<td class="countries">
+								{% if movie.languages is not empty %}
+									{{ movie.languages|join(', ') }}
+								{% else %}
+								    -
+								{% endif %}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="col-md-6">
+				<h4>Plot</h4>
+				<div class="plot">
+					{{ movie.plot }}
+				</div>
+					<br>
+				<h4>Cast</h4>
+				<div class="cast">
+					{% for member in movie.cast[0:10] %}
+					    {{ member.name }}
+					    {% if member.character is not empty %}
+							<small>
+								({{ member.character }})
+							</small>
+					    {% endif %}
+					    ,
+					{% endfor %}
+					...
+				</div>
+			</div>
+		</div>
+	</div>
+{% endfor %}

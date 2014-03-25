@@ -1,0 +1,92 @@
+<form id="filters" class="form-inline" role="form">
+	<br>
+	<div class="order">
+		<strong>Order: </strong>
+		<label class="radio-inline">
+			<input type="radio" name="order" value=".title" checked="checked" />
+			Title
+		</label>
+		<label class="radio-inline">
+			<input type="radio" name="order" value=".year" />
+			Year
+		</label>
+		<label class="radio-inline">
+			<input type="radio" name="order" value=".rating" />
+			Rating
+		</label>
+	</div>
+
+	<div class="direction">
+		<strong>Direction: </strong>
+		<label for="" class="radio-inline">
+			<input type="radio" name="direction" value="asc" checked="checked" />
+			Ascending
+			<img width="16" height="16" alt="asc" src="data:image/png;base64,{{ base64filedump('templates/assets/img/up_arrow.png') }}" />
+		</label>
+		<label for="" class="radio-inline">
+			<input type="radio" name="direction" value="desc" />
+			Descending
+			<img width="16" height="16" alt="desc" src="data:image/png;base64,{{ base64filedump('templates/assets/img/down_arrow.png') }}" />
+		</label>
+	</div>
+	
+	<div class="form-group">
+		<label for="filter">Filter:
+			<input type="text" id="filter" name="filter" class="form-control input-sm filter" placeholder="Filter by name, cast or director ..." />
+		</label>
+	</div>
+
+	<br><br>
+
+	<label for="languages">Languages:
+		<select id="languages" name="languages" class="languages form-control input-sm">
+			<option value="all">(all)</option>
+			{% for language in languages|sort %}
+				<option value="{{ language }}">{{ language }}</option>						    
+			{% endfor %}
+		</select>
+	</label>
+
+	<label for="genre">Genre:
+		<select id="genre" name="genre" class="form-control input-sm">
+			<option value="all">(all)</option>
+			{% for genre in genres|sort %}
+				<option value="{{ genre }}">{{ genre }}</option>						    
+			{% endfor %}
+		</select>
+	</label>
+
+	<label for="country">Country:
+		<select id="country" name="country" class="form-control input-sm">
+			<option value="all">(all)</option>
+			{% for country in countries|sort %}
+				<option value="{{ country }}">{{ country }}</option>						    
+			{% endfor %}
+		</select>
+	</label>
+
+	<label for="rating">Rating:
+		<select id="rating" name="rating" class="form-control input-sm">
+			{% for i in 1..9 %}
+				<option value="{{ i }}">&gt; {{ i }}</option>
+			{% endfor %}
+		</select>
+	</label>
+
+	<label for="year-from">From:
+		<select id="year-from" name="year-from" class="form-control input-sm year-from">
+			{% for year in years %}
+				<option>{{ year }}</option>						    
+			{% endfor %}
+		</select>
+	</label>
+
+	<label for="year-to">To:
+		<select id="year-to" name="year-to" class="form-control input-sm year-to">
+			{% for year in years|reverse %}
+				<option>{{ year }}</option>						    
+			{% endfor %}
+		</select>
+	</label>
+	<br><br>
+</form>
