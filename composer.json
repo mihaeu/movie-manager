@@ -4,7 +4,9 @@
     "require": {
         "wtfzdotnet/php-tmdb-api": "dev-master",
         "slim/slim": "2.*",
-        "mihaeu/sub-collector": "1.*"
+        "mihaeu/sub-collector": "1.*",
+        "glamorous/tmdb-php-api": "dev-master",
+        "twig/twig": "1.*"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",

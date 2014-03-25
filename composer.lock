@@ -3,8 +3,51 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "5bb83d2d518921398c98334c3a99f0c1",
+    "hash": "b141b83a25f6e084722057f1bd04eb9f",
     "packages": [
+        {
+            "name": "glamorous/tmdb-php-api",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vuphuong87/imdb-php-api.git",
+                "reference": "fd7593da421fd98b088d0a008970c90f74377c4b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vuphuong87/imdb-php-api/zipball/fd7593da421fd98b088d0a008970c90f74377c4b",
+                "reference": "fd7593da421fd98b088d0a008970c90f74377c4b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-gd": "*",
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "glamorous",
+                    "homepage": "https://github.com/glamorous/TMDb-PHP-API"
+                }
+            ],
+            "description": "PHP Class for using TMDb (themoviedb.org) API. Because of IMDB hasn't an API we provide this PHP5 class. It's pretty easy to recieve all information about a movie or an actor. No scraping needed.",
+            "homepage": "https://github.com/vuphuong87/imdb-php-api",
+            "keywords": [
+                "api",
+                "imdb",
+                "tmdb"
+            ],
+            "time": "2013-05-17 08:01:22"
+        },
         {
             "name": "guzzle/guzzle",
             "version": "v3.8.1",
@@ -99,16 +142,16 @@
         },
         {
             "name": "mihaeu/sub-collector",
-            "version": "dev-master",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mihaeu/sub-collector.git",
-                "reference": "b44245e0809da2137ea395a836fe9b42b7120645"
+                "reference": "edf321b1c95102b2d84f3cfeebd038e5da78d4d0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mihaeu/sub-collector/zipball/b44245e0809da2137ea395a836fe9b42b7120645",
-                "reference": "b44245e0809da2137ea395a836fe9b42b7120645",
+                "url": "https://api.github.com/repos/mihaeu/sub-collector/zipball/edf321b1c95102b2d84f3cfeebd038e5da78d4d0",
+                "reference": "edf321b1c95102b2d84f3cfeebd038e5da78d4d0",
                 "shasum": ""
             },
             "require": {
@@ -145,7 +188,7 @@
                 "movie",
                 "subtitle"
             ],
-            "time": "2014-03-11 04:41:56"
+            "time": "2014-03-20 10:53:51"
         },
         {
             "name": "psr/log",
@@ -343,22 +386,79 @@
             "time": "2014-02-11 13:52:09"
         },
         {
+            "name": "twig/twig",
+            "version": "v1.15.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fabpot/Twig.git",
+                "reference": "1fb5784662f438d7d96a541e305e28b812e2eeed"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fabpot/Twig/zipball/1fb5784662f438d7d96a541e305e28b812e2eeed",
+                "reference": "1fb5784662f438d7d96a541e305e28b812e2eeed",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.4"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.15-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Twig_": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Armin Ronacher",
+                    "email": "armin.ronacher@active-4.com",
+                    "role": "Project Founder"
+                },
+                {
+                    "name": "Twig Team",
+                    "homepage": "https://github.com/fabpot/Twig/graphs/contributors",
+                    "role": "Contributors"
+                }
+            ],
+            "description": "Twig, the flexible, fast, and secure template language for PHP",
+            "homepage": "http://twig.sensiolabs.org",
+            "keywords": [
+                "templating"
+            ],
+            "time": "2014-02-13 10:19:29"
+        },
+        {
             "name": "wtfzdotnet/php-tmdb-api",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wtfzdotnet/php-tmdb-api.git",
-                "reference": "9144b4d71456f63d4a3421684bbfeb1c4ff726b6"
+                "reference": "23a7015d7bba889eaccb39334b04c5848b905a42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wtfzdotnet/php-tmdb-api/zipball/9144b4d71456f63d4a3421684bbfeb1c4ff726b6",
-                "reference": "9144b4d71456f63d4a3421684bbfeb1c4ff726b6",
+                "url": "https://api.github.com/repos/wtfzdotnet/php-tmdb-api/zipball/23a7015d7bba889eaccb39334b04c5848b905a42",
+                "reference": "23a7015d7bba889eaccb39334b04c5848b905a42",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
-                "guzzle/guzzle": ">=0.7",
+                "guzzle/guzzle": "3.8.*",
                 "php": ">=5.3.2",
                 "psr/log": "~1.0"
             },
@@ -400,7 +500,7 @@
                 "tvdb",
                 "wrapper"
             ],
-            "time": "2014-03-09 01:39:23"
+            "time": "2014-03-24 18:46:15"
         }
     ],
     "packages-dev": [
@@ -501,23 +601,23 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "2.0.2",
+            "version": "2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "2c20ba4872d09d1d3d7ceda5a0c5f82d9a8ff31f"
+                "reference": "a05618d03c60eb07b37432583aabf80ae5f5f447"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/2c20ba4872d09d1d3d7ceda5a0c5f82d9a8ff31f",
-                "reference": "2c20ba4872d09d1d3d7ceda5a0c5f82d9a8ff31f",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/a05618d03c60eb07b37432583aabf80ae5f5f447",
+                "reference": "a05618d03c60eb07b37432583aabf80ae5f5f447",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3",
                 "phpunit/php-file-iterator": "~1.3.1",
                 "phpunit/php-text-template": "~1.2",
-                "phpunit/php-token-stream": "~1.1.3",
+                "phpunit/php-token-stream": "~1.2.2",
                 "sebastian/environment": "~1.0",
                 "sebastian/version": "~1.0.3"
             },
@@ -561,7 +661,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2014-03-17 10:25:49"
+            "time": "2014-03-20 16:12:25"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -698,16 +798,16 @@
         },
         {
             "name": "phpunit/php-token-stream",
-            "version": "1.1.8",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-token-stream.git",
-                "reference": "66a29f0c5bdf85e70112f25ec9072efec5e2d426"
+                "reference": "ad4e1e23ae01b483c16f600ff1bebec184588e32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/66a29f0c5bdf85e70112f25ec9072efec5e2d426",
-                "reference": "66a29f0c5bdf85e70112f25ec9072efec5e2d426",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/ad4e1e23ae01b483c16f600ff1bebec184588e32",
+                "reference": "ad4e1e23ae01b483c16f600ff1bebec184588e32",
                 "shasum": ""
             },
             "require": {
@@ -715,6 +815,11 @@
                 "php": ">=5.3.3"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.2-dev"
+                }
+            },
             "autoload": {
                 "classmap": [
                     "PHP/"
@@ -739,20 +844,20 @@
             "keywords": [
                 "tokenizer"
             ],
-            "time": "2013-08-02 19:10:55"
+            "time": "2014-03-03 05:10:30"
         },
         {
             "name": "phpunit/phpunit",
-            "version": "4.0.11",
+            "version": "4.0.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "566b51d0237ce2af12a777ce2ea6fc49b787dbd9"
+                "reference": "e7631ea91f9e41149c55527047b5dee94538ae1d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/566b51d0237ce2af12a777ce2ea6fc49b787dbd9",
-                "reference": "566b51d0237ce2af12a777ce2ea6fc49b787dbd9",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e7631ea91f9e41149c55527047b5dee94538ae1d",
+                "reference": "e7631ea91f9e41149c55527047b5dee94538ae1d",
                 "shasum": ""
             },
             "require": {
@@ -814,7 +919,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2014-03-18 15:45:22"
+            "time": "2014-03-20 16:22:50"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -1131,7 +1236,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "wtfzdotnet/php-tmdb-api": 20,
-        "mihaeu/sub-collector": 20
+        "glamorous/tmdb-php-api": 20
     },
     "platform": [
 
