@@ -5,6 +5,7 @@ namespace Mihaeu\MovieManager;
 use Silex\Application;
 use Silex\Provider\TwigServiceProvider;
 use Whoops\Provider\Silex\WhoopsServiceProvider;
+use Symfony\Component\HttpFoundation\Request;
 
 class WebApp
 {
@@ -42,9 +43,9 @@ class WebApp
             return $app['twig']->render('index.html.twig', ['files' => $movieFiles]);
         });
 
-        // @TODO should be get
-        $this->app->post('/imdb/{query}', function(Application $app, $query) {
-            $movieHandler = new Moab\MovieHandler;
+        $this->app->get('/imdb', function(Application $app, Request $request) {
+            $query = $request->get('query');
+            $movieHandler = new MovieHandler();
             $result = $movieHandler->searchMoviesOnTMDb($query);
             if (empty($result)) {
                 return $app->json('No match found.', 404);
@@ -68,13 +69,14 @@ class WebApp
             return $app->json($suggestions);
         });
 
-        // @TODO should be get
-        $this->app->post('/movie/:file/:id', function() {
-            $movieHandler = new Moab\MovieHandler;
-            $success = $movieHandler->handleMovie($file, $id);
+        $this->app->get('/movie/{file}/{id}', function(Application $app, $file, $id) {
+            $movieHandler = new MovieHandler();
+            $result = $movieHandler->handleMovie($file, $id);
+            if ($result === false) {
+                return $app->json(['message' => 'failure'], 404);
+            }
 
-            // @TODO adjust to slim
-            return Response::json(['success' => $success]);
+            return $app->json(['message' => 'success'], 200);
         });
     }
 

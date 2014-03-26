@@ -47,16 +47,27 @@ $(function() {
             chunks.push($.trim($(this).html()));
         });
 
-        var url = "index.php/imdb",
-            postData = { query: chunks.join("%20") },
+        var url = "/imdb",
+            getData = { query: chunks.join("%20") },
             suggestions = [],
             current = $(this);
 
-        $.post(url, postData, function(data) {
-            suggestions.push(data);
-            var suggestionsRow = current.parent().parent().next();
-            suggestionsRow.find(".suggestions").html(suggestions);
-            suggestionsRow.fadeIn();
+        $.get(url, getData, function(data) {
+            var suggestions = [],
+                $suggestionsRow = current.parent().parent().next();
+
+            $.each(data, function (index, movie) {
+                suggestions.push(
+                    "<img src='" + movie.poster + "' alt='poster' />"
+                    + "<h3>" + movie.title + " (" + movie.year + ")</h3>"
+                    + "<span class='btn btn-warning span2 rename'>Rename movie</span>"
+                    + "<input type='hidden' class='imdb-id' value='" + movie.id + "'>"
+                );
+            });
+            $suggestionsRow
+                .find(".suggestions")
+                .html("<li>" + suggestions.join("</li><li>") + "</li>");
+            $suggestionsRow.fadeIn();
 
             //////////////////////////
             // Movie rename event //
@@ -71,7 +82,7 @@ $(function() {
                     parentTr.fadeOut();
                     parentTr.prev().find("td:last").html("<img src='assets/img/ajax-loader.gif'></img>");
                 }
-                $.post('index.php/movie',
+                $.get('index.php/movie',
                     { "id": id, "file": file }, function() {
                     parentTr.prev().removeClass("warning").addClass("success");
                     $('.link, .folder, .screenshot, .format, .poster', parentTr.prev())

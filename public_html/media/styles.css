@@ -5486,8 +5486,19 @@ a.label:hover,a.label:focus,a.badge:hover,a.badge:focus {
     margin: 2px
 }
 
-.suggestions li {
-    margin: 10px
+ul.suggestions li {
+    margin: 10px;
+    width: 260px;
+    float: left;
+    list-style: none;
+}
+ul.suggestions img {
+    width: 185px;
+    height: 270px;
+}
+
+ul.suggestions li > * {
+    display: block;
 }
 
 .suggestionsRow {
