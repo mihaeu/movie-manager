@@ -2,7 +2,9 @@
 
 namespace Mihaeu\MovieManager;
 
-use Slim\Slim;
+use Silex\Application;
+use Silex\Provider\TwigServiceProvider;
+use Whoops\Provider\Silex\WhoopsServiceProvider;
 
 class WebApp
 {
@@ -14,39 +16,56 @@ class WebApp
 
     public function __construct()
     {
-        $this->app = new Slim();
+        $this->app = new Application();
+        $this->app['debug'] = true;
+        if($this->app['debug']) {
+            $this->app->register(new WhoopsServiceProvider());
+        }
+
+        $this->app->register(new TwigServiceProvider(), [
+            'twig.path' => __DIR__.'/../../../templates/movie-manager',
+        ]);
+
+
         $this->configureRoutes();
     }
 
     public function configureRoutes()
     {
         // @TODO move this to a separate route
-        $this->app->get('/', function () {
+        $this->app->get('/', function (Application $app) {
             $dir = '/media/media/videos/movies';
 
             $movieHandler = new MovieHandler;
             $movieFiles = $movieHandler->findMoviesInDir($dir);
 
-            // @TODO adjust to slim
-            // return View::make('index', ['files' => $movieFiles]);
-            $loader = new \Twig_Loader_Filesystem(__DIR__.'/../../../templates/movie-manager');
-            $twig = new \Twig_Environment($loader);
-            echo $twig->render('index.html.twig', ['files' => $movieFiles]);
+            return $app['twig']->render('index.html.twig', ['files' => $movieFiles]);
         });
 
         // @TODO should be get
-        $this->app->post('/imdb/:query', function($query) {
+        $this->app->post('/imdb/{query}', function(Application $app, $query) {
             $movieHandler = new Moab\MovieHandler;
             $result = $movieHandler->searchMoviesOnTMDb($query);
-
-            $suggestions = [];
-            foreach ($result as $id => $movie)
-            {
-                $suggestions[] = "<img src='{$movie['posterThumbnailSrc']}'></img>{$movie['title']} ({$movie['year']})<span class='btn btn-warning rename'>Rename movie</span><input type='hidden' class='imdb-id' value='{$id}'>";
+            if (empty($result)) {
+                return $app->json('No match found.', 404);
             }
 
-            // @TODO adjust to slim
-            return $suggestions;
+            $suggestions = [];
+            foreach ($result as $id => $movie) {
+                // $suggestions[] = 
+                //     "<img src='{$movie['posterThumbnailSrc']}'></img>
+                //     {$movie['title']} ({$movie['year']})
+                //     <span class='btn btn-warning rename'>Rename movie</span>
+                //     <input type='hidden' class='imdb-id' value='{$id}'>";
+                $suggestions[] = [
+                    'id'     => $id,
+                    'title'  => $movie['title'],
+                    'year'   => $movie['year'],
+                    'poster' => $movie['posterThumbnailSrc']
+                ];
+            }
+
+            return $app->json($suggestions);
         });
 
         // @TODO should be get
