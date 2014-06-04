@@ -61,7 +61,7 @@ $(function() {
                     "<img src='" + movie.poster + "' alt='poster' />"
                     + "<h3>" + movie.title + " (" + movie.year + ")</h3>"
                     + "<span class='btn btn-warning span2 rename'>Rename movie</span>"
-                    + "<input type='hidden' class='imdb-id' value='" + movie.id + "'>"
+                    + "<input type='hidden' class='imdb-id' value='" + movie.id + "' />"
                 );
             });
             $suggestionsRow
@@ -73,23 +73,34 @@ $(function() {
             // Movie rename event //
             //////////////////////////
             $(".rename").bind("click", function() {
-                var id = $(this).parent().find('.imdb-id').val(),
-                    file = $(this).parent().parent().next().val();
-                if (id.length < 4 || file.length < 10) {
-                    alert(error);
-                } else {
-                    var parentTr = $(this).parent().parent().parent().parent();
-                    parentTr.fadeOut();
-                    parentTr.prev().find("td:last").html("<img src='assets/img/ajax-loader.gif'></img>");
+                var id, file, $suggestionsTr, $movieTr; 
+                id   = $(this).next().val(),
+                file = $(this).parent().parent().next().val();
+
+                if (id.length < 1 || file.length < 10) {
+                    alert("There's something wrong with the movie id or file.");
+                    return;
                 }
-                $.get('index.php/movie',
-                    { "id": id, "file": file }, function() {
-                    parentTr.prev().removeClass("warning").addClass("success");
-                    $('.link, .folder, .screenshot, .format, .poster', parentTr.prev())
-                        .html("<i class='icon-ok'></i>");
-                    parentTr.prev().find("td:last").html("<i class='icon-check'></i>");
+                
+                $suggestionsTr = $(this).parent().parent().parent().parent(),
+                $movieTr       = $suggestionsTr.prev();
+                
+                $suggestionsTr.fadeOut();
+                $movieTr.find("td:last").html("<img src='media/ajax-loader.gif'></img>");
+
+                $.get('/movie',
+                    { "id": id, "file": file },
+                    function() {
+                        $movieTr
+                            .removeClass("warning")
+                            .addClass("success");
+                        $('.link, .folder, .screenshot, .format, .poster', $movieTr)
+                            .html("<i class='icon-ok'></i>");
+                        $movieTr
+                            .find("td:last")
+                            .html("<i class='icon-check'></i>");
                 }).fail(function() {
-                    alert("error");
+                    alert("Unable to process movie.");
                 });
             });
         });
