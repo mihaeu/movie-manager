@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 class WebApp
 {
     /**
-     * @var Slim
+     * @var Application
      */
     private $app;
 
@@ -27,15 +27,17 @@ class WebApp
             'twig.path' => __DIR__.'/../../../templates/movie-manager',
         ]);
 
-
         $this->configureRoutes();
     }
 
     public function configureRoutes()
     {
         // @TODO move this to a separate route
-        $this->app->get('/', function (Application $app) {
-            $dir = '/media/media/videos/movies';
+        $this->app->get('/', function (Application $app, Request $request) {
+            $dir = $request->get('dir');
+            if (empty($dir)) {
+                $dir = '/media/media/videos/movies';
+            }
 
             $movieHandler = new MovieHandler;
             $movieFiles = $movieHandler->findMoviesInDir($dir);
@@ -53,11 +55,6 @@ class WebApp
 
             $suggestions = [];
             foreach ($result as $id => $movie) {
-                // $suggestions[] = 
-                //     "<img src='{$movie['posterThumbnailSrc']}'></img>
-                //     {$movie['title']} ({$movie['year']})
-                //     <span class='btn btn-warning rename'>Rename movie</span>
-                //     <input type='hidden' class='imdb-id' value='{$id}'>";
                 $suggestions[] = [
                     'id'     => $id,
                     'title'  => $movie['title'],
@@ -69,7 +66,10 @@ class WebApp
             return $app->json($suggestions);
         });
 
-        $this->app->get('/movie/{file}/{id}', function(Application $app, $file, $id) {
+        $this->app->get('/movie', function(Application $app, Request $request) {
+            $id   = $request->get('id');
+            $file = $request->get('file');
+            
             $movieHandler = new MovieHandler();
             $result = $movieHandler->handleMovie($file, $id);
             if ($result === false) {
