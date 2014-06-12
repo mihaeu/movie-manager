@@ -92,16 +92,7 @@ class MovieHandler
 			}
 		}
 
-
 		ksort($filenameChunks);
-
-		// foreach ($filenameChunks as $file)
-		// {
-		// 	$files = scandir($file['path']);
-		// 	var_dump($files);
-		// }
-		// var_dump($filenameChunks);exit;
-		
 		return $filenameChunks;
 	}
 
@@ -113,7 +104,6 @@ class MovieHandler
 	 */
 	public function searchMoviesOnTMDb($query)
 	{
-		
 		$query = $this->tmdb->searchMovie($query, 1, true, null, 'en');
 
 		$movies = [];

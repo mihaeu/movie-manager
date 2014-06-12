@@ -25,7 +25,9 @@ class IMDbRater
             if (isset($movieInfo['info']['imdb_id']))
             {
                 $imdb_id = str_replace('tt', '', $movieInfo['info']['imdb_id']);
-                $json_response = file_get_contents('http://kimai.mike-dev.info/get-imdb-rating/index.php?id='.$imdb_id);
+                $json_response = file_get_contents(
+                    'http://kimai.mike-dev.info/get-imdb-rating/index.php?id='.$imdb_id
+                );
                 $response = json_decode($json_response, true);
                 if ($response['rating'] > 0)
                 {
