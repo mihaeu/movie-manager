@@ -22,7 +22,7 @@ class MovieFinder
                 
                 // Armageddon (1994).mp4 should be in a folder called Armageddon (1994)
                 'inProperMovieFolder'       =>
-                    $movieFolder === basename($movieFile, $movie->getMovieFileExtension()),
+                    $this->movieInMovieFolder($movieFile),
                 
                 // is the movie in a separate folder or a plain file under the root directory (because we want to have all the movies in a separate folder) (*)
                 'inSeparateFolderUnderRoot' =>
@@ -50,8 +50,21 @@ class MovieFinder
         return $movieInfo;
     }
 
-    public function movieInMovieFolder($movieFilename, $rootMovieFolder)
+    /**
+     * Detects if the movie resides in the proper directory.
+     * 
+     * The folder should have the same filename as the movie, but without
+     * the file extension. This of course is not a perfect test, because
+     * my.awesome.movie.x264 would still be accepted if the filename is
+     * my.awesome.movie.x264.mkv
+     * 
+     * @param  string $movieFilename Fully qualified filename e.g. '/movies/Avatar/avatar.mkv'
+     * @return bool
+     */
+    public function movieInMovieFolder($movieFilename)
     {
-        return false;
+        $file = new \SPLFileInfo($movieFilename);
+        $dir = new \SPLFileInfo(dirname($movieFilename));
+        return $dir->getBasename() === $file->getBasename('.'.$file->getExtension());
     }
 }
