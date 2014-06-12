@@ -5477,6 +5477,7 @@ a.label:hover,a.label:focus,a.badge:hover,a.badge:focus {
 
 .container {
     margin-top: 15px;
+    margin-bottom: 15px;
     background: #FFF;
     border: 1px solid #999;
     border-radius: 5px
