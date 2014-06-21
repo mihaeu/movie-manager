@@ -92,6 +92,6 @@ class IniWriter
             return false;
         }
 
-        file_put_contents($toFile, $content);
+        file_put_contents($toFile, trim($content));
     }
 }
