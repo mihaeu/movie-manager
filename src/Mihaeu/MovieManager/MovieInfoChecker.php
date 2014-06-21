@@ -102,7 +102,7 @@ class MovieInfoChecker
                     }
                 }
 
-                IMDbRater::writeIniFile($movieInfo, $linkFile);
+                IniWriter::write($movieInfo, $linkFile);
             }   
         }
     }
