@@ -26,70 +26,63 @@ class IniWriter
         }
 
         $content = '';
-        if (is_array($data))
+        foreach ($data as $key => $value)
         {
-            foreach ($data as $key => $value)
+            if (is_array($value))
             {
-                if (is_array($value))
+                if ( ! empty($value))
                 {
-                    if ( ! empty($value))
+                    $content .= "[$key]\r\n";
+                }
+                foreach ($value as $subkey => $subvalue)
+                {
+                    if (is_array($subvalue))
                     {
-                        $content .= "[$key]\r\n";
-                    }
-                    foreach ($value as $subkey => $subvalue)
-                    {
-                        if (is_array($subvalue))
+                        if ( ! empty($value))
                         {
-                            if ( ! empty($value))
-                            {
-                                $content .= "[$key\\$subkey]\r\n";
-                            }
-                            foreach ($subvalue as $subsubkey => $subsubvalue)
-                            {
-                                if (is_numeric($subsubvalue))
-                                {
-                                    $content .= "$subsubkey=$subsubvalue\r\n";
-                                }
-                                else
-                                {
-                                    $subsubvalue = str_replace('"', "'", $subsubvalue);
-                                    $content .= "$subsubkey=\"$subsubvalue\"\r\n";
-                                }
-                            }
-                            $content .= "\r\n";
+                            $content .= "[$key\\$subkey]\r\n";
                         }
-                        else
+                        foreach ($subvalue as $subsubkey => $subsubvalue)
                         {
-                            if (is_numeric($subvalue))
+                            if (is_numeric($subsubvalue))
                             {
-                                $content .= "$subkey=$subvalue\r\n";
+                                $content .= "$subsubkey=$subsubvalue\r\n";
                             }
                             else
                             {
-                                $subvalue = str_replace('"', "'", $subvalue);
-                                $content .= "$subkey=\"$subvalue\"\r\n";
+                                $subsubvalue = str_replace('"', "'", $subsubvalue);
+                                $content .= "$subsubkey=\"$subsubvalue\"\r\n";
                             }
                         }
-                    }
-                    $content .= "\r\n";
-                }
-                else
-                {
-                    if (is_numeric($value))
-                    {
-                        $content .= "$key=$value\r\n";
+                        $content .= "\r\n";
                     }
                     else
                     {
-                        $value = str_replace('"', "'", $value);
-                        $content .= "$key=\"$value\"\r\n";
+                        if (is_numeric($subvalue))
+                        {
+                            $content .= "$subkey=$subvalue\r\n";
+                        }
+                        else
+                        {
+                            $subvalue = str_replace('"', "'", $subvalue);
+                            $content .= "$subkey=\"$subvalue\"\r\n";
+                        }
                     }
                 }
+                $content .= "\r\n";
             }
-        }
-        else
-        {
-            return false;
+            else
+            {
+                if (is_numeric($value))
+                {
+                    $content .= "$key=$value\r\n";
+                }
+                else
+                {
+                    $value = str_replace('"', "'", $value);
+                    $content .= "$key=\"$value\"\r\n";
+                }
+            }
         }
 
         file_put_contents($toFile, trim($content));
