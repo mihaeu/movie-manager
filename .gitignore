@@ -1,3 +1,4 @@
 /vendor/
 /build/
 bower_components
+tmdb-api-secret
