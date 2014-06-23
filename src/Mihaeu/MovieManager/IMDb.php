@@ -2,8 +2,20 @@
 
 namespace Mihaeu\MovieManager;
 
-class IMDbRater
+class IMDb
 {
+    /**
+     * Fetches IMDb rating by parsing the site using RedPandas library.
+     * 
+     * @param  int      $id IMDb ID without the tt prefix
+     * @return float
+     */
+    public static function getRatingFromIMDb($id)
+    {
+        $movie = new IMDb\Movie($_GET['id']);
+        return $movie->getRating();
+    }
+
     public static function check()
     {
         if (!isset($argv[1]) || !is_dir($argv[1])) {
@@ -21,7 +33,7 @@ class IMDbRater
                 continue;
             }
 
-            $movieInfo = parse_ini_file($linkFile, true);
+            $movieInfo = Ini::read($linkFile);
             if (isset($movieInfo['info']['imdb_id']))
             {
                 $imdb_id = str_replace('tt', '', $movieInfo['info']['imdb_id']);
@@ -34,7 +46,7 @@ class IMDbRater
                     echo "$linkFile - ".$response['rating']."\n";
                     $movieInfo['info']['imdb_rating'] = $response['rating'];
 
-                    IniWriter::write($movieInfo, $linkFile);
+                    Ini::write($movieInfo, $linkFile);
                 }
                 else
                 {
