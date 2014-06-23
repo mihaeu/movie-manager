@@ -28,7 +28,8 @@ class MovieHandler
 	 */
 	public function __construct()
 	{
-		$this->tmdb = new \TMDb('20f832e20d298376fcd4bc6a3b262108', 'en');
+		$tmdbApiSecret = file_get_contents('../../../tmdb-api-secret');
+		$this->tmdb = new \TMDb($tmdbApiSecret, 'en');
 	}
 
 	/**
