@@ -19,7 +19,7 @@ class WebApp
     {
         $this->app = new Application();
         $this->app['debug'] = true;
-        if($this->app['debug']) {
+        if ($this->app['debug']) {
             $this->app->register(new WhoopsServiceProvider());
         }
 
@@ -45,7 +45,7 @@ class WebApp
             return $app['twig']->render('index.html.twig', ['files' => $movieFiles]);
         });
 
-        $this->app->get('/imdb', function(Application $app, Request $request) {
+        $this->app->get('/imdb', function (Application $app, Request $request) {
             $query = $request->get('query');
             $movieHandler = new MovieHandler();
             $result = $movieHandler->searchMoviesOnTMDb($query);
@@ -66,7 +66,7 @@ class WebApp
             return $app->json($suggestions);
         });
 
-        $this->app->get('/movie', function(Application $app, Request $request) {
+        $this->app->get('/movie', function (Application $app, Request $request) {
             $id   = $request->get('id');
             $file = $request->get('file');
             

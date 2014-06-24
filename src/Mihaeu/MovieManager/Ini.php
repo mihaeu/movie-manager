@@ -17,13 +17,13 @@ class Ini
      * @param  String $toFile
      * @return Array
      */
-    public static function read($toFile)
+    public static function read($fromFile)
     {
-        if (!is_readable($toFile)) {
-            throw new \Exception("$toFile is not readable.".PHP_EOL, 1);
+        if (!is_readable($fromFile)) {
+            throw new \Exception("$fromFile is not readable.".PHP_EOL, 1);
         }
 
-        return parse_ini_file($toFile, true);
+        return parse_ini_file($fromFile, true);
     }
 
     /**
@@ -43,21 +43,15 @@ class Ini
         }
 
         $result = [];
-        foreach ($data as $key => $value)
-        {
-            if (is_array($value))
-            {
-                if ( ! empty($value))
-                {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                if (!empty($value)) {
                     $result[] = "\r\n[$key]";
                 }
-                foreach ($value as $subkey => $subvalue)
-                {
+                foreach ($value as $subkey => $subvalue) {
                     $result[] = $subkey.'='.self::sanitizeValue($subvalue);
                 }
-            }
-            else
-            {
+            } else {
                 $result[] = $key.'='.self::sanitizeValue($value);
             }
         }

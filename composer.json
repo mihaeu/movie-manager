@@ -14,7 +14,8 @@
         "phpunit/phpunit": "4.*",
         "mockery/mockery": "0.*",
         "mikey179/vfsStream": "1.*",
-        "psy/psysh": "dev-master"
+        "psy/psysh": "dev-master",
+        "squizlabs/php_codesniffer": "1.*"
     },
     "license": "MIT",
     "authors": [

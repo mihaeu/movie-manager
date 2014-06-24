@@ -6,11 +6,16 @@ use Mihaeu\Movie\Finder;
 
 class MovieFinder
 {
+    /**
+     * Finds and identifies movies in a folder.
+     * 
+     * @param  String $rootMovieFolder
+     * @return Array
+     */
     public function find($rootMovieFolder)
     {
         $finder = new Finder($rootMovieFolder);
         $movies = $finder->findMoviesInFolder();
-        // var_dump($movies);
         
         $movieInfo = [];
         foreach ($movies as $movie) {
@@ -24,7 +29,8 @@ class MovieFinder
                 'inProperMovieFolder'       =>
                     $this->movieInMovieFolder($movieFile),
                 
-                // is the movie in a separate folder or a plain file under the root directory (because we want to have all the movies in a separate folder) (*)
+                // is the movie in a separate folder or a plain file under
+                // the root directory (because we want to have all the movies in a separate folder) (*)
                 'inSeparateFolderUnderRoot' =>
                     dirname($movieFolder) === $rootMovieFolder,
                 

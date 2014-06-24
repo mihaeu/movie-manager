@@ -35,31 +35,24 @@ class HtmlBuilder
         $movieCountries = [];
 
         $movieFolders = array_diff(scandir($pathToMovies), ['.', '..']);
-        foreach ($movieFolders as $movieFolder)
-        {
-            if (--$limit === 0)
-            {
+        foreach ($movieFolders as $movieFolder) {
+            if (--$limit === 0) {
                 break;
             }
 
             $linkFile = "$pathToMovies/$movieFolder/$movieFolder - IMDb.url";
-            if ( ! file_exists($linkFile))
-            {
+            if (!file_exists($linkFile)) {
                 continue;
             }
 
             $movieInfo = parse_ini_file($linkFile, true);
-            if (isset($movieInfo['info']))
-            {
+            if (isset($movieInfo['info'])) {
                 $posterFile = str_replace('- IMDb.url', '- Poster.jpg', $linkFile);
                 $cast = [];
-                if (isset($movieInfo['cast']))
-                {
-                    foreach ($movieInfo['cast'] as $id => $name)
-                    {
+                if (isset($movieInfo['cast'])) {
+                    foreach ($movieInfo['cast'] as $id => $name) {
                         $character = '';
-                        if (isset($movieInfo['character'][$id]))
-                        {
+                        if (isset($movieInfo['character'][$id])) {
                             $character = $movieInfo['character'][$id];
                         }
                         $cast[] = [
@@ -76,11 +69,17 @@ class HtmlBuilder
                     'year'              => preg_replace('/(\d{4}).*/', '$1', $movieInfo['info']['release_date']),
                     'directors'         => isset($movieInfo['directors']) ? $movieInfo['directors'] : '',
                     'cast'              => isset($cast) ? $cast : '',
-                    'rating'            => isset($movieInfo['info']['imdb_rating']) ? $movieInfo['info']['imdb_rating'] : $movieInfo['info']['vote_average'],
+                    'rating'            =>
+                        isset($movieInfo['info']['imdb_rating'])
+                            ? $movieInfo['info']['imdb_rating']
+                            : $movieInfo['info']['vote_average'],
                     'length'            => $movieInfo['info']['runtime'],
-                    'genre'             => isset($movieInfo['genres']) ? array_values($movieInfo['genres']) : [],
-                    'languages'         => isset($movieInfo['spoken_languages']) ? array_values($movieInfo['spoken_languages']) : [],
-                    'countries'         => isset($movieInfo['production_countries']) ? array_values($movieInfo['production_countries']) : [],
+                    'genre'             =>
+                        isset($movieInfo['genres']) ? array_values($movieInfo['genres']) : [],
+                    'languages'         =>
+                        isset($movieInfo['spoken_languages']) ? array_values($movieInfo['spoken_languages']) : [],
+                    'countries'         =>
+                    isset($movieInfo['production_countries']) ? array_values($movieInfo['production_countries']) : [],
                     'plot'              => $movieInfo['info']['overview'],
                     'tagline'           => $movieInfo['info']['tagline']
                 ];
@@ -90,22 +89,17 @@ class HtmlBuilder
                 $movie['poster'] = $this->getScaledPosterAsBase64($posterFile, 400, 266);
 
                 $movieYears[$movie['year']] = $movie['year'];
-                foreach ($movie['genre'] as $genre)
-                {
+                foreach ($movie['genre'] as $genre) {
                     $movieGenres[$genre] = $genre;
                 }
-                if (isset($movieInfo['spoken_languages']))
-                {
-                    foreach ($movieInfo['spoken_languages'] as $language)
-                    {
-                        if ( ! empty($language))
-                        {
+                if (isset($movieInfo['spoken_languages'])) {
+                    foreach ($movieInfo['spoken_languages'] as $language) {
+                        if (!empty($language)) {
                             $movieLanguages[$language] = $language;
                         }
                     }
                 }
-                foreach ($movie['countries'] as $country)
-                {
+                foreach ($movie['countries'] as $country) {
                     $movieCountries[$country] = $country;
                 }
                 $movies[$movie['id']] = $movie;
@@ -126,7 +120,7 @@ class HtmlBuilder
 
     public function getScaledPosterAsBase64($file, $newHeight = 400, $newWidth = 0)
     {
-        if ( ! file_exists($file)) {
+        if (!file_exists($file)) {
             return '';
         }
 
