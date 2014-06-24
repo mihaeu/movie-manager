@@ -2,7 +2,7 @@
 
 ## Mission Statement
 
-So I just decided to rewrite an old project of mine. Actually it's a rewrite of two to three projects one of which was developed in a proper way and will be included as a dependency.
+So I just decided to rewrite an old project of mine. Actually it's a rewrite of two to three projects only one of which was developed in a proper way and will be included as a dependency.
 
 What is it supposed to do?
 
@@ -18,6 +18,7 @@ So the app has two parts:
 
 Keep in mind that:
 
+- this should probably **not** have been done with PHP
 - this is an oppinionated app for my purpose
 - however it should be usable by others and extensible
 

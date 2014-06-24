@@ -36,7 +36,6 @@ class IniTest extends PHPUnit_Framework_TestCase
             ]
         ];
         Ini::write($inputArray, $this->testFile);
-        Ini::write($inputArray, $this->testFile.'t');
         
         $this->assertEquals("1st=\"1\\\"a\"\r\n\r\n[2nd]\r\n0=2\r\n1=3\r\n2=4", file_get_contents($this->testFile));
         $this->assertEquals($inputArray, Ini::read($this->testFile));
