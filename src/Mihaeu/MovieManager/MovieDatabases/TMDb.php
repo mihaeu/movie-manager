@@ -1,6 +1,6 @@
 <?php
 
-namespace Mihaeu\MovieManager;
+namespace Mihaeu\MovieManager\MovieDatabases;
 
 class TMDb
 {
