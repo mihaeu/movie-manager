@@ -21,7 +21,7 @@ class HtmlBuilder
      */
     public function __construct()
     {
-        $this->setUpTempalting();
+        $this->setUpTemplating();
     }
 
     /**
