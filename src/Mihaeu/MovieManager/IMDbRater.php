@@ -2,8 +2,18 @@
 
 namespace Mihaeu\MovieManager;
 
+/**
+ * Class IMDbRater
+ *
+ * @package Mihaeu\MovieManager
+ *
+ * @author Michael Haeuslmann (haeuslmann@gmail.com)
+ */
 class IMDbRater
 {
+    /**
+     * @TODO Copied in from a cmd line script and still needs major rework.
+     */
     public static function check()
     {
         if (!isset($argv[1]) || !is_dir($argv[1])) {
@@ -17,7 +27,7 @@ class IMDbRater
             $linkFile = "$pathToMovies/$movieFolder/$movieFolder - IMDb.url";
             if ( ! file_exists($linkFile))
             {
-                "Skipping $linkFile\n";
+                echo  "Skipping $linkFile\n";
                 continue;
             }
 
@@ -50,8 +60,10 @@ class IMDbRater
     /**
      * Parses a PHP array to INI format and writes the result to a file.
      *
-     * @param array $data
-     * @param string $path
+     * @param  Array $data
+     * @param  String $path
+     *
+     * @return mixed
      */
     public static function writeIniFile($data, $path)
     {

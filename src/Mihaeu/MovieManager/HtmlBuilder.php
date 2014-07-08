@@ -2,6 +2,13 @@
 
 namespace Mihaeu\MovieManager;
 
+/**
+ * Class HtmlBuilder
+ *
+ * @package Mihaeu\MovieManager
+ *
+ * @author Michael Haeuslmann (haeuslmann@gmail.com)
+ */
 class HtmlBuilder
 {
     /**
@@ -9,43 +16,27 @@ class HtmlBuilder
      */
     private $templating;
 
+    /**
+     * Constructor.
+     */
     public function __construct()
     {
-        $loader = new \Twig_Loader_Filesystem(
-            [
-                __DIR__ . '/../../../templates/movie-collection',
-                __DIR__ . '/../../../templates/movie-collection/assets/css',
-                __DIR__ . '/../../../templates/movie-collection/assets/js'
-            ]
-        );
-        $this->templating = new \Twig_Environment($loader, ['debug' => true]);
-        $this->templating->addExtension(new \Twig_Extension_Debug());
-
-        // add custom functions
-        $this->templating->addFunction(
-            new \Twig_SimpleFunction(
-                'filedump', function ($file) {
-                    $data = file_get_contents(__DIR__.'/../../../templates/movie-collection/'.$file);
-                    echo $data;
-                }
-            )
-        );
-        $this->templating->addFunction(
-            new \Twig_SimpleFunction(
-                'base64filedump', function ($file) {
-                    $data = file_get_contents(__DIR__.'/../../../templates/movie-collection/'.$file);
-                    echo base64_encode($data);
-                }
-            )
-        );
+        $this->setUpTempalting();
     }
 
+    /**
+     * Builds the HTML.
+     *
+     * @param $pathToMovies
+     * @param $limit
+     * @return string
+     */
     public function build($pathToMovies, $limit = -1)
     {
-        $movies = [];
-        $moviesJson = [];
-        $movieYears = [];
-        $movieGenres = [];
+        $movies         = [];
+        $moviesJson     = [];
+        $movieYears     = [];
+        $movieGenres    = [];
         $movieLanguages = [];
         $movieCountries = [];
 
@@ -133,7 +124,15 @@ class HtmlBuilder
         );
     }
 
-
+    /**
+     * Scales a .jpeg image and returns the base64 encoded data.
+     *
+     * @param string $file
+     * @param int    $newHeight
+     * @param int    $newWidth
+     *
+     * @return string
+     */
     public function getScaledPosterAsBase64($file, $newHeight = 400, $newWidth = 0)
     {
         if (!file_exists($file)) {
@@ -159,5 +158,39 @@ class HtmlBuilder
         $img = ob_get_clean();
 
         return base64_encode($img);
+    }
+
+    /**
+     * Sets up Twig environment, extensions and functions.
+     */
+    public function setUpTemplating()
+    {
+        $loader = new \Twig_Loader_Filesystem(
+            [
+                __DIR__ . '/../../../templates/movie-collection',
+                __DIR__ . '/../../../templates/movie-collection/assets/css',
+                __DIR__ . '/../../../templates/movie-collection/assets/js'
+            ]
+        );
+        $this->templating = new \Twig_Environment($loader, ['debug' => true]);
+        $this->templating->addExtension(new \Twig_Extension_Debug());
+
+        // add custom functions
+        $this->templating->addFunction(
+            new \Twig_SimpleFunction(
+                'filedump', function ($file) {
+                    $data = file_get_contents(__DIR__.'/../../../templates/movie-collection/'.$file);
+                    echo $data;
+                }
+            )
+        );
+        $this->templating->addFunction(
+            new \Twig_SimpleFunction(
+                'base64filedump', function ($file) {
+                    $data = file_get_contents(__DIR__.'/../../../templates/movie-collection/'.$file);
+                    echo base64_encode($data);
+                }
+            )
+        );
     }
 }
