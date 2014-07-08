@@ -1,3 +1,9 @@
+# IDE
+/.idea/
+
+# dependencies
 /vendor/
-/build/
 bower_components
+
+# build artifacts
+/build/
