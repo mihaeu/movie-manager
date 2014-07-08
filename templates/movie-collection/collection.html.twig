@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<title>Mike's Movies</title>
 	<link rel="icon" type="image/png" href="data:image/png;base64,{{ base64filedump('assets/img/favicon.png') }}" />
-	<style>{{ include('styles.css') }}</style>
+	<style>{{ include('assets/css/styles.css') }}</style>
 </head>
 <body>
 	<div class="container">
@@ -26,9 +26,9 @@
 			</div>
 		</div>
 
-		{{ include('movies.html.twig') }}
+        {{ include('movies.html.twig') }}
 		
 	</div>
-	<script>{{ include('scripts.js') }}</script>
+	<script>{{ filedump('assets/js/scripts.js') }}</script>
 </body>
 </html>

@@ -1,12 +1,12 @@
-{{ filedump('templates/bower_components/bootstrap/dist/css/bootstrap.min.css') }}
-{{ filedump('templates/bower_components/fancybox/source/jquery.fancybox.css') }}
+{{ filedump('bower_components/bootstrap/dist/css/bootstrap.min.css') }}
+{{ filedump('bower_components/fancybox/source/jquery.fancybox.css') }}
 
 {########################}
 {# Header 				#}
 {########################}
 
 html, body {
-	background: url(data:image/jpg;base64,{{ base64filedump('templates/assets/img/movie-bg.jpg') }})
+	background: url(data:image/jpg;base64,{{ base64filedump('assets/img/movie-bg.jpg') }})
 	no-repeat center center fixed;
 	-webkit-background-size: cover;
 	-moz-background-size: cover;

@@ -1,7 +1,7 @@
-{{ filedump('templates/bower_components/jquery/jquery.min.js') }}
-{{ filedump('templates/bower_components/bootstrap/dist/js/bootstrap.min.js') }}
-{{ filedump('templates/bower_components/tinysort/dist/jquery.tinysort.min.js') }}
-{{ filedump('templates/bower_components/fancybox/source/jquery.fancybox.js') }}
+{{ filedump('bower_components/jquery/jquery.min.js') }}
+{{ filedump('bower_components/bootstrap/dist/js/bootstrap.min.js') }}
+{{ filedump('bower_components/tinysort/dist/jquery.tinysort.min.js') }}
+{{ filedump('bower_components/fancybox/source/jquery.fancybox.js') }}
 
 $(function() {
 
