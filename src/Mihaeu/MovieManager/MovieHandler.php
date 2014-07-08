@@ -63,7 +63,7 @@ class MovieHandler
 				$chunks = preg_replace('/  +/', ' ', $chunks);
 
 				$formatOk = $folder = $link = $screenshot = $poster = false;
-				$formatOk = preg_match('/[a-z0-9 \-\.]+ \(\d{4}\)\.[a-z0-9]{2,4}/i', $filename);
+				$formatOk = preg_match('/.+ \(\d{4}\)\.[a-z0-9]{2,4}/i', $filename);
 				if ($formatOk)
 				{
 					$folder = is_dir(realpath($file->getPath().'/../'.$filenameWithoutExt));
@@ -116,32 +116,71 @@ class MovieHandler
 	}
 
 	/**
+	 * Retrieves the IMDb ID by crawling TMDb's site.
+	 *
+	 * This is a **HACK** and was only intended for one time use.
+	 * (Isn't it always?)
+	 *
+	 * TMDb search retrieves only a single result when searching
+	 * for an IMDb ID, so crawling the result is simple.
+	 * 
+	 * @param  string $imdbId Should be a string, because of leading 0s
+	 * 
+	 * @return string
+	 */
+	public function getTmdbIdFromImdbId($imdbId)
+	{
+	    $url = 'https://www.themoviedb.org/search?query=tt'.$imdbId;
+	    $ch = curl_init();
+	    $timeout = 5;
+	    curl_setopt($ch, CURLOPT_URL, $url);
+	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+	    $data = curl_exec($ch);
+	    curl_close($ch);
+
+	    $crawler = new \Symfony\Component\DomCrawler\Crawler($data);
+
+	    // this is highly volatile and was only used for a quick hack
+	    $xpath = '//*[@id="container"]/div[5]/div[1]/ul/li/div[2]/h3/a';
+
+	    $tmdbUrl = $crawler->filterXpath($xpath)->attr('href');
+	    $tmdbId = preg_replace('/^\/movie\/(\d+).*$/', '$1', $tmdbUrl);
+
+	    if (!is_numeric($tmdbId)) {
+	        throw new \Exception("TMDb ID \"$tmdbId\" extracted from \"$tmdbUrl\" is not valid".PHP_EOL, 1);
+	        
+	    }
+
+	    return $tmdbId;
+	}
+
+	/**
 	 * Handles movie related tasts like renaming, downloading the poster etc.
 	 *
 	 * @param  string   $file   Movie file
-	 * @param  int      $imdbId IMDb ID which is also used by TMDb.org
+	 * @param  int      $imdbId IMDb ID which is also used by TMDb.org **NOOOOOT anymore :(**
 	 * @return boolean          success flag
 	 */
-	public function handleMovie($file, $tmdbId)
+	public function handleMovie($file, $imdbId, $isIMDb = false)
 	{
+		// by default (=webapp) this id is from tmdb
+		$tmdbId = $imdbId;
+		if ($isIMDb) {
+			try {
+				$tmdbId = $this->getTmdbIdFromImdbId($imdbId);
+			} catch (\Exception $e) {
+				// can't recover without the ID, abort
+				echo "$file couldn't be handled.\n";
+				return false;
+			}
+		}
+
 		$movie = $this->tmdb->getMovie($tmdbId);
 		$imdbId = str_replace('tt', '', $movie['imdb_id']);
 
 		$movieTitle = $this->convertMovieTitle($movie['title']);
 		$movieYear = $this->convertMovieYear($movie['release_date']);
-
-		// if the file is located in the base folder, put it in a separate folder first
-		// if (realpath(dirname($file)) === realpath('/mnt/usb-passport/videos/neda-movies/flattened'))
-		// {
-		// 	$tmpFolder = dirname($file).'/'.md5($file);
-		// 	mkdir($tmpFolder);
-
-		// 	$newFile = $tmpFolder.'/'.basename($file);
-		// 	rename(realpath($file), $newFile);
-
-		// 	// change file location
-		// 	$file = $newFile;
-		// }
 
 		$fileInfo = new \SplFileInfo($file);
 		$filePath = $fileInfo->getPath();
@@ -155,12 +194,32 @@ class MovieHandler
 			return false;
 		}
 
-		$this->renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt);
-		$this->createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, $movie);
-		$this->downloadMoviePoster($movieTitle, $movieYear, $filePath, $movie);
-		$this->renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder);
+		$hasCorrectName = $this->renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt);
+		if (!$hasCorrectName) {
+			echo '$hasCorrectName failer';
+		}
 
-		return true;
+		$hasIMDbLink = $this->createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, $movie);
+		if (!$hasIMDbLink) {
+			echo '$hasIMDbLink failer';
+		}
+
+		$hasPoster = $this->downloadMoviePoster($movieTitle, $movieYear, $filePath, $movie);
+		if (!$hasPoster) {
+			echo '$hasPoster failer';
+		}
+
+		$hasCorrectFolder = $this->renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder);
+		if (!$hasCorrectFolder) {
+			echo '$hasCorrectFolder failer';
+		}
+
+
+		if ($hasCorrectName && $hasIMDbLink && $hasPoster && $hasCorrectFolder) {
+			return "$movieTitle ($movieYear)";
+		} else {
+			return false;
+		}
 	}
 
 	private function getMovieFromTMDbResult(Array $movie)
@@ -194,14 +253,33 @@ class MovieHandler
 		return date('Y', strtotime($originalReleaseDate));
 	}
 
-	private function renameFile($movieTitle, $movieYear,$file, $filePath, $fileExt)
+	private function renameFile($movieTitle, $movieYear,$file, $filePath, $fileExt, $maxRetries = 5)
 	{
-		rename($file, "$filePath/$movieTitle ($movieYear).$fileExt");
+		$retries = 0;
+		$success = @rename($file, "$filePath/$movieTitle ($movieYear).$fileExt");
+		while (!$success && ++$retries < $maxRetries) {
+			echo 'Renaming '.basename($file)." unsuccessful. Retry $retries of $maxRetries.\n"; 
+			usleep(100);
+			$success = @rename($file, "$filePath/$movieTitle ($movieYear).$fileExt");
+		}
+		return $success;
 	}
 
-	private function renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder)
+	private function renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder, $maxRetries = 5)
 	{
-		rename($filePath, "$movieFolder/$movieTitle ($movieYear)");
+		$newPath = "$movieFolder/$movieTitle ($movieYear)";
+		if (is_dir($newPath)) {
+			return true;
+		}
+
+		$retries = 0;
+		$success = @rename($filePath, $newPath);
+		while (!$success && ++$retries < $maxRetries) {
+			echo 'Renaming '.basename($file)." unsuccessful. Retry $retries of $maxRetries.\n"; 
+			usleep(100);
+			$success = @rename($filePath, $newPath);
+		}
+		return $success;
 	}
 
 	private function createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, Array $movie)
@@ -254,14 +332,17 @@ class MovieHandler
 		}
 
 		$url = $this->getIMDbLink($imdbId);
-		$internetShortcut = "[InternetShortcut]\rURL=$url\r";
 		$iniArray = [
 			'InternetShortcut' => [
 				'URL' => $url
 			]
 		] + $movie;
 
-		$this->writeIniFile($iniArray, "$filePath/$movieTitle ($movieYear) - IMDb.url");
+		$iniFile = "$filePath/$movieTitle ($movieYear) - IMDb.url";
+		$this->writeIniFile($iniArray, $iniFile);
+
+		// this is not fast, but it doesn't really matter for this app
+		return parse_ini_file($iniFile) !== false;
 	}
 
 	private function getIMDbLink($imdbId)
@@ -292,7 +373,7 @@ class MovieHandler
 		// take a screenshot with PhantomJS and save it
 		$output = '';
 		$url = $this->getIMDbLink($movie['imdb_id']);
-		$script = __DIR__.'/../../../../assets/js/rasterize.js';
+		$script = __DIR__.'/../../../rasterize.js';
 		$target = "$filePath/$movieTitle ($movieYear) - IMDb.png";
 		$cmd = "phantomjs $script \"$url\" \"$target\"";
 		system($cmd, $output);

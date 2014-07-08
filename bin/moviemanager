@@ -17,6 +17,6 @@ if (is_file(__DIR__ . '/../vendor/autoload.php')) {
     );
 }
 
-$builder = new \Mihaeu\MovieManager\HtmlBuilder();
-echo $builder->build('/media/media/videos/movies');
-
+$app = new \Symfony\Component\Console\Application();
+$app->add(new \Mihaeu\MovieManager\Console\BuildCommand());
+$app->run();

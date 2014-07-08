@@ -8,9 +8,11 @@
         "wtfzdotnet/php-tmdb-api": "dev-master",
         "glamorous/tmdb-php-api": "dev-master",
         "twig/twig": "1.*",
-        "filp/whoops": "1"
+        "symfony/dom-crawler": "2.1.*",
+        "symfony/console": "2.*"
     },
     "require-dev": {
+        "filp/whoops": "1.*",
         "phpunit/phpunit": "4.*",
         "mockery/mockery": "0.*",
         "mikey179/vfsStream": "1.*",
