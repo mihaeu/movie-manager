@@ -2,6 +2,8 @@
 
 namespace Mihaeu\MovieManager;
 
+use Mihaeu\MovieManager\Ini\Reader;
+use Mihaeu\MovieManager\Ini\Writer;
 use Symfony\Component\DomCrawler\Crawler;
 
 class MovieHandler
@@ -283,7 +285,7 @@ class MovieHandler
         $retries = 0;
         $success = @rename($filePath, $newPath);
         while (!$success && ++$retries < $maxRetries) {
-            echo 'Renaming ' . basename($file) . " unsuccessful. Retry $retries of $maxRetries.\n";
+            echo 'Renaming ' . basename($movieFolder) . " unsuccessful. Retry $retries of $maxRetries.\n";
             usleep(100);
             $success = @rename($filePath, $newPath);
         }
@@ -303,26 +305,28 @@ class MovieHandler
             } else {
                 switch ($key) {
                     case 'genres':
-                        foreach ($movie['genres'] as $key => $genre) {
+                        foreach ($movie['genres'] as $genre) {
                             $movie['genres'][$genre['id']] = $genre['name'];
                             unset($movie['genres'][$key]);
                         }
                         break;
                     case 'production_companies':
-                        foreach ($movie['production_companies'] as $key => $company) {
+                        foreach ($movie['production_companies'] as $company) {
                             $movie['production_companies'][$company['id']] = $company['name'];
                             unset($movie['production_companies'][$key]);
                         }
                         break;
                     case 'production_countries':
-                        foreach ($movie['production_countries'] as $key => $country) {
+                        foreach ($movie['production_countries'] as $country) {
                             $movie['production_countries'][$country['iso_3166_1']] = $country['name'];
                             unset($movie['production_countries'][$key]);
                         }
                         break;
                     case 'spoken_languages':
-                        foreach ($movie['spoken_languages'] as $key => $language) {
-                            $movie['spoken_languages'][$language['iso_639_1']] = $language['name'];
+                        foreach ($movie['spoken_languages'] as $language) {
+                            // language key no (=Norsk) is not allowed in .ini files
+                            // so we cannot use the iso shortcode for the key
+                            $movie['spoken_languages'][] = $language['name'];
                             unset($movie['spoken_languages'][$key]);
                         }
                         break;
@@ -338,10 +342,10 @@ class MovieHandler
             ] + $movie;
 
         $iniFile = "$filePath/$movieTitle ($movieYear) - IMDb.url";
-        $this->writeIniFile($iniArray, $iniFile);
+        Writer::write($iniFile,$iniArray);
 
         // this is not fast, but it doesn't really matter for this app
-        return parse_ini_file($iniFile) !== false;
+        return Reader::read($iniFile) !== false;
     }
 
     private function getIMDbLink($imdbId)
@@ -376,60 +380,5 @@ class MovieHandler
         system($cmd, $output);
 
         return 0 === $output;
-    }
-
-    /**
-     * Parses a PHP array to INI format and writes the result to a file.
-     *
-     * @param array $data
-     * @param string $path
-     */
-    private function writeIniFile($data, $path)
-    {
-        $content = '';
-        if (is_array($data)) {
-            foreach ($data as $key => $value) {
-                if (is_array($value)) {
-                    if (!empty($value)) {
-                        $content .= "[$key]\r\n";
-                    }
-                    foreach ($value as $subkey => $subvalue) {
-                        if (is_array($subvalue)) {
-                            if (!empty($value)) {
-                                $content .= "[$key\\$subkey]\r\n";
-                            }
-                            foreach ($subvalue as $subsubkey => $subsubvalue) {
-                                if (is_numeric($subsubvalue)) {
-                                    $content .= "$subsubkey=$subsubvalue\r\n";
-                                } else {
-                                    $subsubvalue = str_replace('"', "'", $subsubvalue);
-                                    $content .= "$subsubkey=\"$subsubvalue\"\r\n";
-                                }
-                            }
-                            $content .= "\r\n";
-                        } else {
-                            if (is_numeric($subvalue)) {
-                                $content .= "$subkey=$subvalue\r\n";
-                            } else {
-                                $subvalue = str_replace('"', "'", $subvalue);
-                                $content .= "$subkey=\"$subvalue\"\r\n";
-                            }
-                        }
-                    }
-                    $content .= "\r\n";
-                } else {
-                    if (is_numeric($value)) {
-                        $content .= "$key=$value\r\n";
-                    } else {
-                        $value = str_replace('"', "'", $value);
-                        $content .= "$key=\"$value\"\r\n";
-                    }
-                }
-            }
-        } else {
-            return false;
-        }
-
-        file_put_contents($path, $content);
     }
 }
