@@ -39,15 +39,18 @@ class WebApp
                 $dir = '/media/media/videos/movies';
             }
 
-            $movieHandler = new MovieHandler;
-            $movieFiles = $movieHandler->findMoviesInDir($dir);
+            $config = new Config();
+            $finder = new MovieFinder();
+            $movieFiles = $finder->findMoviesInDir($dir, $config->get('allowed-movie-formats'));
 
             return $app['twig']->render('index.html.twig', ['files' => $movieFiles]);
         });
 
         $this->app->get('/imdb', function(Application $app, Request $request) {
+            $config = new Config();
+            $movieHandler = new MovieHandler($config);
+
             $query = $request->get('query');
-            $movieHandler = new MovieHandler();
             $result = $movieHandler->searchMoviesOnTMDb($query);
             if (empty($result)) {
                 return $app->json('No match found.', 404);
@@ -69,8 +72,9 @@ class WebApp
         $this->app->get('/movie', function(Application $app, Request $request) {
             $id   = $request->get('id');
             $file = $request->get('file');
-            
-            $movieHandler = new MovieHandler();
+
+            $config = new Config();
+            $movieHandler = new MovieHandler($config);
             $result = $movieHandler->handleMovie($file, $id);
             if ($result === false) {
                 return $app->json(['message' => 'failure'], 404);
