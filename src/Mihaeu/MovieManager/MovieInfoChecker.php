@@ -2,6 +2,19 @@
 
 namespace Mihaeu\MovieManager;
 
+use Mihaeu\MovieManager\Ini\Writer;
+
+/**
+ * Class MovieInfoChecker
+ *
+ * This is supposed to be a validator class for the .url storage format
+ * we're using for persisting movie info.
+ *
+ * Originally this was a standalone script and it has been pretty much
+ * copied 1:1 into a static method.
+ *
+ * @author Michael Haeuslmann (haeuslmann@gmail.com)
+ */
 class MovieInfoChecker
 {
     public static function check()
@@ -15,7 +28,6 @@ class MovieInfoChecker
 
         // $movieRootFolder = '/media/media/videos/movies';
         $movieFolders = array_diff(scandir($movieRootFolder), ['.', '..']);
-        $movies = [];
         foreach ($movieFolders as $movieFolder)
         {
 
@@ -102,7 +114,7 @@ class MovieInfoChecker
                     }
                 }
 
-                IMDbRater::writeIniFile($movieInfo, $linkFile);
+                Writer::write($linkFile, $movieInfo);
             }   
         }
     }

@@ -1,3 +1,14 @@
 {
-    "tmdb-api-key" : "0132465798"
+    "tmdb-api-key" : "0132465798",
+    "allowed-movie-formats" : [
+        "mkv",
+        "mv4",
+        "m4v",
+        "mp4",
+        "mpeg",
+        "mpg",
+        "avi",
+        "rmvb",
+        "m2ts"
+    ]
 }

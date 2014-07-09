@@ -8,17 +8,10 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class MovieHandler
 {
-    public static $ALLOWED_FORMATS = [
-        'mkv',
-        'mv4',
-        'm4v',
-        'mp4',
-        'mpeg',
-        'mpg',
-        'avi',
-        'rmvb',
-        'm2ts'
-    ];
+    /**
+     * @var Config
+     */
+    private $config;
 
     /**
      * TMDb API Wrapper
@@ -32,13 +25,8 @@ class MovieHandler
      */
     public function __construct()
     {
-        $configFile = __DIR__ . '/../../../config.json';
-        if (!file_exists($configFile)) {
-            exit($configFile . ' does not exist, please create it or rename config.sample.json.' . PHP_EOL);
-        }
-
-        $config = json_decode(file_get_contents($configFile), true);
-        $this->tmdb = new \TMDb($config['tmdb-api-key'], 'en');
+        $this->config = new Config();
+        $this->tmdb = new \TMDb($this->config->get('tmdb-api-key'), 'en');
     }
 
     /**
@@ -57,7 +45,7 @@ class MovieHandler
 
         $filenameChunks = [];
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
-        $allowedExtensionsRegex = '/(' . implode('|', $this::$ALLOWED_FORMATS) . ')/i';
+        $allowedExtensionsRegex = '/(' . implode('|', $this->config->get('allowed-movie-formats')) . ')/i';
         foreach ($files as $name => $file) {
             if (preg_match($allowedExtensionsRegex, $file->getExtension())
                 && !preg_match('/.*CD2\.\w+$/', $name)
@@ -86,15 +74,15 @@ class MovieHandler
                 }
 
                 $filenameChunks[$file->getBasename()] = [
-                    'name' => $filename,
-                    'fullname' => $name,
-                    'path' => $file->getPath(),
-                    'chunks' => explode(' ', trim($chunks)),
-                    'format' => (bool)$formatOk,
-                    'folder' => $folder,
-                    'link' => $link,
-                    'screenshot' => $screenshot,
-                    'poster' => $poster
+                    'name'          => $filename,
+                    'fullname'      => $name,
+                    'path'          => $file->getPath(),
+                    'chunks'        => explode(' ', trim($chunks)),
+                    'format'        => (bool)$formatOk,
+                    'folder'        => $folder,
+                    'link'          => $link,
+                    'screenshot'    => $screenshot,
+                    'poster'        => $poster
                 ];
             }
         }
