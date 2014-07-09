@@ -56,19 +56,19 @@ class MovieHandler
         $filenameChunks = [];
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
         $allowedExtensionsRegex = '/(' . implode('|', $this::$ALLOWED_FORMATS) . ')/i';
-        $filesArray = iterator_to_array($files);
         foreach ($files as $name => $file) {
             if (preg_match($allowedExtensionsRegex, $file->getExtension())
                 && !preg_match('/.*CD2\.\w+$/', $name)
             ) {
-                $matches = [];
                 $filename = $file->getBasename();
+                $matches = [];
                 preg_match('/^(.*)\.[a-z0-9]{2,4}$/i', $filename, $matches);
                 $filenameWithoutExt = $matches[1];
+                
                 $chunks = preg_replace('/[\:\-\._\(\)\[\]]/', ' ', $filenameWithoutExt);
                 $chunks = preg_replace('/  +/', ' ', $chunks);
 
-                $formatOk = $folder = $link = $screenshot = $poster = false;
+                $folder = $link = $screenshot = $poster = false;
                 $formatOk = preg_match('/.+ \(\d{4}\)\.[a-z0-9]{2,4}/i', $filename);
                 if ($formatOk) {
                     $folder = is_dir(realpath($file->getPath() . '/../' . $filenameWithoutExt));

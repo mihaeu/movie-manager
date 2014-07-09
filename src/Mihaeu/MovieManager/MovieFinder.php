@@ -10,8 +10,7 @@ class MovieFinder
     {
         $finder = new Finder($rootMovieFolder);
         $movies = $finder->findMoviesInFolder();
-        // var_dump($movies);
-        
+
         $movieInfo = [];
         foreach ($movies as $movie) {
             $movieFile = $movie->getMovieFilename();
