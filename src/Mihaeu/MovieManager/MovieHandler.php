@@ -64,7 +64,7 @@ class MovieHandler
                 $matches = [];
                 preg_match('/^(.*)\.[a-z0-9]{2,4}$/i', $filename, $matches);
                 $filenameWithoutExt = $matches[1];
-                
+
                 $chunks = preg_replace('/[\:\-\._\(\)\[\]]/', ' ', $filenameWithoutExt);
                 $chunks = preg_replace('/  +/', ' ', $chunks);
 

@@ -27,8 +27,8 @@ class HtmlBuilder
     /**
      * Builds the HTML.
      *
-     * @param $pathToMovies
-     * @param $limit
+     * @param  string $pathToMovies
+     * @param  int    $limit
      * @return string
      */
     public function build($pathToMovies, $limit = -1)
@@ -47,11 +47,11 @@ class HtmlBuilder
             }
 
             $linkFile = "$pathToMovies/$movieFolder/$movieFolder - IMDb.url";
-            if (!file_exists($linkFile)) {
+            $movieInfo = Ini\Reader::read($linkFile);
+            if (false === $movieInfo) {
                 continue;
             }
 
-            $movieInfo = parse_ini_file($linkFile, true);
             if (isset($movieInfo['info'])) {
                 $posterFile = str_replace('- IMDb.url', '- Poster.jpg', $linkFile);
                 $cast = [];
