@@ -40,9 +40,12 @@ class BuildCommand extends Command
     {
         $builder = new HtmlBuilder();
 
-        $path = $input->getArgument('path');
-        $save = $input->getArgument('save');
-        if (!empty($save)) {
+        $path = realpath($input->getArgument('path'));
+        if (is_writable(dirname($input->getArgument('save')))) {
+            $save = realpath($input->getArgument('save'));
+            if (!is_writable(dirname($save))) {
+                throw new \InvalidArgumentException(dirname($save).' is not writable.');
+            }
             file_put_contents($save, $builder->build($path, $input->getOption('limit')));
         } else {
             echo $builder->build($path, $input->getOption('limit'));
