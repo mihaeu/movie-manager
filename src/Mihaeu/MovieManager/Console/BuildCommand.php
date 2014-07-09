@@ -2,7 +2,7 @@
 
 namespace Mihaeu\MovieManager\Console;
 
-use Mihaeu\MovieManager\HtmlBuilder;
+use Mihaeu\MovieManager\Builder\Html;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,7 +38,7 @@ class BuildCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $builder = new HtmlBuilder();
+        $builder = new Html();
 
         $path = realpath($input->getArgument('path'));
         if (is_writable(dirname($input->getArgument('save')))) {

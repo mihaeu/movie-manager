@@ -1,15 +1,17 @@
 <?php
 
-namespace Mihaeu\MovieManager;
+namespace Mihaeu\MovieManager\Builder;
+
+use Mihaeu\MovieManager\Ini\Reader;
 
 /**
- * Class HtmlBuilder
+ * Class Html
  *
  * @package Mihaeu\MovieManager
  *
  * @author Michael Haeuslmann (haeuslmann@gmail.com)
  */
-class HtmlBuilder
+class Html
 {
     /**
      * @var \Twig_Environment
@@ -17,10 +19,26 @@ class HtmlBuilder
     private $templating;
 
     /**
+     * @var string
+     */
+    private $templateDir;
+
+    /**
+     * @var array
+     */
+    private $movies = [];
+
+    /**
+     * @var string
+     */
+    private $moviesJson;
+
+    /**
      * Constructor.
      */
     public function __construct()
     {
+        $this->templateDir = realpath(__DIR__ . '/../../../../templates');
         $this->setUpTemplating();
     }
 
@@ -33,7 +51,6 @@ class HtmlBuilder
      */
     public function build($pathToMovies, $limit = -1)
     {
-        $movies         = [];
         $moviesJson     = [];
         $movieYears     = [];
         $movieGenres    = [];
@@ -47,7 +64,7 @@ class HtmlBuilder
             }
 
             $linkFile = "$pathToMovies/$movieFolder/$movieFolder - IMDb.url";
-            $movieInfo = Ini\Reader::read($linkFile);
+            $movieInfo = Reader::read($linkFile);
             if (false === $movieInfo) {
                 continue;
             }
@@ -90,6 +107,7 @@ class HtmlBuilder
 
                 // the poster should not be part of the json file, so let's add that later
                 $moviesJson[$movie['id']] = $movie;
+
                 $movie['poster'] = $this->getScaledPosterAsBase64($posterFile, 400, 266);
 
                 $movieYears[$movie['year']] = $movie['year'];
@@ -106,23 +124,41 @@ class HtmlBuilder
                 foreach ($movie['countries'] as $country) {
                     $movieCountries[$country] = $country;
                 }
-                $movies[$movie['id']] = $movie;
+                $this->movies[$movie['id']] = $movie;
             }
         }
 
+        $this->moviesJson = str_replace("'", '&#39;', json_encode($moviesJson));
         asort($movieYears);
         return $this->templating->render(
             'collection.html.twig',
             [
-                'years' => $movieYears,
-                'genres' => $movieGenres,
-                'languages' => $movieLanguages,
-                'countries' => $movieCountries,
-                'movies' => $movies,
-                'moviesJson' => str_replace("'", '&#39;', json_encode($moviesJson))
+                'years'      => $movieYears,
+                'genres'     => $movieGenres,
+                'languages'  => $movieLanguages,
+                'countries'  => $movieCountries,
+                'movies'     => $this->getMovies(),
+                'moviesJson' => $this->getMoviesJson()
             ]
         );
     }
+
+    /**
+     * @return array
+     */
+    public function getMovies()
+    {
+        return $this->movies;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMoviesJson()
+    {
+        return $this->moviesJson;
+    }
+
 
     /**
      * Scales a .jpeg image and returns the base64 encoded data.
@@ -167,9 +203,9 @@ class HtmlBuilder
     {
         $loader = new \Twig_Loader_Filesystem(
             [
-                __DIR__ . '/../../../templates/movie-collection',
-                __DIR__ . '/../../../templates/movie-collection/assets/css',
-                __DIR__ . '/../../../templates/movie-collection/assets/js'
+                $this->templateDir.'/movie-collection',
+                $this->templateDir.'/movie-collection/assets/css',
+                $this->templateDir.'/movie-collection/assets/js'
             ]
         );
         $this->templating = new \Twig_Environment($loader, ['debug' => true]);
@@ -179,7 +215,7 @@ class HtmlBuilder
         $this->templating->addFunction(
             new \Twig_SimpleFunction(
                 'filedump', function ($file) {
-                    $data = file_get_contents(__DIR__.'/../../../templates/movie-collection/'.$file);
+                    $data = file_get_contents($this->templateDir.'/movie-collection/'.$file);
                     echo $data;
                 }
             )
@@ -187,7 +223,7 @@ class HtmlBuilder
         $this->templating->addFunction(
             new \Twig_SimpleFunction(
                 'base64filedump', function ($file) {
-                    $data = file_get_contents(__DIR__.'/../../../templates/movie-collection/'.$file);
+                    $data = file_get_contents($this->templateDir.'/movie-collection/'.$file);
                     echo base64_encode($data);
                 }
             )
