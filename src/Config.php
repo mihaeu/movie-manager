@@ -19,7 +19,7 @@ class Config
      */
     public function __construct()
     {
-        $configFile = __DIR__ . '/../../../config.json';
+        $configFile = __DIR__ . '/../config.json';
         if (!file_exists($configFile)) {
             throw new \Exception($configFile . ' does not exist, please create it or rename config.sample.json.' . PHP_EOL);
         }

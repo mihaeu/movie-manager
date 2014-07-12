@@ -5,10 +5,10 @@
         "silex/silex": "1.*",
         "symfony/twig-bridge": "~2.3",
         "mihaeu/sub-collector": "1.*",
-        "wtfzdotnet/php-tmdb-api": "dev-master",
+        "wtfzdotnet/php-tmdb-api": "1.*",
         "glamorous/tmdb-php-api": "dev-master",
         "twig/twig": "1.*",
-        "symfony/dom-crawler": "2.1.*",
+        "symfony/dom-crawler": "2.*",
         "symfony/console": "2.*"
     },
     "require-dev": {
@@ -26,8 +26,8 @@
     ],
     "minimum-stability": "stable",
     "autoload": {
-        "psr-0": {
-            "Mihaeu": "src"
+        "psr-4": {
+            "Mihaeu\\MovieManager\\": ["src/", "tests/unit/"]
         }
     }
 }

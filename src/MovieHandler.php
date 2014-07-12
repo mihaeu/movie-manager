@@ -94,8 +94,10 @@ class MovieHandler
     /**
      * Handles movie related tasts like renaming, downloading the poster etc.
      *
-     * @param  string $file Movie file
-     * @param  int $imdbId IMDb ID which is also used by TMDb.org **NOOOOOT anymore :(**
+     * @param  string $file    Movie file
+     * @param  int    $imdbId  IMDb ID which is also used by TMDb.org **NOOOOOT anymore :(**
+     * @param  bool   $isIMDb  Workaround to accept both IMDb and TMDb IDs.
+     *
      * @return boolean          success flag
      */
     public function handleMovie($file, $imdbId, $isIMDb = false)
@@ -157,20 +159,7 @@ class MovieHandler
         }
     }
 
-    private function getMovieFromTMDbResult(Array $movie)
-    {
-        return [
-            'id' => $movie['id'],
-            'title' => $movie['title'],
-            'year' => (int)date('Y', strtotime($movie['release_date'])),
-            'link' => 'http://imdb.com/title/tt' . $movie['id'],
-            'posterThumbnailSrc' => $this->tmdb->getImageUrl(
-                $movie['poster_path'],
-                \TMDb::IMAGE_PROFILE,
-                'w185'
-            )
-        ];
-    }
+
 
     public function convertMovieTitle($originalTitle)
     {

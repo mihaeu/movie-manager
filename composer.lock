@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "7dbc6161ab0653fc9345c29da0bf4e59",
+    "hash": "b7ab031c6792926992ab3b608a642967",
     "packages": [
         {
             "name": "glamorous/tmdb-php-api",
@@ -51,22 +51,22 @@
         },
         {
             "name": "guzzle/guzzle",
-            "version": "v3.8.1",
+            "version": "v3.9.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "4de0618a01b34aa1c8c33a3f13f396dcd3882eba"
+                "url": "https://github.com/guzzle/guzzle3.git",
+                "reference": "92d9934f2fca1da15178c91239576ae26e505e60"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/4de0618a01b34aa1c8c33a3f13f396dcd3882eba",
-                "reference": "4de0618a01b34aa1c8c33a3f13f396dcd3882eba",
+                "url": "https://api.github.com/repos/guzzle/guzzle3/zipball/92d9934f2fca1da15178c91239576ae26e505e60",
+                "reference": "92d9934f2fca1da15178c91239576ae26e505e60",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
                 "php": ">=5.3.3",
-                "symfony/event-dispatcher": ">=2.1"
+                "symfony/event-dispatcher": "~2.1"
             },
             "replace": {
                 "guzzle/batch": "self.version",
@@ -93,13 +93,13 @@
                 "guzzle/stream": "self.version"
             },
             "require-dev": {
-                "doctrine/cache": "*",
-                "monolog/monolog": "1.*",
+                "doctrine/cache": "~1.3",
+                "monolog/monolog": "~1.0",
                 "phpunit/phpunit": "3.7.*",
-                "psr/log": "1.0.*",
-                "symfony/class-loader": "*",
-                "zendframework/zend-cache": "<2.3",
-                "zendframework/zend-log": "<2.3"
+                "psr/log": "~1.0",
+                "symfony/class-loader": "~2.1",
+                "zendframework/zend-cache": "2.*,<2.3",
+                "zendframework/zend-log": "2.*,<2.3"
             },
             "type": "library",
             "extra": {
@@ -139,7 +139,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2014-01-28 22:29:15"
+            "time": "2014-05-07 17:04:22"
         },
         {
             "name": "mihaeu/sub-collector",
@@ -479,32 +479,37 @@
         },
         {
             "name": "symfony/dom-crawler",
-            "version": "v2.1.13",
+            "version": "v2.5.1",
             "target-dir": "Symfony/Component/DomCrawler",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/DomCrawler.git",
-                "reference": "bedfd7eb44e3b1224d1e18335d2e36bbbed26cbe"
+                "reference": "91123952ba618685c240ef8a2d34acb31c7a75ef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/DomCrawler/zipball/bedfd7eb44e3b1224d1e18335d2e36bbbed26cbe",
-                "reference": "bedfd7eb44e3b1224d1e18335d2e36bbbed26cbe",
+                "url": "https://api.github.com/repos/symfony/DomCrawler/zipball/91123952ba618685c240ef8a2d34acb31c7a75ef",
+                "reference": "91123952ba618685c240ef8a2d34acb31c7a75ef",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3"
             },
             "require-dev": {
-                "symfony/css-selector": "2.1.*"
+                "symfony/css-selector": "~2.0"
             },
             "suggest": {
-                "symfony/css-selector": "2.1.*"
+                "symfony/css-selector": ""
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.5-dev"
+                }
+            },
             "autoload": {
                 "psr-0": {
-                    "Symfony\\Component\\DomCrawler": ""
+                    "Symfony\\Component\\DomCrawler\\": ""
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -525,7 +530,7 @@
             ],
             "description": "Symfony DomCrawler Component",
             "homepage": "http://symfony.com",
-            "time": "2013-05-16 00:06:15"
+            "time": "2014-07-08 12:21:33"
         },
         {
             "name": "symfony/event-dispatcher",
@@ -1035,21 +1040,21 @@
         },
         {
             "name": "wtfzdotnet/php-tmdb-api",
-            "version": "dev-master",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wtfzdotnet/php-tmdb-api.git",
-                "reference": "bcb6b2335e4c08c56f3a6bcf5421eaf58c7162e4"
+                "reference": "63812a50f83e345b9eb23ce91eb5bf8b7050105f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wtfzdotnet/php-tmdb-api/zipball/bcb6b2335e4c08c56f3a6bcf5421eaf58c7162e4",
-                "reference": "bcb6b2335e4c08c56f3a6bcf5421eaf58c7162e4",
+                "url": "https://api.github.com/repos/wtfzdotnet/php-tmdb-api/zipball/63812a50f83e345b9eb23ce91eb5bf8b7050105f",
+                "reference": "63812a50f83e345b9eb23ce91eb5bf8b7050105f",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
-                "guzzle/guzzle": "3.8.*",
+                "guzzle/guzzle": "3.9.*",
                 "php": ">=5.3.2",
                 "psr/log": "~1.0"
             },
@@ -1091,7 +1096,7 @@
                 "tvdb",
                 "wrapper"
             ],
-            "time": "2014-06-09 17:15:31"
+            "time": "2014-07-09 19:14:45"
         }
     ],
     "packages-dev": [
@@ -1950,7 +1955,6 @@
     ],
     "minimum-stability": "stable",
     "stability-flags": {
-        "wtfzdotnet/php-tmdb-api": 20,
         "glamorous/tmdb-php-api": 20
     },
     "platform": [
