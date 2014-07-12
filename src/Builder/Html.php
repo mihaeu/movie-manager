@@ -38,7 +38,7 @@ class Html
      */
     public function __construct()
     {
-        $this->templateDir = realpath(__DIR__ . '/../../../../templates');
+        $this->templateDir = realpath(__DIR__ . '/../../templates');
         $this->setUpTemplating();
     }
 

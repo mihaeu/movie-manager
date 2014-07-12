@@ -2,6 +2,7 @@
 
 namespace Mihaeu\MovieManager;
 
+use Mihaeu\MovieManager\MovieDatabase\TMDb;
 use Silex\Application;
 use Silex\Provider\TwigServiceProvider;
 use Whoops\Provider\Silex\WhoopsServiceProvider;
@@ -24,7 +25,7 @@ class WebApp
         }
 
         $this->app->register(new TwigServiceProvider(), [
-            'twig.path' => __DIR__.'/../../../templates/movie-manager',
+            'twig.path' => __DIR__.'/../templates/movie-manager',
         ]);
 
         $this->configureRoutes();
@@ -65,6 +66,8 @@ class WebApp
                     'poster' => $movie['posterThumbnailSrc']
                 ];
             }
+            $tmdb = new TMDb($config->get('tmdb-api-key'));
+            $suggestions = $tmdb->getMovieSuggestionsFromQuery($query);
 
             return $app->json($suggestions);
         });
