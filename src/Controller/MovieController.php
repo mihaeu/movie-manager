@@ -1,6 +1,6 @@
 <?php
 
-namespace Mihaeu\MovieManager\Controllers;
+namespace Mihaeu\MovieManager\Controller;
 
 use Mihaeu\MovieManager\Config;
 use Mihaeu\MovieManager\MovieFinder;
@@ -17,6 +17,18 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class MovieController
 {
+    /**
+     * Index action
+     *
+     * Displays all movies that were found in the provided dir.
+     *
+     * @param Application $app
+     * @param Request $request
+     *
+     * @return mixed
+     *
+     * @throws \Exception
+     */
     public function index(Application $app, Request $request)
     {
         $dir = $request->get('dir');
@@ -31,6 +43,18 @@ class MovieController
         return $app['twig']->render('index.html.twig', ['files' => $movieFiles]);
     }
 
+    /**
+     * Suggestions action
+     *
+     * Display suggestions for a movie search.
+     *
+     * @param Application $app
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @throws \Exception
+     */
     public function suggestions(Application $app, Request $request) {
         $config = new Config();
         $tmdb = new TMDb($config->get('tmdb-api-key'));
@@ -42,6 +66,16 @@ class MovieController
         return $app->json($suggestions);
     }
 
+    /**
+     * Movie action
+     *
+     * Transforms the movie (rename, poster, info, ...).
+     *
+     * @param Application $app
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
     public function movie(Application $app, Request $request) {
         $id   = $request->get('id');
         $file = $request->get('file');

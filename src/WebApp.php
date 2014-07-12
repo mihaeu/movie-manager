@@ -9,6 +9,11 @@ use Silex\Provider\TwigServiceProvider;
 use Whoops\Provider\Silex\WhoopsServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Silex based WebApp
+ *
+ * @author Michael Haeuslmann (haeuslmann@gmail.com)
+ */
 class WebApp
 {
     /**
@@ -28,14 +33,16 @@ class WebApp
             'twig.path' => __DIR__.'/../templates/movie-manager',
         ]);
 
-        $this->app->get('/',                        'Mihaeu\MovieManager\Controllers\MovieController::index');
-        $this->app->get('/suggestions',             'Mihaeu\MovieManager\Controllers\MovieController::suggestions');
-        $this->app->get('/movie',                   'Mihaeu\MovieManager\Controllers\MovieController::movie');
-        $this->app->put('/movie/info',              'Mihaeu\MovieManager\Controllers\MovieController::a');
-        $this->app->put('/movie/name',              'Mihaeu\MovieManager\Controllers\MovieController::b');
-        $this->app->put('/movie/poster',            'Mihaeu\MovieManager\Controllers\MovieController::c');
-        $this->app->put('/movie/imdb-screenshot',   'Mihaeu\MovieManager\Controllers\MovieController::d');
-        $this->app->put('/movie/dir',               'Mihaeu\MovieManager\Controllers\MovieController::f');
+        $this->app->get('/',                        'Mihaeu\MovieManager\Controller\MovieController::index');
+        $this->app->get('/suggestions',             'Mihaeu\MovieManager\Controller\MovieController::suggestions');
+        $this->app->get('/movie',                   'Mihaeu\MovieManager\Controller\MovieController::movie');
+
+        // not active yet
+        $this->app->put('/movie/info',              'Mihaeu\MovieManager\Controller\MovieController::a');
+        $this->app->put('/movie/name',              'Mihaeu\MovieManager\Controller\MovieController::b');
+        $this->app->put('/movie/poster',            'Mihaeu\MovieManager\Controller\MovieController::c');
+        $this->app->put('/movie/imdb-screenshot',   'Mihaeu\MovieManager\Controller\MovieController::d');
+        $this->app->put('/movie/dir',               'Mihaeu\MovieManager\Controller\MovieController::f');
     }
 
     public function run()

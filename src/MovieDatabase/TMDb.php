@@ -58,11 +58,16 @@ class TMDb
         $suggestions = [];
         foreach ($results as $result) {
             /** @var Movie $result */
+            $filepath = $result->getPosterImage()->getFilePath();
+            $url = '';
+            if (!empty($filepath)) {
+                $url = $imageHelper->getUrl($filepath, 'w342');
+            }
             $suggestions[] = [
                 'id'        => ((int) $result->getId()),
                 'title'     => $result->getTitle(),
                 'year'      => ((int) $result->getReleaseDate()->format('Y')),
-                'poster'    => $imageHelper->getUrl($result->getPosterImage()->getFilePath(), 'w342')
+                'poster'    => $url
             ];
         }
         return $suggestions;
