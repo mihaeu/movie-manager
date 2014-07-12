@@ -233,7 +233,7 @@ class MovieHandler
         // take a screenshot with PhantomJS and save it
         $output = '';
         $url = $this->getIMDbLink($movie['imdb_id']);
-        $script = __DIR__ . '/../../../rasterize.js';
+        $script = __DIR__.'/../rasterize.js';
         $target = "$filePath/$movieTitle ($movieYear) - IMDb.png";
         $cmd = "phantomjs $script \"$url\" \"$target\"";
         system($cmd, $output);

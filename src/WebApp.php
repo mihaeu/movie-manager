@@ -71,6 +71,31 @@ class WebApp
 
             return $app->json(['message' => 'success'], 200);
         });
+
+        $this->app->put('/movie/info', function(Application $app, Request $request) {
+
+            return $app->json(['message' => 'success'], 200);
+        });
+
+        $this->app->put('/movie/name', function(Application $app, Request $request) {
+
+            return $app->json(['message' => 'success'], 200);
+        });
+
+        $this->app->put('/movie/poster', function(Application $app, Request $request) {
+
+            return $app->json(['message' => 'success'], 200);
+        });
+
+        $this->app->put('/movie/imdb-screenshot', function(Application $app, Request $request) {
+
+            return $app->json(['message' => 'success'], 200);
+        });
+
+        $this->app->put('/movie/dir', function(Application $app, Request $request) {
+
+            return $app->json(['message' => 'success'], 200);
+        });
     }
 
     public function run()
