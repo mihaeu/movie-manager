@@ -57,12 +57,12 @@ class TMDb
         $suggestions = [];
         foreach ($results as $result) {
             /** @var Movie $result */
-            $suggestions[] = new Suggestion(
-                ((int) $result->getId()),
-                $result->getTitle(),
-                ((int) $result->getReleaseDate()->format('Y')),
-                $imageHelper->getUrl($result->getPosterImage()->getFilePath(), 'w342')
-            );
+            $suggestions[] = [
+                'id'        => ((int) $result->getId()),
+                'title'     => $result->getTitle(),
+                'year'      => ((int) $result->getReleaseDate()->format('Y')),
+                'poster'    => $imageHelper->getUrl($result->getPosterImage()->getFilePath(), 'w342')
+            ];
         }
         return $suggestions;
     }

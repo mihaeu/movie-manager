@@ -47,7 +47,7 @@ $(function() {
             chunks.push($.trim($(this).html()));
         });
 
-        var url = "/imdb",
+        var url = "/suggestions",
             getData = { query: chunks.join("%20") },
             suggestions = [],
             current = $(this);

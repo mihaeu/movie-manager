@@ -47,28 +47,14 @@ class WebApp
             return $app['twig']->render('index.html.twig', ['files' => $movieFiles]);
         });
 
-        $this->app->get('/imdb', function(Application $app, Request $request) {
+        $this->app->get('/suggestions', function(Application $app, Request $request) {
             $config = new Config();
-            $movieHandler = new MovieHandler($config);
-
-            $query = $request->get('query');
-            $result = $movieHandler->searchMoviesOnTMDb($query);
-            if (empty($result)) {
-                return $app->json('No match found.', 404);
-            }
-
-            $suggestions = [];
-            foreach ($result as $id => $movie) {
-                $suggestions[] = [
-                    'id'     => $id,
-                    'title'  => $movie['title'],
-                    'year'   => $movie['year'],
-                    'poster' => $movie['posterThumbnailSrc']
-                ];
-            }
             $tmdb = new TMDb($config->get('tmdb-api-key'));
-            $suggestions = $tmdb->getMovieSuggestionsFromQuery($query);
+            $suggestions = $tmdb->getMovieSuggestionsFromQuery($request->get('query'));
 
+            if (empty($suggestions)) {
+                return $app->json(['message' => 'No match found.'], 404);
+            }
             return $app->json($suggestions);
         });
 
