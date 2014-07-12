@@ -4,6 +4,7 @@ namespace Mihaeu\MovieManager;
 
 use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\Ini\Writer;
+use Mihaeu\MovieManager\MovieDatabase\TMDb;
 use Symfony\Component\DomCrawler\Crawler;
 
 class MovieHandler
@@ -31,65 +32,6 @@ class MovieHandler
         $this->tmdb = new \TMDb($this->config->get('tmdb-api-key'), 'en');
     }
 
-    /**
-     * Search for movie matches on "The Movie Database tmdb.org"
-     *
-     * @param  string $query movie query
-     * @return array            matches movies
-     */
-    public function searchMoviesOnTMDb($query)
-    {
-        $query = $this->tmdb->searchMovie($query, 1, true, null, 'en');
-
-        $movies = [];
-        foreach ($query['results'] as $movie) {
-            $movies[$movie['id']] = $this->getMovieFromTMDbResult($movie);
-        }
-
-        return $movies;
-    }
-
-    /**
-     * Retrieves the IMDb ID by crawling TMDb's site.
-     *
-     * This is a **HACK** and was only intended for one time use.
-     * (Isn't it always?)
-     *
-     * TMDb search retrieves only a single result when searching
-     * for an IMDb ID, so crawling the result is simple.
-     *
-     * @param  string $imdbId Should be a string, because of leading 0s
-     *
-     * @throws \Exception
-     *
-     * @return string
-     */
-    public function getTmdbIdFromImdbId($imdbId)
-    {
-        $url = 'https://www.themoviedb.org/search?query=tt' . $imdbId;
-        $ch = curl_init();
-        $timeout = 5;
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-        $data = curl_exec($ch);
-        curl_close($ch);
-
-        $crawler = new Crawler($data);
-
-        // this is highly volatile and was only used for a quick hack
-        $xpath = '//*[@id="container"]/div[5]/div[1]/ul/li/div[2]/h3/a';
-
-        $tmdbUrl = $crawler->filterXpath($xpath)->attr('href');
-        $tmdbId = preg_replace('/^\/movie\/(\d+).*$/', '$1', $tmdbUrl);
-
-        if (!is_numeric($tmdbId)) {
-            throw new \Exception("TMDb ID \"$tmdbId\" extracted from \"$tmdbUrl\" is not valid" . PHP_EOL, 1);
-
-        }
-
-        return $tmdbId;
-    }
 
     /**
      * Handles movie related tasts like renaming, downloading the poster etc.
@@ -106,7 +48,7 @@ class MovieHandler
         $tmdbId = $imdbId;
         if ($isIMDb) {
             try {
-                $tmdbId = $this->getTmdbIdFromImdbId($imdbId);
+                $tmdbId = TMDb::getTmdbIdFromImdbId($imdbId);
             } catch (\Exception $e) {
                 // can't recover without the ID, abort
                 echo "$file couldn't be handled.\n";
