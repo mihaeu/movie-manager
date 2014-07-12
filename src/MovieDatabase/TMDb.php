@@ -58,8 +58,10 @@ class TMDb
         $suggestions = [];
         foreach ($results as $result) {
             /** @var Movie $result */
-            $filepath = $result->getPosterImage()->getFilePath();
+
+            // check filepath, because Image Helper returns url even if filepath is empty
             $url = '';
+            $filepath = $result->getPosterImage()->getFilePath();
             if (!empty($filepath)) {
                 $url = $imageHelper->getUrl($filepath, 'w342');
             }
