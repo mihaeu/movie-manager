@@ -84,7 +84,7 @@ class TMDb
      * TMDb search retrieves only a single result when searching
      * for an IMDb ID, so crawling the result is simple.
      *
-     * @param  string $imdbId Should be a string, because of leading 0s
+     * @param  string $imdbId E.g. tt0068646
      *
      * @throws \Exception
      *
@@ -92,7 +92,7 @@ class TMDb
      */
     public static function getTmdbIdFromImdbId($imdbId)
     {
-        $url = 'https://www.themoviedb.org/search?query=tt' . $imdbId;
+        $url = 'https://www.themoviedb.org/search?query=' . $imdbId;
         $ch = curl_init();
         $timeout = 5;
         curl_setopt($ch, CURLOPT_URL, $url);

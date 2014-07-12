@@ -48,7 +48,7 @@ class MovieHandler
         $tmdbId = $imdbId;
         if ($isIMDb) {
             try {
-                $tmdbId = TMDb::getTmdbIdFromImdbId($imdbId);
+                $tmdbId = TMDb::getTmdbIdFromImdbId('tt'.$imdbId);
             } catch (\Exception $e) {
                 // can't recover without the ID, abort
                 echo "$file couldn't be handled.\n";

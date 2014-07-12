@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b7ab031c6792926992ab3b608a642967",
+    "hash": "dd97ff3c0eb095b48200678b0388636d",
     "packages": [
         {
             "name": "glamorous/tmdb-php-api",
@@ -417,6 +417,59 @@
                 }
             ],
             "description": "Symfony Console Component",
+            "homepage": "http://symfony.com",
+            "time": "2014-07-08 12:21:33"
+        },
+        {
+            "name": "symfony/css-selector",
+            "version": "v2.5.1",
+            "target-dir": "Symfony/Component/CssSelector",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/CssSelector.git",
+                "reference": "8679e89e6cc9cd415120625071c3cbb3c70311b5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/CssSelector/zipball/8679e89e6cc9cd415120625071c3cbb3c70311b5",
+                "reference": "8679e89e6cc9cd415120625071c3cbb3c70311b5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.5-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\CssSelector\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                },
+                {
+                    "name": "Jean-François Simon",
+                    "email": "jeanfrancois.simon@sensiolabs.com"
+                }
+            ],
+            "description": "Symfony CssSelector Component",
             "homepage": "http://symfony.com",
             "time": "2014-07-08 12:21:33"
         },

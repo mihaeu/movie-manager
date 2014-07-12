@@ -2,20 +2,22 @@
     "name": "mihaeu/movie-manager",
     "description": "Web-based movie manager (requires local PHP server).",
     "require": {
-        "silex/silex": "1.*",
-        "symfony/twig-bridge": "~2.3",
-        "mihaeu/sub-collector": "1.*",
-        "wtfzdotnet/php-tmdb-api": "1.*",
-        "glamorous/tmdb-php-api": "dev-master",
-        "twig/twig": "1.*",
-        "symfony/dom-crawler": "2.*",
-        "symfony/console": "2.*"
+        "twig/twig":                    "1.*",
+        "silex/silex":                  "1.*",
+        "guzzle/guzzle":                "3.*",
+        "mihaeu/sub-collector":         "1.*",
+        "wtfzdotnet/php-tmdb-api":      "1.*",
+        "glamorous/tmdb-php-api":       "dev-master",
+        "symfony/console":              "2.*",
+        "symfony/dom-crawler":          "2.*",
+        "symfony/twig-bridge":          "~2.3",
+        "symfony/css-selector":         "2.*"
     },
     "require-dev": {
-        "filp/whoops": "1.*",
-        "phpunit/phpunit": "4.*",
-        "mockery/mockery": "0.*",
-        "mikey179/vfsStream": "1.*"
+        "filp/whoops":                  "1.*",
+        "phpunit/phpunit":              "4.*",
+        "mockery/mockery":              "0.*",
+        "mikey179/vfsStream":           "1.*"
     },
     "license": "MIT",
     "authors": [
