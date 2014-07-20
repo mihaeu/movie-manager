@@ -46,4 +46,10 @@ class TMDbTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals($this->tmdb->getTmdbIdFromImdbId('tt0068646'), 238);
     }
+
+    public function testThrowsExceptionOnBadId()
+    {
+        $this->setExpectedException('\Exception');
+        $this->tmdb->getTmdbIdFromImdbId('badId');
+    }
 }
