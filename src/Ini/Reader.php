@@ -12,7 +12,7 @@ class Reader
     /**
      * Read a .ini file into an associative array.
      *
-     * @param  String $file
+     * @param  string $file
      * @param  bool   $sections
      *
      * @return array
