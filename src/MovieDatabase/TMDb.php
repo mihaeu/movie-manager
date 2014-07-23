@@ -99,27 +99,28 @@ class TMDb
         $movieResult = $movieRepository->load($tmdbId);
         $movie = [
             'id'                    => $movieResult->getId(),
-            'genres'                => $this->extractGenres($movieResult->getGenres()),
-            'production_companies'  => $this->extractProductionCompanies($movieResult->getProductionCompanies()),
-            'production_countries'  => $this->extractProductionCountries($movieResult->getProductionCountries()),
-            'spoken_languages'      => $this->extractSpokenLanguages($movieResult->getSpokenLanguages()),
+            'imdbId'                => $movieResult->getImdbId(),
             'adult'                 => $movieResult->getAdult(),
-            'backdrop_path'         => $imageHelper->getUrl($movieResult->getBackdropImage()),
+            'posterUrl'             => $imageHelper->getUrl($movieResult->getPosterImage()),
+            'backdropUrl'           => $imageHelper->getUrl($movieResult->getBackdropImage()),
             'budget'                => $movieResult->getBudget(),
             'homepage'              => $movieResult->getHomepage(),
-            'imdb_id'               => $movieResult->getImdbId(),
-            'original_title'        => $movieResult->getOriginalTitle(),
+            'originalTitle'         => $movieResult->getOriginalTitle(),
             'overview'              => $movieResult->getOverview(),
             'popularity'            => $movieResult->getPopularity(),
-            'poster_path'           => $imageHelper->getUrl($movieResult->getPosterImage()),
-            'release_date'          => $movieResult->getReleaseDate()->format('Y-m-d'),
+            'releaseDate'           => $movieResult->getReleaseDate()->format('Y-m-d'),
+            'year'                  => intval($movieResult->getReleaseDate()->format('Y')),
             'revenue'               => $movieResult->getRevenue(),
             'runtime'               => $movieResult->getRuntime(),
             'status'                => $movieResult->getStatus(),
             'tagline'               => $movieResult->getTagline(),
             'title'                 => $movieResult->getTitle(),
-            'vote_average'          => $movieResult->getVoteAverage(),
-            'vote_count'            => $movieResult->getVoteCount()
+            'voteAverage'           => $movieResult->getVoteAverage(),
+            'voteCount'             => $movieResult->getVoteCount(),
+            'genres'                => $this->extractGenres($movieResult->getGenres()),
+            'productionCompanies'   => $this->extractProductionCompanies($movieResult->getProductionCompanies()),
+            'productionCountries'   => $this->extractProductionCountries($movieResult->getProductionCountries()),
+            'spokenLanguages'       => $this->extractSpokenLanguages($movieResult->getSpokenLanguages())
         ];
 
         return $movie;

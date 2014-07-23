@@ -1,6 +1,6 @@
 <?php
 
-namespace Mihaeu\MovieManager\Tests\MovieDatabase\TMDb;
+namespace Mihaeu\MovieManager\Tests\MovieDatabase;
 
 use Mihaeu\MovieManager\Builder\Movie;
 use Mihaeu\MovieManager\Config;
@@ -12,6 +12,8 @@ class TMDbTest extends \PHPUnit_Framework_TestCase
      * @var TMDb
      */
     private $tmdb;
+
+    const THE_GODFATHER_TMDB_ID = 238;
 
     public function setUp()
     {
@@ -39,13 +41,12 @@ class TMDbTest extends \PHPUnit_Framework_TestCase
     {
         $suggestions = $this->tmdb->getMovieSuggestionsFromQuery('the godfather');
 
-        $theGodfatherTMDbId = 238;
-        $this->assertEquals($theGodfatherTMDbId, $suggestions[0]['id']);
+        $this->assertEquals(self::THE_GODFATHER_TMDB_ID, $suggestions[0]['id']);
     }
 
     public function testConvertsImdbToTmdbId()
     {
-        $this->assertEquals($this->tmdb->getTmdbIdFromImdbId('tt0068646'), 238);
+        $this->assertEquals($this->tmdb->getTmdbIdFromImdbId('tt0068646'), self::THE_GODFATHER_TMDB_ID);
     }
 
     public function testThrowsExceptionOnBadId()
@@ -56,7 +57,7 @@ class TMDbTest extends \PHPUnit_Framework_TestCase
 
     public function testFindsTmdbInfo()
     {
-        $movie = $this->tmdb->getMovieFromTmdbId(238);
-        var_dump((array)$movie);
+        $movie = $this->tmdb->getMovieFromTmdbId(self::THE_GODFATHER_TMDB_ID);
+        $this->assertEquals(1972, $movie['year']);
     }
 }
