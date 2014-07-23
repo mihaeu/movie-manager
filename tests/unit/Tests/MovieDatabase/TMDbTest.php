@@ -2,6 +2,7 @@
 
 namespace Mihaeu\MovieManager\Tests\MovieDatabase\TMDb;
 
+use Mihaeu\MovieManager\Builder\Movie;
 use Mihaeu\MovieManager\Config;
 use Mihaeu\MovieManager\MovieDatabase\TMDb;
 
@@ -51,5 +52,11 @@ class TMDbTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('\Exception');
         $this->tmdb->getTmdbIdFromImdbId('badId');
+    }
+
+    public function testFindsTmdbInfo()
+    {
+        $movie = $this->tmdb->getMovieFromTmdbId(238);
+        var_dump((array)$movie);
     }
 }

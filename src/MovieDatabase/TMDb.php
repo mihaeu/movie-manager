@@ -7,11 +7,18 @@ use Mihaeu\MovieManager\Movie\Suggestion;
 use Symfony\Component\DomCrawler\Crawler;
 use Tmdb\ApiToken;
 use Tmdb\Client;
+use Tmdb\Model\Collection\Genres;
+use Tmdb\Model\Common\GenericCollection;
+use Tmdb\Model\Genre;
 use Tmdb\Model\Movie;
+use Tmdb\Model\Common\SpokenLanguage;
+use Tmdb\Model\Company;
 use Tmdb\Model\Search\SearchQuery\MovieSearchQuery;
+use Tmdb\Repository\MovieRepository;
 use Tmdb\Repository\SearchRepository;
 use Tmdb\Repository\ConfigurationRepository;
 use Tmdb\Helper\ImageHelper;
+use Tmdb\Model\Common\Country;
 
 /**
  * TMDb Wrapper
@@ -73,6 +80,117 @@ class TMDb
             ];
         }
         return $suggestions;
+    }
+
+    /**
+     * Get all movie information from TMDb.
+     *
+     * @param  int   $tmdbId
+     * @return array
+     */
+    public function getMovieFromTmdbId($tmdbId)
+    {
+        $configRepository = new ConfigurationRepository($this->client);
+        $config = $configRepository->load();
+        $imageHelper = new ImageHelper($config);
+        $movieRepository = new MovieRepository($this->client);
+
+        /** @var Movie $movieResult */
+        $movieResult = $movieRepository->load($tmdbId);
+        $movie = [
+            'id'                    => $movieResult->getId(),
+            'genres'                => $this->extractGenres($movieResult->getGenres()),
+            'production_companies'  => $this->extractProductionCompanies($movieResult->getProductionCompanies()),
+            'production_countries'  => $this->extractProductionCountries($movieResult->getProductionCountries()),
+            'spoken_languages'      => $this->extractSpokenLanguages($movieResult->getSpokenLanguages()),
+            'adult'                 => $movieResult->getAdult(),
+            'backdrop_path'         => $imageHelper->getUrl($movieResult->getBackdropImage()),
+            'budget'                => $movieResult->getBudget(),
+            'homepage'              => $movieResult->getHomepage(),
+            'imdb_id'               => $movieResult->getImdbId(),
+            'original_title'        => $movieResult->getOriginalTitle(),
+            'overview'              => $movieResult->getOverview(),
+            'popularity'            => $movieResult->getPopularity(),
+            'poster_path'           => $imageHelper->getUrl($movieResult->getPosterImage()),
+            'release_date'          => $movieResult->getReleaseDate()->format('Y-m-d'),
+            'revenue'               => $movieResult->getRevenue(),
+            'runtime'               => $movieResult->getRuntime(),
+            'status'                => $movieResult->getStatus(),
+            'tagline'               => $movieResult->getTagline(),
+            'title'                 => $movieResult->getTitle(),
+            'vote_average'          => $movieResult->getVoteAverage(),
+            'vote_count'            => $movieResult->getVoteCount()
+        ];
+
+        return $movie;
+    }
+
+    /**
+     * Extract genres from the API respone to a simple array.
+     *
+     * @param  Genres $genres
+     *
+     * @return array
+     */
+    private function extractGenres(Genres $genres)
+    {
+        $plainGenres = [];
+        foreach ($genres->getGenres() as $genre) {
+            /** @var Genre $genre */
+            $plainGenres[$genre->getId()] = $genre->getName();
+        }
+        return $plainGenres;
+    }
+
+    /**
+     * Extract production companies from the API response into a simple array.
+     *
+     * @param  GenericCollection $companies
+     *
+     * @return array
+     */
+    private function extractProductionCompanies(GenericCollection $companies)
+    {
+        $plainCompanies = [];
+        foreach ($companies->toArray() as $company) {
+            /** @var Company $company */
+            $plainCompanies[$company->getId()] = $company->getName();
+        }
+        return $plainCompanies;
+    }
+
+    /**
+     * Extract production countries from the API response into a simple array.
+     *
+     * @param  GenericCollection $countries
+     *
+     * @return array
+     */
+    private function extractProductionCountries(GenericCollection $countries)
+    {
+        $plainCountries = [];
+        foreach ($countries->toArray() as $country) {
+            /** @var Country $country */
+            $plainCountries[] = $country->getName();
+        }
+        return $plainCountries;
+    }
+
+    /**
+     * Extract spoken languages from the API response into a simple array.
+     *
+     * @param  GenericCollection $spokenLanguages
+     *
+     * @return array
+     */
+    private function extractSpokenLanguages(GenericCollection $spokenLanguages)
+    {
+        $plainLanguages = [];
+        foreach ($spokenLanguages->toArray() as $spokenLanguage) {
+            /** @var SpokenLanguage $spokenLanguage*/
+            $plainLanguages[] = $spokenLanguage->getName();
+        }
+        return $plainLanguages;
     }
 
     /**
