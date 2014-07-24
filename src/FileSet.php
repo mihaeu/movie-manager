@@ -198,5 +198,41 @@ class FileSet
         $this->subtitleFiles = $subtitleFiles;
     }
 
+    /**
+     * Checks if the movie has the proper name (`%MOVIE_TITLE (%MOVIE_YEAR)`).
+     *
+     * Proper check is only possible if movie title and year is available.
+     *
+     * @param string $movieTitle
+     * @param string $movieYear
+     *
+     * @return bool
+     */
+    public function hasCorrectName($movieTitle = null, $movieYear = null)
+    {
+        if (null === $this->getMovieFile()) {
+            return false;
+        }
 
+        if (null !== $movieTitle && null !== $movieYear) {
+            return "$movieTitle ($movieYear)" === $this->getMovieFile()->getBasename('.'.$this->getMovieFile()->getExtension());
+        }
+        return 1 === preg_match('/^.+ \(\d\d\d\d\)$/', $this->getMovieFile()->getBasename('.'.$this->getMovieFile()->getExtension()));
+    }
+
+    /**
+     * Checks if the movie file resides in the correct folder.
+     *
+     * @return bool
+     */
+    public function hasCorrectParentFolder()
+    {
+        if (null === $this->getMovieFile() || null === $this->getParentFolder()) {
+            return false;
+        }
+
+        return $this->hasCorrectName()
+            && $this->getRootFolder()->getPathname() === $this->getParentFolder()->getPath()
+            && $this->getParentFolder()->getBasename() === $this->getMovieFile()->getBasename('.'.$this->getMovieFile()->getExtension());
+    }
 }

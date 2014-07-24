@@ -12,6 +12,7 @@ class FileSetFactoryTest extends \PHPUnit_Framework_TestCase
         vfsStream::setup('root', null, [
             'Amour (2012)' => [
                 'Amour (2012).avi'          => '',
+                'Amour (2012) - CD2.avi'    => '',
                 'Amour (2012) - IMDb.png'   => '',
                 'Amour (2012) - IMDb.url'   => '',
                 'Amour (2012) - Poster.jpg' => ''
@@ -20,6 +21,11 @@ class FileSetFactoryTest extends \PHPUnit_Framework_TestCase
 
         $factory = new FileSetFactory(vfsStream::url('root'));
         $fileSet = $factory->create(vfsStream::url('root').'/Amour (2012)/Amour (2012).avi');
+
         $this->assertEquals('Amour (2012)', $fileSet->getParentFolder()->getBasename());
+        $this->assertCount(2,               $fileSet->getMoviePartFiles());
+        $this->assertNotEmpty($fileSet->getImdbScreenshotFile());
+        $this->assertNotEmpty($fileSet->getPosterFile());
+        $this->assertNotEmpty($fileSet->getInfoFile());
     }
 }
