@@ -20,12 +20,12 @@ class FileSet
     private $moviePartFiles;
 
     /**
-     * @var \SplFileObject
+     * @var \SplFileInfo
      */
     private $parentFolder;
 
     /**
-     * @var \SplFileObject
+     * @var \SplFileInfo
      */
     private $rootFolder;
 
@@ -135,7 +135,7 @@ class FileSet
     }
 
     /**
-     * @return \SplFileObject
+     * @return \SplFileInfo
      */
     public function getParentFolder()
     {
@@ -143,9 +143,9 @@ class FileSet
     }
 
     /**
-     * @param \SplFileObject $parentFolder
+     * @param \SplFileInfo $parentFolder
      */
-    public function setParentFolder($parentFolder)
+    public function setParentFolder(\SplFileInfo $parentFolder)
     {
         $this->parentFolder = $parentFolder;
     }
@@ -167,7 +167,7 @@ class FileSet
     }
 
     /**
-     * @return \SplFileObject
+     * @return \SplFileInfo
      */
     public function getRootFolder()
     {
@@ -175,9 +175,9 @@ class FileSet
     }
 
     /**
-     * @param \SplFileObject $rootFolder
+     * @param \SplFileInfo $rootFolder
      */
-    public function setRootFolder($rootFolder)
+    public function setRootFolder(\SplFileInfo $rootFolder)
     {
         $this->rootFolder = $rootFolder;
     }

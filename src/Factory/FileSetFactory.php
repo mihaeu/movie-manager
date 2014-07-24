@@ -20,7 +20,7 @@ class FileSetFactory
      * %s is the base name of the movie so for `Lawrence of Arabia (1962).mkv` it would be `Lawrence of Arabia (1962)`
      */
     const POSTER_FORMAT             = '%s - Poster.jpg';
-    const INFO_FILE_FORMAT          = '%s.ini';
+    const INFO_FILE_FORMAT          = '%s - IMDb.url';
     const IMDB_SCREENSHOT_FORMAT    = '%s - IMDb.png';
 
     /**
@@ -28,7 +28,7 @@ class FileSetFactory
      */
     public function __construct($rootFolder)
     {
-        $this->root = new \SplFileObject($rootFolder);
+        $this->root = new \SplFileInfo($rootFolder);
     }
 
     /**
@@ -41,7 +41,19 @@ class FileSetFactory
         $movieFile = new \SplFileObject($movieFilename);
         $fileSet = new FileSet();
         $fileSet->setMovieFile($movieFile);
-        $fileSet->setParentFolder(new \SplFileObject($movieFile->getPath()));
+        $fileSet->setRootFolder($this->root);
+        $fileSet->setParentFolder(new \SplFileInfo($movieFile->getPath()));
+
+        $allFiles = iterator_to_array(new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($fileSet->getParentFolder()->getPathname()),
+            \RecursiveIteratorIterator::SELF_FIRST
+        ));
+
+        $fileSet->setSubtitleFiles(array_filter($allFiles, function (\SplFileInfo $file) {
+            $fileExtension = strtolower($file->getExtension());
+            $allowedfileExtensions = ['srt', 'sub', 'ass'];
+            return in_array($fileExtension, $allowedfileExtensions);
+        }));
 
         // for /tmp/Avatar.mkv the basePath would be /tmp/Avatar
         // which will be used only to construct the paths of other files
@@ -57,7 +69,7 @@ class FileSetFactory
             $fileSet->setInfoFile(new \SplFileObject($infoFileFilename));
         }
 
-        $imdbScreenshotFilename = sprintf(self::IMDB_SCREENSHOT_FORMAT);
+        $imdbScreenshotFilename = sprintf(self::IMDB_SCREENSHOT_FORMAT, $basePath);
         if (file_exists($imdbScreenshotFilename)) {
             $fileSet->setImdbScreenshotFile(new \SplFileObject($imdbScreenshotFilename));
         }

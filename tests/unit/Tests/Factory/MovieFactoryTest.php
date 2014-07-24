@@ -23,4 +23,3 @@ class MovieFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(9.2,             $movie->getImdbRating());
     }
 }
- 
