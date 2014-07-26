@@ -214,10 +214,11 @@ class FileSet
             return false;
         }
 
+        $movieBasename = $this->getMovieFile()->getBasename('.'.$this->getMovieFile()->getExtension());
         if (null !== $movieTitle && null !== $movieYear) {
-            return "$movieTitle ($movieYear)" === $this->getMovieFile()->getBasename('.'.$this->getMovieFile()->getExtension());
+            return "$movieTitle ($movieYear)" === $movieBasename;
         }
-        return 1 === preg_match('/^.+ \(\d\d\d\d\)$/', $this->getMovieFile()->getBasename('.'.$this->getMovieFile()->getExtension()));
+        return 1 === preg_match('/^.+ \(\d\d\d\d\)$/', $movieBasename);
     }
 
     /**
@@ -231,8 +232,9 @@ class FileSet
             return false;
         }
 
+        $movieBasename = $this->getMovieFile()->getBasename('.'.$this->getMovieFile()->getExtension());
         return $this->hasCorrectName()
             && $this->getRootFolder()->getPathname() === $this->getParentFolder()->getPath()
-            && $this->getParentFolder()->getBasename() === $this->getMovieFile()->getBasename('.'.$this->getMovieFile()->getExtension());
+            && $this->getParentFolder()->getBasename() === $movieBasename;
     }
 }
