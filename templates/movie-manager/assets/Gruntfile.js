@@ -5,19 +5,25 @@ module.exports = function(grunt) {
   grunt.initConfig({
       pkg: grunt.file.readJSON('package.json'),
 
+      config: {
+          fontOutput: '../../../public_html/fonts',
+          cssOutput: '../../../public_html/css',
+          jsOutput: '../../../public_html/js'
+      },
+
       clean: {
           build: {
               options: {
                   force: true
               },
-              src: ['../../../public_html/css', '../../../public_html/js']
+              src: ['<%= config.cssOutput %>', '../../../public_html/js']
           }
       },
 
       less: {
           build: {
               files: {
-                  '../../../public_html/css/styles.css': 'less/styles.less'
+                  '<%= config.cssOutput %>/styles.css': 'less/styles.less'
               }
           }
       },
@@ -25,9 +31,9 @@ module.exports = function(grunt) {
       cssmin: {
           minify: {
               expand: true,
-              cwd: '../../../public_html/css/',
+              cwd: '<%= config.cssOutput %>/',
               src: ['*.css', '!*.min.css'],
-              dest: '../../../public_html/css/',
+              dest: '<%= config.cssOutput %>/',
               ext: '.min.css'
           }
       },
@@ -42,7 +48,7 @@ module.exports = function(grunt) {
                   compress: true
               },
               files: {
-                  '../../../public_html/js/scripts.min.js': [
+                  '<%= config.jsOutput %>/scripts.min.js': [
                       'bower_components/jquery/dist/jquery.min.js',
                       'js/app.js'
                   ]
@@ -55,7 +61,7 @@ module.exports = function(grunt) {
               flatten: true,
               expand: true,
               src: 'bower_components/bootstrap/fonts/*',
-              dest: '../../../public_html/fonts/'
+              dest: '<%= config.fontOutput %>/'
           }
       },
 
@@ -65,7 +71,7 @@ module.exports = function(grunt) {
           },
           dist: {
               files: {
-                  '../../../public_html/css/styles.min.css': ['../index.html.twig']
+                  '<%= config.cssOutput %>/styles.min.css': ['../index.html.twig']
               }
           }
       },
