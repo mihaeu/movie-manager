@@ -4,6 +4,7 @@
 # dependencies
 /vendor/
 bower_components
+node_modules
 
 # build artifacts
 /build/

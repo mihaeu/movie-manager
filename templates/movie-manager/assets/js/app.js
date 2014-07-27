@@ -5,17 +5,8 @@ $(function() {
     ////////////////////////
     var index = 0;
     $("tr:odd").each(function() {
-        $('td:first', this).html(++index);
-    });
-
-    /////////////////////////////
-    // Check entries and mark //
-    /////////////////////////////
-    $("tr:odd").each(function() {
-        var numberOfRequirementsMet = $('.icon-ok', this).length;
-        if (numberOfRequirementsMet !== 5) {
-            $(this).addClass('warning');
-        } else {
+        var numberOfRequirementsMet = $('.glyphicon-ok', this).length;
+        if (numberOfRequirementsMet === 5) {
             $(this).addClass('success');
         }
     });
@@ -58,10 +49,7 @@ $(function() {
 
             $.each(data, function (index, movie) {
                 suggestions.push(
-                    "<img src='" + movie.poster + "' alt='poster' />"
-                    + "<h3>" + movie.title + " (" + movie.year + ")</h3>"
-                    + "<span class='btn btn-warning span2 rename'>Rename movie</span>"
-                    + "<input type='hidden' class='imdb-id' value='" + movie.id + "' />"
+                    "<img src='" + movie.poster + "' alt='poster' />" + "<h3>" + movie.title + " (" + movie.year + ")</h3>" + "<span class='btn btn-warning span2 rename'>Rename movie</span>" + "<input type='hidden' class='imdb-id' value='" + movie.id + "' />"
                 );
             });
             $suggestionsRow
@@ -73,20 +61,20 @@ $(function() {
             // Movie rename event //
             //////////////////////////
             $(".rename").bind("click", function() {
-                var id, file, $suggestionsTr, $movieTr; 
-                id   = $(this).next().val(),
-                file = $(this).parent().parent().next().val();
+                var $suggestionsTr, $movieTr;
+                var id   = $(this).next().val(),
+                    file = $(this).parent().parent().next().val();
 
                 if (id.length < 1 || file.length < 10) {
                     alert("There's something wrong with the movie id or file.");
                     return;
                 }
-                
-                $suggestionsTr = $(this).parent().parent().parent().parent(),
+
+                $suggestionsTr = $(this).parent().parent().parent().parent();
                 $movieTr       = $suggestionsTr.prev();
-                
+
                 $suggestionsTr.fadeOut();
-                $movieTr.find("td:last").html("<img src='media/ajax-loader.gif'></img>");
+                $movieTr.find("td:last").html("<img src='media/ajax-loader.gif' />");
 
                 $.get('/movie',
                     { "id": id, "file": file },
@@ -99,9 +87,9 @@ $(function() {
                         $movieTr
                             .find("td:last")
                             .html("<i class='icon-check'></i>");
-                }).fail(function() {
-                    alert("Unable to process movie.");
-                });
+                    }).fail(function() {
+                        alert("Unable to process movie.");
+                    });
             });
         });
     });
