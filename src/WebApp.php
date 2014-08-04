@@ -34,6 +34,7 @@ class WebApp
         ]);
 
         $this->app->get('/',                        'Mihaeu\MovieManager\Controller\MovieController::index');
+        $this->app->get('/movies',                  'Mihaeu\MovieManager\Controller\MovieController::movies');
         $this->app->get('/suggestions',             'Mihaeu\MovieManager\Controller\MovieController::suggestions');
         $this->app->get('/movie',                   'Mihaeu\MovieManager\Controller\MovieController::movie');
 

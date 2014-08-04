@@ -10,6 +10,10 @@ body {
   margin: 0;
 }
 
+main {
+  display: block;
+}
+
 h1 {
   margin: .67em 0;
 }
@@ -565,12 +569,4 @@ th {
 
 .movies th {
   font-size: 10px;
-}
-
-.title {
-  margin-top: 65px;
-}
-
-.searchbar {
-  margin-top: 80px;
 }

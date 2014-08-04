@@ -1,12 +1,13 @@
 $(function() {
 
-    ////////////////////////
-    // Index all entries //
-    ////////////////////////
-    var index = 0;
-    $("tr:odd").each(function() {
-        var numberOfRequirementsMet = $('.glyphicon-ok', this).length;
-        if (numberOfRequirementsMet === 5) {
+    var app = function() {
+
+    };
+
+    // check movie requirements
+    $(".movie").each(function() {
+        var checkedItems = $('.glyphicon-ok', this);
+        if (null !== checkedItems && checkedItems.length == 5) {
             $(this).addClass('success');
         }
     });
@@ -25,6 +26,7 @@ $(function() {
         if ($(this).hasClass("btn-success")) {
             $(this).removeClass("btn-success");
         } else {
+            $(this).removeClass("btn-default");
             $(this).addClass("btn-success");
         }
     });
@@ -34,7 +36,7 @@ $(function() {
     ////////////////////////
     $("button.go-imdb").bind("click", function() {
         var chunks = [];
-        $(this).parent().parent().find('span.btn-success').each(function() {
+        $(this).parent().parent().find('.btn-success').each(function() {
             chunks.push($.trim($(this).html()));
         });
 
@@ -49,7 +51,7 @@ $(function() {
 
             $.each(data, function (index, movie) {
                 suggestions.push(
-                    "<img src='" + movie.poster + "' alt='poster' />" + "<h3>" + movie.title + " (" + movie.year + ")</h3>" + "<span class='btn btn-warning span2 rename'>Rename movie</span>" + "<input type='hidden' class='imdb-id' value='" + movie.id + "' />"
+                    "<img src='" + movie.poster + "' alt='poster' />" + "<h3>" + movie.title + " (" + movie.year + ")</h3>" + "<button type='button' class='btn btn-warning col-md-2 rename'>Rename movie</button>" + "<input type='hidden' class='imdb-id' value='" + movie.id + "' />"
                 );
             });
             $suggestionsRow

@@ -40,7 +40,31 @@ class MovieController
         $finder = new MovieFinder();
         $movieFiles = $finder->findMoviesInDir($dir, $config->get('allowed-movie-formats'));
 
-        return $app['twig']->render('index.html.twig', ['files' => $movieFiles]);
+        return $app['twig']->render('index.html.twig', ['files' => []]);
+    }
+
+    /**
+     * [REST] movies
+     *
+     * @param Application $app
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @throws \Exception
+     */
+    public function movies(Application $app, Request $request)
+    {
+        $dir = $request->get('dir');
+        if (empty($dir) || !is_dir($dir)) {
+            return $$app->json(['message' => 'No or wrong directory specified.'], 404);
+        }
+
+        $config = new Config();
+        $finder = new MovieFinder();
+        $movieFiles = $finder->findMoviesInDir($dir, $config->get('allowed-movie-formats'));
+
+        return $app->json(['movies' => $movieFiles]);
     }
 
     /**

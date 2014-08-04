@@ -50,7 +50,8 @@ module.exports = function(grunt) {
               files: {
                   '<%= config.jsOutput %>/scripts.min.js': [
                       'bower_components/jquery/dist/jquery.min.js',
-                      'js/app.js'
+                      'bower_components/handlebars/handlebars.min.js',
+                      'js/app2.js'
                   ]
               }
           }
