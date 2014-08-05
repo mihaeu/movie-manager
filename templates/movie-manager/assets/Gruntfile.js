@@ -6,6 +6,7 @@ module.exports = function(grunt) {
       pkg: grunt.file.readJSON('package.json'),
 
       config: {
+          webRoot: '../../../public_html',
           fontOutput: '../../../public_html/fonts',
           cssOutput: '../../../public_html/css',
           jsOutput: '../../../public_html/js'
@@ -50,7 +51,8 @@ module.exports = function(grunt) {
               files: {
                   '<%= config.jsOutput %>/scripts.min.js': [
                       'bower_components/jquery/dist/jquery.min.js',
-                      'bower_components/handlebars/handlebars.min.js',
+                      'bower_components/handlebars/handlebars.runtime.min.js',
+                      '<%= config.jsOutput %>/templates.js',
                       'js/app2.js'
                   ]
               }
@@ -67,12 +69,23 @@ module.exports = function(grunt) {
       },
 
       uncss: {
-          options: {
-              csspath: '../../public_html/'
-          },
           dist: {
               files: {
-                  '<%= config.cssOutput %>/styles.min.css': ['../index.html.twig']
+                  '<%= config.cssOutput %>/styles.min.css': ['<%= config.webRoot %>/index.html']
+              }
+          }
+      },
+
+      handlebars: {
+          options: {
+              namespace: 'MovieManager.Templates',
+              processName: function(filePath) {
+                  return filePath.replace(/^\.\.\//, '').replace(/\.hbs$/, '');
+              }
+          },
+          all: {
+              files: {
+                  "<%= config.jsOutput %>/templates.js": ["../**/*.hbs"]
               }
           }
       },
@@ -93,7 +106,7 @@ module.exports = function(grunt) {
               }
           },
           templates: {
-              files: ['../*.twig'],
+              files: ['<%= config.webRoot %>/index.html'],
               tasks: [],
               options: {
                   livereload: true
@@ -110,11 +123,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-handlebars');
   grunt.loadNpmTasks('grunt-uncss');
 
   // Default task.
   grunt.registerTask('css',     ['less', 'cssmin', 'uncss']);
-  grunt.registerTask('js',      ['jshint', 'uglify']);
+  grunt.registerTask('js',      ['jshint', 'handlebars', 'uglify']);
   grunt.registerTask('default', ['clean', 'css', 'js', 'watch']);
 
 };

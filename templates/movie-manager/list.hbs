@@ -1,0 +1,78 @@
+<div class="col-md-12">
+    {{#if movies}}
+        <table class="table table-hover movies">
+            <thead>
+            <tr>
+                <th class="index">#</th>
+                <th class="filename">Filename</th>
+                <th class="chunks">Chunks</th>
+                <th class="folder">Folder</th>
+                <th class="link">Info</th>
+                <th class="screenshot">Screeny</th>
+                <th class="poster">Poster</th>
+                <th class="format">Format</th>
+                <th class="action"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#each movies}}
+                <tr class="movie">
+                    <td class="index">
+                        {{@index}}
+                    </td>
+                    <td class="filename">
+                        {{name}}
+                    </td>
+                    <td class="chunks">
+                        {{#each chunks}}
+                            <button type="button" class='btn btn-xs btn-default chunk'>
+                                {{ this }}
+                            </button>
+                        {{/each}}
+                    </td>
+                    <td class="folder">
+                        {{#if folder}}
+                            <span class="glyphicon glyphicon-ok"></span>
+                        {{else}}
+                            <span class="glyphicon glyphicon-remove"></span>
+                        {{/if}}
+                    </td>
+                    <td class="link">
+                        {{#if link}}
+                            <span class="glyphicon glyphicon-ok"></span>
+                        {{else}}
+                            <span class="glyphicon glyphicon-remove"></span>
+                        {{/if}}
+                    </td>
+                    <td class="screenshot">
+                        {{#if screenshot}}
+                            <span class="glyphicon glyphicon-ok"></span>
+                        {{else}}
+                            <span class="glyphicon glyphicon-remove"></span>
+                        {{/if}}
+                    </td>
+                    <td class="poster">
+                        {{#if poster}}
+                            <span class="glyphicon glyphicon-ok"></span>
+                        {{else}}
+                            <span class="glyphicon glyphicon-remove"></span>
+                        {{/if}}
+                    </td>
+                    <td class="format">
+                        {{#if format}}
+                            <span class="glyphicon glyphicon-ok"></span>
+                        {{else}}
+                            <span class="glyphicon glyphicon-remove"></span>
+                        {{/if}}
+                    </td>
+                    <td class="action">
+                        <button class="btn btn-xs btn-info go-imdb" value="{{ path }}">GO</button>
+                    </td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
+    {{else}}
+        <p class="text-warning center">Please, choose a folder.</p>
+    {{/if}}
+</div>

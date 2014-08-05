@@ -1,5 +1,5 @@
-/* global jQuery, Handlebars */
-jQuery(function ($) {
+/* global jQuery, MovieManager.Templates */
+(function ($, templates) {
     'use strict';
 
     var App = {
@@ -17,7 +17,7 @@ jQuery(function ($) {
          */
         fetchMovies: function () {
             $.ajax({
-                url: '/movies',
+                url: 'api.php/movies',
                 data: {
                     dir: '/media/media/videos/movies'
                 },
@@ -31,10 +31,7 @@ jQuery(function ($) {
          * @param movies
          */
         renderMovies: function (movies) {
-            console.log(movies);
-            var source   = $("#entry-template").html();
-            var template = Handlebars.compile(source);
-            $('main').html(template(movies));
+            $('main').html(templates.list(movies));
         },
 
         bindEvents: function () {
@@ -47,4 +44,4 @@ jQuery(function ($) {
     };
 
     App.init();
-});
+})(jQuery, MovieManager.Templates);
