@@ -113,7 +113,8 @@ $(function() {
 
 	};
 
-	var movieData = $.parseJSON('{{ moviesJson|raw }}');
+	var json = '{{ moviesJson|raw }}';
+	var movieData = $.parseJSON(json);
 
 	// filter function
 	$("#languages, #country, #year-from, #year-to, #genre, #rating").change(function() {

@@ -129,6 +129,7 @@ class Html
         }
 
         $this->moviesJson = str_replace("'", '&#39;', json_encode($moviesJson));
+        file_put_contents('/tmp/movies.json', json_encode($moviesJson));exit;
         asort($movieYears);
         return $this->templating->render(
             'collection.html.twig',
