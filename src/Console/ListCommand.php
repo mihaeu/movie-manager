@@ -12,6 +12,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ListCommand extends Command
 {
+    /**
+     * @var array|Callback[]
+     */
+    private $filters;
+
     public function configure()
     {
         $this
@@ -29,20 +34,20 @@ class ListCommand extends Command
                 'Prints the movies with a null character instead of new lines (e.g. for xargs -0).'
             )
             ->addOption(
-                'yearFrom',
-                'yf',
+                'year-from',
+                null,
                 InputOption::VALUE_REQUIRED,
                 'List only movies from a certain year (e.g. -yf 2000 list movies between 2000-2014).'
             )
             ->addOption(
-                'yearTo',
-                'yt',
+                'year-to',
+                null,
                 InputOption::VALUE_REQUIRED,
                 'List only movies up to a certain year (e.g. -yt 2000 list movies between 1900-2000).'
             )
             ->addOption(
                 'rating',
-                'r',
+                null,
                 InputOption::VALUE_REQUIRED,
                 'List only movies with an IMDb rating equal or higher then this rating.'
             )
@@ -53,6 +58,8 @@ class ListCommand extends Command
     {
         $path = $input->getArgument('path');
         $delimiter = $input->getOption('print0') ? "\0" : PHP_EOL;
+
+        $this->setUpFilters($input);
 
         $movies = [];
         $movieFolders = array_diff(scandir($path), ['.', '..']);
@@ -67,8 +74,51 @@ class ListCommand extends Command
                 continue;
             }
 
-            $movies[] = $movieFolder;
+            if ($this->passesFilters($input, $movieInfo['info'])) {
+                $movies[] = realpath($path).DIRECTORY_SEPARATOR.$movieFolder;
+            }
         }
         echo implode($delimiter, $movies);
+    }
+
+    public function setUpFilters(InputInterface $input)
+    {
+        if ($input->getOption('year-from')) {
+            $this->filters['year-from'] = function (array $movieInfo, $year) {
+                return isset($movieInfo['release_date']) && $movieInfo['release_date'] >= $year;
+            };
+        }
+        if ($input->getOption('year-to')) {
+            $this->filters['year-to'] = function (array $movieInfo, $year) {
+                return isset($movieInfo['release_date']) && $movieInfo['release_date'] <= $year;
+            };
+        }
+        if ($input->getOption('rating')) {
+            $this->filters['rating'] = function (array $movieInfo, $rating) {
+                return isset($movieInfo['imdb_rating']) && $movieInfo['imdb_rating'] >= $rating;
+            };
+        }
+    }
+
+    public function passesFilters(InputInterface $input, $movieInfo)
+    {
+        if ($input->getOption('year-from')
+            && isset($movieInfo['release_date'])
+            && $movieInfo['release_date'] >= $input->getOption('year-from')) {
+            return true;
+        }
+        if ($input->getOption('year-to')
+            && isset($movieInfo['release_date'])
+            && $movieInfo['release_date'] <= $input->getOption('year-to')) {
+            return true;
+        }
+        if ($input->getOption('rating')
+            && (
+            (isset($movieInfo['imdb_rating']) && floatval($movieInfo['imdb_rating']) >= floatval($input->getOption('rating')))
+            || (isset($movieInfo['popularity']) && floatval($movieInfo['popularity']) >= floatval($input->getOption('rating')))
+            )) {
+            @print($movieInfo['original_title'].'-'.$movieInfo['popularity'].$movieInfo['imdb_rating'].PHP_EOL);
+            return true;
+        }
     }
 }
