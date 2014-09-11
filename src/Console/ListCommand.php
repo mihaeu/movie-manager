@@ -4,6 +4,8 @@ namespace Mihaeu\MovieManager\Console;
 
 use Mihaeu\MovieManager\Ini\Reader;
 
+use Mihaeu\MovieManager\Ini\Writer;
+use Mihaeu\MovieManager\MovieDatabase\IMDb;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -15,7 +17,11 @@ class ListCommand extends Command
     /**
      * @var array|Callback[]
      */
-    private $filters;
+    private $filters = [
+        'year-from' => 0,
+        'year-to'   => 0,
+        'rating'    => 0
+    ];
 
     public function configure()
     {
@@ -59,8 +65,6 @@ class ListCommand extends Command
         $path = $input->getArgument('path');
         $delimiter = $input->getOption('print0') ? "\0" : PHP_EOL;
 
-        $this->setUpFilters($input);
-
         $movies = [];
         $movieFolders = array_diff(scandir($path), ['.', '..']);
         foreach ($movieFolders as $movieFolder) {
@@ -78,26 +82,8 @@ class ListCommand extends Command
                 $movies[] = realpath($path).DIRECTORY_SEPARATOR.$movieFolder;
             }
         }
-        echo implode($delimiter, $movies);
-    }
 
-    public function setUpFilters(InputInterface $input)
-    {
-        if ($input->getOption('year-from')) {
-            $this->filters['year-from'] = function (array $movieInfo, $year) {
-                return isset($movieInfo['release_date']) && $movieInfo['release_date'] >= $year;
-            };
-        }
-        if ($input->getOption('year-to')) {
-            $this->filters['year-to'] = function (array $movieInfo, $year) {
-                return isset($movieInfo['release_date']) && $movieInfo['release_date'] <= $year;
-            };
-        }
-        if ($input->getOption('rating')) {
-            $this->filters['rating'] = function (array $movieInfo, $rating) {
-                return isset($movieInfo['imdb_rating']) && $movieInfo['imdb_rating'] >= $rating;
-            };
-        }
+        echo implode($delimiter, $movies);
     }
 
     public function passesFilters(InputInterface $input, $movieInfo)
@@ -113,11 +99,8 @@ class ListCommand extends Command
             return true;
         }
         if ($input->getOption('rating')
-            && (
-            (isset($movieInfo['imdb_rating']) && floatval($movieInfo['imdb_rating']) >= floatval($input->getOption('rating')))
-            || (isset($movieInfo['popularity']) && floatval($movieInfo['popularity']) >= floatval($input->getOption('rating')))
-            )) {
-            @print($movieInfo['original_title'].'-'.$movieInfo['popularity'].$movieInfo['imdb_rating'].PHP_EOL);
+            && isset($movieInfo['imdb_rating'])
+            && $movieInfo['imdb_rating'] >= $input->getOption('rating')) {
             return true;
         }
     }
