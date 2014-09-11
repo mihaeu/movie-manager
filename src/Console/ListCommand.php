@@ -4,8 +4,6 @@ namespace Mihaeu\MovieManager\Console;
 
 use Mihaeu\MovieManager\Ini\Reader;
 
-use Mihaeu\MovieManager\Ini\Writer;
-use Mihaeu\MovieManager\MovieDatabase\IMDb;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -57,6 +55,12 @@ class ListCommand extends Command
                 InputOption::VALUE_REQUIRED,
                 'List only movies with an IMDb rating equal or higher then this rating.'
             )
+            ->addOption(
+                'max-size',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Stop listing movie after a certain total filesize has been reached.'
+            )
         ;
     }
 
@@ -67,6 +71,8 @@ class ListCommand extends Command
 
         $movies = [];
         $movieFolders = array_diff(scandir($path), ['.', '..']);
+
+        $totalSize = 0;
         foreach ($movieFolders as $movieFolder) {
             $linkFile = "$path/$movieFolder/$movieFolder - IMDb.url";
             $movieInfo = Reader::read($linkFile);
@@ -74,12 +80,24 @@ class ListCommand extends Command
                 continue;
             }
 
+            // don't process files which have not been parsed
             if (!isset($movieInfo['info'])) {
                 continue;
             }
 
             if ($this->passesFilters($input, $movieInfo['info'])) {
-                $movies[] = realpath($path).DIRECTORY_SEPARATOR.$movieFolder;
+
+                // if we check for max size then try to fit in as many movies as possible
+                if ($input->getOption('max-size')) {
+                    $movieSize = $this->getMovieSizeInMb($path.$movieFolder);
+                    if ($totalSize + $movieSize <= $input->getOption('max-size')) {
+                        $totalSize += $movieSize;
+                        $movies[] = realpath($path).DIRECTORY_SEPARATOR.$movieFolder;
+                    }
+                } else {
+                    $movies[] = realpath($path).DIRECTORY_SEPARATOR.$movieFolder;
+                }
+
             }
         }
 
@@ -103,5 +121,22 @@ class ListCommand extends Command
             && $movieInfo['imdb_rating'] >= $input->getOption('rating')) {
             return true;
         }
+    }
+
+    /**
+     * Calculate the total size of a movie folder.
+     *
+     * @param string $dir Movie Directory
+     *
+     * @return int
+     */
+    public function getMovieSizeInMb($dir)
+    {
+        $files = array_diff(scandir($dir), ['.', '..']);
+        $totalSize = 0;
+        foreach ($files as $file) {
+            $totalSize += filesize($dir.DIRECTORY_SEPARATOR.$file) / 1024 / 1024;
+        }
+        return (int) $totalSize;
     }
 }
