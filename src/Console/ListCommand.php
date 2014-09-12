@@ -101,26 +101,38 @@ class ListCommand extends Command
             }
         }
 
-        echo implode($delimiter, $movies);
+        echo implode($delimiter, $movies).PHP_EOL;
     }
 
+    /**
+     * Tests all filters for a movie and returns true only when all filters pass.
+     *
+     * @param InputInterface $input
+     * @param array          $movieInfo
+     *
+     * @return bool
+     */
     public function passesFilters(InputInterface $input, $movieInfo)
     {
-        if ($input->getOption('year-from')
-            && isset($movieInfo['release_date'])
-            && $movieInfo['release_date'] >= $input->getOption('year-from')) {
-            return true;
-        }
-        if ($input->getOption('year-to')
-            && isset($movieInfo['release_date'])
-            && $movieInfo['release_date'] <= $input->getOption('year-to')) {
-            return true;
-        }
-        if ($input->getOption('rating')
-            && isset($movieInfo['imdb_rating'])
-            && $movieInfo['imdb_rating'] >= $input->getOption('rating')) {
-            return true;
-        }
+        $yearFrom =
+            // if the filter has not been set, then it passes
+            !$input->getOption('year-from')
+            // if the information does not exist, we cannot filter it
+            || isset($movieInfo['release_date'])
+            // check the condition
+            && $movieInfo['release_date'] >= $input->getOption('year-from');
+
+        $yearTo =
+            !$input->getOption('year-to')
+            || isset($movieInfo['release_date'])
+            && $movieInfo['release_date'] <= $input->getOption('year-to');
+
+        $rating =
+            !$input->getOption('rating')
+            || isset($movieInfo['imdb_rating'])
+            && $movieInfo['imdb_rating'] >= $input->getOption('rating');
+
+        return $yearFrom && $yearTo && $rating;
     }
 
     /**
