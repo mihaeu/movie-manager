@@ -128,7 +128,7 @@ class Html
             }
         }
 
-        $this->moviesJson = str_replace("'", '&#39;', json_encode($moviesJson));
+        $this->moviesJson = str_replace("[\n\r]", ' ', json_encode($moviesJson, JSON_HEX_APOS | JSON_HEX_QUOT));
         asort($movieYears);
         return $this->templating->render(
             'collection.html.twig',
