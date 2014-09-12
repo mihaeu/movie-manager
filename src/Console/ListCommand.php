@@ -198,9 +198,6 @@ class ListCommand extends Command
         foreach ($movieFolders as $movieFolder) {
             $linkFile = $this->options['path']."/$movieFolder/$movieFolder - IMDb.url";
             $movieInfo = Reader::read($linkFile);
-            if (false === $movieInfo) {
-                continue;
-            }
 
             // don't process files which have not been parsed
             if (!isset($movieInfo['info'])) {
@@ -208,7 +205,6 @@ class ListCommand extends Command
             }
 
             if ($this->passesFilters($movieInfo['info'])) {
-
                 // if we check for max size then try to fit in as many movies as possible
                 if ($this->options['max-size']) {
                     $movieSize = $this->getMovieSizeInMb($this->options['path'].$movieFolder);
