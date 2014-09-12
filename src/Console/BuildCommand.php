@@ -42,7 +42,7 @@ class BuildCommand extends Command
 
         $path = realpath($input->getArgument('path'));
         if (is_writable(dirname($input->getArgument('save')))) {
-            $save = realpath($input->getArgument('save'));
+            $save = $input->getArgument('save');
             if (!is_writable(dirname($save))) {
                 throw new \InvalidArgumentException(dirname($save).' is not writable.');
             }
