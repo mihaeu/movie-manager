@@ -61,6 +61,18 @@ class ListCommand extends Command
                 InputOption::VALUE_REQUIRED,
                 'Stop listing movie after a certain total filesize has been reached.'
             )
+            ->addOption(
+                'sort-by',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Sort the result by the value provided.'
+            )
+            ->addOption(
+                'desc',
+                null,
+                InputOption::VALUE_NONE,
+                'Sort in descending order.'
+            )
         ;
     }
 
@@ -92,16 +104,42 @@ class ListCommand extends Command
                     $movieSize = $this->getMovieSizeInMb($path.$movieFolder);
                     if ($totalSize + $movieSize <= $input->getOption('max-size')) {
                         $totalSize += $movieSize;
-                        $movies[] = realpath($path).DIRECTORY_SEPARATOR.$movieFolder;
+                        $movies[realpath($path).DIRECTORY_SEPARATOR.$movieFolder] = $movieInfo;
                     }
                 } else {
-                    $movies[] = realpath($path).DIRECTORY_SEPARATOR.$movieFolder;
+                    $movies[realpath($path).DIRECTORY_SEPARATOR.$movieFolder] = $movieInfo;
                 }
 
             }
         }
 
-        echo implode($delimiter, $movies).PHP_EOL;
+        if ($input->getOption('sort-by')) {
+            $sortBy = $input->getOption('sort-by');
+            uasort($movies, function ($arrayA, $arrayB) use ($sortBy) {
+                if (!isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
+                    return 0;
+                } else if (isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
+                    return 1;
+                }  else if (!isset($arrayA['info'][$sortBy]) && isset($arrayB['info'][$sortBy])) {
+                    return -1;
+                }
+
+                if ($arrayA['info'][$sortBy] === $arrayB['info'][$sortBy]) {
+                    return 0;
+                } else if ($arrayA['info'][$sortBy] > $arrayB['info'][$sortBy]) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            });
+        }
+
+        $matchedMovies = array_keys($movies);
+        if ($input->getOption('desc')) {
+            $matchedMovies = array_reverse($matchedMovies);
+        }
+
+        echo implode($delimiter, $matchedMovies).PHP_EOL;
     }
 
     /**
