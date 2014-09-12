@@ -10,17 +10,28 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Lists all the (correctly formatted) movies in a directory.
+ *
+ * @package Mihaeu\MovieManager\Console
+ *
+ * @author Michael Haeuslmann (haeuslmann@gmail.com)
+ */
 class ListCommand extends Command
 {
     /**
-     * @var array|Callback[]
+     * @var array
      */
-    private $filters = [
-        'year-from' => 0,
-        'year-to'   => 0,
-        'rating'    => 0
-    ];
+    private $movies = [];
 
+    /**
+     * @var array
+     */
+    private $options;
+
+    /**
+     * @inheritdoc
+     */
     public function configure()
     {
         $this
@@ -76,99 +87,58 @@ class ListCommand extends Command
         ;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $path = $input->getArgument('path');
-        $delimiter = $input->getOption('print0') ? "\0" : PHP_EOL;
+        $this->options = $input->getOptions();
+        $this->options['path'] = realpath($input->getArgument('path'));
 
-        $movies = [];
-        $movieFolders = array_diff(scandir($path), ['.', '..']);
+        $this->movies = $this->parseMovies();
 
-        $totalSize = 0;
-        foreach ($movieFolders as $movieFolder) {
-            $linkFile = "$path/$movieFolder/$movieFolder - IMDb.url";
-            $movieInfo = Reader::read($linkFile);
-            if (false === $movieInfo) {
-                continue;
-            }
-
-            // don't process files which have not been parsed
-            if (!isset($movieInfo['info'])) {
-                continue;
-            }
-
-            if ($this->passesFilters($input, $movieInfo['info'])) {
-
-                // if we check for max size then try to fit in as many movies as possible
-                if ($input->getOption('max-size')) {
-                    $movieSize = $this->getMovieSizeInMb($path.$movieFolder);
-                    if ($totalSize + $movieSize <= $input->getOption('max-size')) {
-                        $totalSize += $movieSize;
-                        $movies[realpath($path).DIRECTORY_SEPARATOR.$movieFolder] = $movieInfo;
-                    }
-                } else {
-                    $movies[realpath($path).DIRECTORY_SEPARATOR.$movieFolder] = $movieInfo;
-                }
-
-            }
+        if ($this->options['sort-by']) {
+            $this->sortMovies();
         }
 
-        if ($input->getOption('sort-by')) {
-            $sortBy = $input->getOption('sort-by');
-            uasort($movies, function ($arrayA, $arrayB) use ($sortBy) {
-                if (!isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
-                    return 0;
-                } else if (isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
-                    return 1;
-                }  else if (!isset($arrayA['info'][$sortBy]) && isset($arrayB['info'][$sortBy])) {
-                    return -1;
-                }
-
-                if ($arrayA['info'][$sortBy] === $arrayB['info'][$sortBy]) {
-                    return 0;
-                } else if ($arrayA['info'][$sortBy] > $arrayB['info'][$sortBy]) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-            });
-        }
-
-        $matchedMovies = array_keys($movies);
-        if ($input->getOption('desc')) {
+        $matchedMovies = array_keys($this->movies);
+        if ($this->options['desc']) {
             $matchedMovies = array_reverse($matchedMovies);
         }
 
-        echo implode($delimiter, $matchedMovies).PHP_EOL;
+        if ($this->options['print0']) {
+            echo implode("\0", $matchedMovies);
+        } else {
+            echo implode("\n", $matchedMovies).PHP_EOL;
+        }
     }
 
     /**
      * Tests all filters for a movie and returns true only when all filters pass.
      *
-     * @param InputInterface $input
      * @param array          $movieInfo
      *
      * @return bool
      */
-    public function passesFilters(InputInterface $input, $movieInfo)
+    public function passesFilters($movieInfo)
     {
         $yearFrom =
             // if the filter has not been set, then it passes
-            !$input->getOption('year-from')
+            !$this->options['year-from']
             // if the information does not exist, we cannot filter it
             || isset($movieInfo['release_date'])
             // check the condition
-            && $movieInfo['release_date'] >= $input->getOption('year-from');
+            && $movieInfo['release_date'] >= $this->options['year-from'];
 
         $yearTo =
-            !$input->getOption('year-to')
+            !$this->options['year-to']
             || isset($movieInfo['release_date'])
-            && $movieInfo['release_date'] <= $input->getOption('year-to');
+            && $movieInfo['release_date'] <= $this->options['year-to'];
 
         $rating =
-            !$input->getOption('rating')
+            !$this->options['rating']
             || isset($movieInfo['imdb_rating'])
-            && $movieInfo['imdb_rating'] >= $input->getOption('rating');
+            && $movieInfo['imdb_rating'] >= $this->options['rating'];
 
         return $yearFrom && $yearTo && $rating;
     }
@@ -188,5 +158,70 @@ class ListCommand extends Command
             $totalSize += filesize($dir.DIRECTORY_SEPARATOR.$file) / 1024 / 1024;
         }
         return (int) $totalSize;
+    }
+
+    /**
+     * Sorts movies using the key supplied in the options.
+     */
+    public function sortMovies()
+    {
+        $sortBy = $this->options['sort-by'];
+        uasort($this->movies, function ($arrayA, $arrayB) use ($sortBy) {
+            if (!isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
+                return 0;
+            } else if (isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
+                return 1;
+            }  else if (!isset($arrayA['info'][$sortBy]) && isset($arrayB['info'][$sortBy])) {
+                return -1;
+            }
+
+            if ($arrayA['info'][$sortBy] === $arrayB['info'][$sortBy]) {
+                return 0;
+            } else if ($arrayA['info'][$sortBy] > $arrayB['info'][$sortBy]) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+    }
+
+    /**
+     * Parses all properly formatted movies in the directory.
+     *
+     * @return array
+     */
+    public function parseMovies()
+    {
+        $movies = [];
+        $totalSize = 0;
+        $movieFolders = array_diff(scandir($this->options['path']), ['.', '..']);
+        foreach ($movieFolders as $movieFolder) {
+            $linkFile = $this->options['path']."/$movieFolder/$movieFolder - IMDb.url";
+            $movieInfo = Reader::read($linkFile);
+            if (false === $movieInfo) {
+                continue;
+            }
+
+            // don't process files which have not been parsed
+            if (!isset($movieInfo['info'])) {
+                continue;
+            }
+
+            if ($this->passesFilters($movieInfo['info'])) {
+
+                // if we check for max size then try to fit in as many movies as possible
+                if ($this->options['max-size']) {
+                    $movieSize = $this->getMovieSizeInMb($this->options['path'].$movieFolder);
+                    if ($totalSize + $movieSize <= $this->options['max-size']) {
+                        $totalSize += $movieSize;
+                        $movies[$this->options['path'].DIRECTORY_SEPARATOR.$movieFolder] = $movieInfo;
+                    }
+                } else {
+                    $movies[$this->options['path'].DIRECTORY_SEPARATOR.$movieFolder] = $movieInfo;
+                }
+
+            }
+        }
+        return $movies;
     }
 }
