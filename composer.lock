@@ -4,8 +4,51 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "ea6095e22b87ec1ff25b2e67a7a50a2f",
+    "hash": "905776b97768123e0cea25cea25287b8",
     "packages": [
+        {
+            "name": "glamorous/tmdb-php-api",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vuphuong87/imdb-php-api.git",
+                "reference": "fd7593da421fd98b088d0a008970c90f74377c4b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vuphuong87/imdb-php-api/zipball/fd7593da421fd98b088d0a008970c90f74377c4b",
+                "reference": "fd7593da421fd98b088d0a008970c90f74377c4b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-gd": "*",
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "glamorous",
+                    "homepage": "https://github.com/glamorous/TMDb-PHP-API"
+                }
+            ],
+            "description": "PHP Class for using TMDb (themoviedb.org) API. Because of IMDB hasn't an API we provide this PHP5 class. It's pretty easy to recieve all information about a movie or an actor. No scraping needed.",
+            "homepage": "https://github.com/vuphuong87/imdb-php-api",
+            "keywords": [
+                "api",
+                "imdb",
+                "tmdb"
+            ],
+            "time": "2013-05-17 08:01:22"
+        },
         {
             "name": "guzzle/guzzle",
             "version": "v3.9.2",
@@ -183,57 +226,6 @@
                 "psr-3"
             ],
             "time": "2012-12-21 11:40:51"
-        },
-        {
-            "name": "raveren/kint",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/raveren/kint.git",
-                "reference": "593b1c3af298204cf92780ba62985e479fb62b74"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/raveren/kint/zipball/593b1c3af298204cf92780ba62985e479fb62b74",
-                "reference": "593b1c3af298204cf92780ba62985e479fb62b74",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.2.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "0.9-dev"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "Kint.class.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Rokas Šleinius",
-                    "homepage": "https://github.com/raveren"
-                },
-                {
-                    "name": "Contributors",
-                    "homepage": "https://github.com/raveren/kint/contributors"
-                }
-            ],
-            "description": "Kint - debugging helper for PHP developers",
-            "homepage": "https://github.com/raveren/kint",
-            "keywords": [
-                "debug",
-                "kint",
-                "php"
-            ],
-            "time": "2014-09-08 13:50:01"
         },
         {
             "name": "silex/silex",
@@ -1788,6 +1780,57 @@
             "time": "2014-09-06 17:32:37"
         },
         {
+            "name": "raveren/kint",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/raveren/kint.git",
+                "reference": "593b1c3af298204cf92780ba62985e479fb62b74"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/raveren/kint/zipball/593b1c3af298204cf92780ba62985e479fb62b74",
+                "reference": "593b1c3af298204cf92780ba62985e479fb62b74",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.9-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "Kint.class.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rokas Šleinius",
+                    "homepage": "https://github.com/raveren"
+                },
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/raveren/kint/contributors"
+                }
+            ],
+            "description": "Kint - debugging helper for PHP developers",
+            "homepage": "https://github.com/raveren/kint",
+            "keywords": [
+                "debug",
+                "kint",
+                "php"
+            ],
+            "time": "2014-09-08 13:50:01"
+        },
+        {
             "name": "sebastian/comparator",
             "version": "1.0.0",
             "source": {
@@ -2107,6 +2150,7 @@
     ],
     "minimum-stability": "stable",
     "stability-flags": {
+        "glamorous/tmdb-php-api": 20,
         "raveren/kint": 20
     },
     "prefer-stable": false,

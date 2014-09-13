@@ -6,6 +6,13 @@ use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\Ini\Writer;
 use Mihaeu\MovieManager\MovieDatabase\TMDb;
 
+/**
+ * Handles all tasks to get the movie into a proper format.
+ *
+ * @package Mihaeu\MovieManager
+ *
+ * @author Michael Haeuslmann (haeuslmann@gmail.com)
+ */
 class MovieHandler
 {
     /**
@@ -83,16 +90,20 @@ class MovieHandler
         $hasIMDbLink = $this->createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, $movie);
         $hasPoster = $this->downloadMoviePoster($movieTitle, $movieYear, $filePath, $movie);
         $hasCorrectFolder = $this->renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder);
+        $hasScreenshot = $this->downloadIMDbScreenshot($imdbId, $movieTitle, $movieYear, $filePath);
 
-        if ($hasCorrectName && $hasIMDbLink && $hasPoster && $hasCorrectFolder) {
+        if ($hasCorrectName && $hasIMDbLink && $hasPoster && $hasCorrectFolder && $hasScreenshot) {
             return "$movieTitle ($movieYear)";
         } else {
             return false;
         }
     }
 
-
-
+    /**
+     * @param $originalTitle
+     *
+     * @return mixed
+     */
     public function convertMovieTitle($originalTitle)
     {
         // : is not allowed in most OS, replace with - and add spaces
@@ -107,11 +118,26 @@ class MovieHandler
         return $movieTitle;
     }
 
+    /**
+     * @param $originalReleaseDate
+     *
+     * @return bool|string
+     */
     public function convertMovieYear($originalReleaseDate)
     {
         return date('Y', strtotime($originalReleaseDate));
     }
 
+    /**
+     * @param $movieTitle
+     * @param $movieYear
+     * @param $file
+     * @param $filePath
+     * @param $fileExt
+     * @param int $maxRetries
+     *
+     * @return bool
+     */
     public function renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt, $maxRetries = 5)
     {
         $retries = 0;
@@ -124,6 +150,15 @@ class MovieHandler
         return $success;
     }
 
+    /**
+     * @param $movieTitle
+     * @param $movieYear
+     * @param $filePath
+     * @param $movieFolder
+     * @param int $maxRetries
+     *
+     * @return bool
+     */
     public function renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder, $maxRetries = 5)
     {
         $newPath = "$movieFolder/$movieTitle ($movieYear)";
@@ -141,6 +176,15 @@ class MovieHandler
         return $success;
     }
 
+    /**
+     * @param $movieTitle
+     * @param $movieYear
+     * @param $filePath
+     * @param $imdbId
+     * @param array $movie
+     *
+     * @return bool
+     */
     public function createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, array $movie)
     {
         $movie['info'] = [];
@@ -197,6 +241,11 @@ class MovieHandler
         return Reader::read($iniFile) !== false;
     }
 
+    /**
+     * @param $imdbId
+     *
+     * @return string
+     */
     public function getIMDbLink($imdbId)
     {
         if (strpos($imdbId, 'tt') === false) {
@@ -206,6 +255,16 @@ class MovieHandler
         }
     }
 
+    /**
+     * @param $movieTitle
+     * @param $movieYear
+     * @param $filePath
+     * @param array $movie
+     *
+     * @return bool
+     *
+     * @throws \TMDbException
+     */
     public function downloadMoviePoster($movieTitle, $movieYear, $filePath, array $movie)
     {
         $posterSrc = $this->tmdb->getImageUrl(
@@ -215,12 +274,10 @@ class MovieHandler
         );
         $srcExtension = substr(strrchr($posterSrc, '.'), 1);
 
-        file_put_contents(
-            "$filePath/$movieTitle ($movieYear) - Poster.$srcExtension",
-            file_get_contents($posterSrc)
-        );
+        $destination = "$filePath/$movieTitle ($movieYear) - Poster.$srcExtension";
+        file_put_contents($destination, file_get_contents($posterSrc));
 
-        return $this->downloadIMDbScreenshot($movie['imdb_id'], $movieTitle, $movieYear, $filePath);
+        return file_exists($destination);
     }
 
     /**

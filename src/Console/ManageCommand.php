@@ -4,7 +4,9 @@ namespace Mihaeu\MovieManager\Console;
 
 use Mihaeu\MovieManager\Config;
 use Mihaeu\MovieManager\Ini\Reader;
+use Mihaeu\MovieManager\MovieDatabase\TMDb;
 use Mihaeu\MovieManager\MovieFinder;
+use Mihaeu\MovieManager\MovieHandler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,9 +14,28 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\Question;
 
 class ManageCommand extends Command
 {
+    /**
+     * @var Config
+     */
+    private $config;
+
+    /**
+     * @var InputInterface
+     */
+    private $input;
+
+    /**
+     * @var OutputInterface
+     */
+    private $output;
+
+    /**
+     * @inheritdoc
+     */
     public function configure()
     {
         $this
@@ -34,11 +55,17 @@ class ManageCommand extends Command
         ;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $config = new Config();
+        $this->config = new Config();
+        $this->input = $input;
+        $this->output = $output;
+
         $finder = new MovieFinder();
-        $movieFiles = $finder->findMoviesInDir($input->getArgument('path'), $config->get('allowed-movie-formats'));
+        $movieFiles = $finder->findMoviesInDir($input->getArgument('path'), $this->config->get('allowed-movie-formats'));
 
         if (!$input->getOption('show-all')) {
             $movieFiles = $this->filterBadMovies($movieFiles);
@@ -95,36 +122,97 @@ class ManageCommand extends Command
 
     /**
      * @param array $movieFiles
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
      */
-    public function manageMoviesInteractively(array $movieFiles, InputInterface $input, OutputInterface $output)
+    public function manageMoviesInteractively(array $movieFiles)
     {
         /** @var QuestionHelper $dialog */
         $helper = $this->getHelper('question');
-        $question = new ChoiceQuestion(
+        $processMovieQuestion = new ChoiceQuestion(
             'Process movie?',
             ['y' => 'yes', 'n' => 'no', 'q' => 'quit'],
             'y'
         );
+        $movieTitleQuestion =  new Question('Please enter the movie title: ');
 
         $index = 0;
+        $movieHandler = new MovieHandler($this->config);
+        $tmdb = new TMDb($this->config->get('tmdb-api-key'));
         foreach ($movieFiles as $movie) {
-            $output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
-            $answer = $helper->ask($input, $output, $question);
-            if ('no' === $answer) {
-                continue;
+            $this->output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
+
+            if (!$this->input->getOption('no-interaction')) {
+                $answer = $helper->ask($this->input, $this->output, $processMovieQuestion);
+
+                if ('no' === $answer) {
+                    continue;
+                }
+
+                if ('quit' === $answer) {
+                    return;
+                }
             }
 
-            if ('quit' === $answer) {
-                return;
+            if (!$movie['link']) {
+                $query = $helper->ask($this->input, $this->output, $movieTitleQuestion);
+                $suggestions = $tmdb->getMovieSuggestionsFromQuery($query);
+
+                $table = $this->getHelper('table');
+                $table
+                    ->setHeaders(['Title', 'Year', 'Link'])
+                    ->setRows($this->formatSuggestionsForTable($suggestions))
+                ;
+                $table->render($this->output);
+
+                $suggestionChoices = [];
+                foreach ($suggestions as $suggestion) {
+                    $suggestionChoices[] = $suggestion['title'].' ('.$suggestion['year'].') ['.$suggestion['id'].']';
+                }
+                $suggestion['q'] = 'quit';
+                $suggestionQuestion = new ChoiceQuestion(
+                    'What is the correct title?',
+                    $suggestionChoices
+                );
+                $titleChoice = $helper->ask($this->input, $this->output, $suggestionQuestion);
+                $tmdbId = preg_replace('/^.* \[(\d+)\]$/', '$1', $titleChoice);
+                $this->output->writeln("<info>You chose: $tmdbId</info>");
             }
 
             if ($movie['link']) {
                 $infoFile = $movie['path'].DIRECTORY_SEPARATOR.basename($movie['path']).' - IMDb.url';
                 $movieInfo = Reader::read($infoFile);
+
+                $title = preg_replace('/([^\(]+) \(\d+\).*/', '$1', $movie['name']);
+                $year = preg_replace('/[^\(]+ \((\d+)\).*/', '$1', $movie['name']);
+                if (!$movie['screenshot']) {
+                    $this->output->write('Downloading IMDb screenshot: ');
+                    $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
+                    $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
+                }
+
+                if (!$movie['poster']) {
+                    $this->output->write('Downloading IMDb screenshot: ');
+                    $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
+                    $tmdbHandler = $movieHandler->getTMDB();
+                    $movieHandler->downloadMoviePoster(
+                        $title,
+                        $year,
+                        $movie['path'],
+                        $tmdbHandler->getMovie($movie['info']['id'])
+                    );
+                    $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
+                }
             }
         }
+    }
+
+    public function formatSuggestionsForTable(array $suggestions)
+    {
+        return array_map(function (array $suggestion) {
+                return [
+                    $suggestion['title'],
+                    $suggestion['year'],
+                    'https://www.themoviedb.org/movie/'.$suggestion['id']
+                ];
+            }, $suggestions);
     }
 }
