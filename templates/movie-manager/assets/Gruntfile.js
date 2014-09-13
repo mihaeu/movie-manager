@@ -46,11 +46,11 @@ module.exports = function(grunt) {
       uglify: {
           build: {
               options: {
-                  compress: true
+                  sourceMap: true
               },
               files: {
                   '<%= config.jsOutput %>/scripts.min.js': [
-                      'bower_components/jquery/dist/jquery.min.js',
+                      'bower_components/jquery/dist/jquery.js',
                       'bower_components/handlebars/handlebars.runtime.min.js',
                       '<%= config.jsOutput %>/templates.js',
                       'js/app2.js'
@@ -127,7 +127,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-uncss');
 
   // Default task.
-  grunt.registerTask('css',     ['less', 'cssmin', 'uncss']);
+  grunt.registerTask('css',     ['less', 'cssmin']);
   grunt.registerTask('js',      ['jshint', 'handlebars', 'uglify']);
   grunt.registerTask('default', ['clean', 'css', 'js', 'watch']);
 
