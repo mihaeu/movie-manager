@@ -40,16 +40,47 @@ class ManageCommand extends Command
         $movieFiles = $finder->findMoviesInDir($input->getArgument('path'), $config->get('allowed-movie-formats'));
 
         if (!$input->getOption('show-all')) {
-            $movieFiles = array_filter($movieFiles, function ($movie) {
-                return !$movie['format']
-                    || !$movie['folder']
-                    || !$movie['link']
-                    || !$movie['screenshot']
-                    || !$movie['poster'];
-            });
+            $movieFiles = $this->filterBadMovies($movieFiles);
         }
 
-        $movies = array_map(function (array $movie) {
+        $table = $this->getHelper('table');
+        $table
+            ->setHeaders(['Name', 'Format ', 'Folder ', 'Info   ', 'Screeny', 'Poster '])
+            ->setRows($this->formatMoviesForTable($movieFiles))
+        ;
+        $table->render($output);
+
+        $this->manageMoviesInteractively($movieFiles, $output);
+    }
+
+    /**
+     * Filters the movies so that only movies which are not properly parsed will be left.
+     *
+     * @param array $movieFiles
+     *
+     * @return array
+     */
+    public function filterBadMovies(array $movieFiles)
+    {
+        return array_filter($movieFiles, function ($movie) {
+            return !$movie['format']
+            || !$movie['folder']
+            || !$movie['link']
+            || !$movie['screenshot']
+            || !$movie['poster'];
+        });
+    }
+
+    /**
+     * Formats a movie for pretty printing in a symfony console table.
+     *
+     * @param array $movieFiles
+     *
+     * @return array
+     */
+    public function formatMoviesForTable(array $movieFiles)
+    {
+        return array_map(function (array $movie) {
             return [
                 substr($movie['name'], 0, 40),
                 $movie['format']        ? '<fg=black;bg=green>   ✔   </fg=black;bg=green>' : '<fg=black;bg=red>   ✘   </fg=black;bg=red>',
@@ -59,27 +90,21 @@ class ManageCommand extends Command
                 $movie['poster']        ? '<fg=black;bg=green>   ✔   </fg=black;bg=green>' : '<fg=black;bg=red>   ✘   </fg=black;bg=red>'
             ];
         }, $movieFiles);
+    }
 
-        $table = $this->getHelper('table');
-        $table
-            ->setHeaders([
-                'Name',
-                    'Format ',
-                    'Folder ',
-                    'Info   ',
-                    'Screeny',
-                    'Poster '
-            ])
-            ->setRows($movies)
-        ;
-        $table->render($output);
-
+    /**
+     * @param array $movieFiles
+     * 
+     * @param OutputInterface $output
+     */
+    public function manageMoviesInteractively(array $movieFiles, OutputInterface $output)
+    {
         /** @var DialogHelper $dialog */
         $dialog = $this->getHelper('dialog');
 
         $index = 0;
         foreach ($movieFiles as $movie) {
-            $output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movies), $movie['name']));
+            $output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
             $answer = $dialog->select($output, 'Process movie?', ['y' => 'yes', 'n' => 'no', 'q' => 'quit'], 'y');
 
             if ('n' === $answer) {
@@ -87,14 +112,12 @@ class ManageCommand extends Command
             }
 
             if ('q' === $answer) {
-                exit;
+                return;
             }
 
             if ($movie['link']) {
                 $infoFile = $movie['path'].DIRECTORY_SEPARATOR.basename($movie['path']).' - IMDb.url';
                 $movieInfo = Reader::read($infoFile);
-
-
             }
         }
     }
