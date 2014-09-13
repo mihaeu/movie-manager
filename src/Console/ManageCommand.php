@@ -3,8 +3,10 @@
 namespace Mihaeu\MovieManager\Console;
 
 use Mihaeu\MovieManager\Config;
+use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\MovieFinder;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\DialogHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -49,7 +51,7 @@ class ManageCommand extends Command
 
         $movies = array_map(function (array $movie) {
             return [
-                $movie['name'],
+                substr($movie['name'], 0, 40),
                 $movie['format']        ? '<fg=black;bg=green>   ✔   </fg=black;bg=green>' : '<fg=black;bg=red>   ✘   </fg=black;bg=red>',
                 $movie['folder']        ? '<fg=black;bg=green>   ✔   </fg=black;bg=green>' : '<fg=black;bg=red>   ✘   </fg=black;bg=red>',
                 $movie['link']          ? '<fg=black;bg=green>   ✔   </fg=black;bg=green>' : '<fg=black;bg=red>   ✘   </fg=black;bg=red>',
@@ -71,5 +73,29 @@ class ManageCommand extends Command
             ->setRows($movies)
         ;
         $table->render($output);
+
+        /** @var DialogHelper $dialog */
+        $dialog = $this->getHelper('dialog');
+
+        $index = 0;
+        foreach ($movieFiles as $movie) {
+            $output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movies), $movie['name']));
+            $answer = $dialog->select($output, 'Process movie?', ['y' => 'yes', 'n' => 'no', 'q' => 'quit'], 'y');
+
+            if ('n' === $answer) {
+                continue;
+            }
+
+            if ('q' === $answer) {
+                exit;
+            }
+
+            if ($movie['link']) {
+                $infoFile = $movie['path'].DIRECTORY_SEPARATOR.basename($movie['path']).' - IMDb.url';
+                $movieInfo = Reader::read($infoFile);
+
+
+            }
+        }
     }
 }

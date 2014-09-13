@@ -75,22 +75,22 @@ class MovieHandler
 
         $hasCorrectName = $this->renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt);
         if (!$hasCorrectName) {
-            echo '$hasCorrectName failer';
+            echo '$hasCorrectName error';
         }
 
         $hasIMDbLink = $this->createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, $movie);
         if (!$hasIMDbLink) {
-            echo '$hasIMDbLink failer';
+            echo '$hasIMDbLink error';
         }
 
         $hasPoster = $this->downloadMoviePoster($movieTitle, $movieYear, $filePath, $movie);
         if (!$hasPoster) {
-            echo '$hasPoster failer';
+            echo '$hasPoster error';
         }
 
         $hasCorrectFolder = $this->renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder);
         if (!$hasCorrectFolder) {
-            echo '$hasCorrectFolder failer';
+            echo '$hasCorrectFolder error';
         }
 
 
