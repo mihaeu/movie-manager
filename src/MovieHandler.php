@@ -5,7 +5,6 @@ namespace Mihaeu\MovieManager;
 use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\Ini\Writer;
 use Mihaeu\MovieManager\MovieDatabase\TMDb;
-use Symfony\Component\DomCrawler\Crawler;
 
 class MovieHandler
 {
@@ -17,7 +16,7 @@ class MovieHandler
     /**
      * TMDb API Wrapper
      *
-     * @var Object
+     * @var \TMDb
      */
     private $tmdb;
 
@@ -32,6 +31,13 @@ class MovieHandler
         $this->tmdb = new \TMDb($this->config->get('tmdb-api-key'), 'en');
     }
 
+    /**
+     * @return \TMDb
+     */
+    public function GetTMDb()
+    {
+        return $this->tmdb;
+    }
 
     /**
      * Handles movie related tasts like renaming, downloading the poster etc.
@@ -74,25 +80,9 @@ class MovieHandler
         }
 
         $hasCorrectName = $this->renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt);
-        if (!$hasCorrectName) {
-            echo '$hasCorrectName error';
-        }
-
         $hasIMDbLink = $this->createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, $movie);
-        if (!$hasIMDbLink) {
-            echo '$hasIMDbLink error';
-        }
-
         $hasPoster = $this->downloadMoviePoster($movieTitle, $movieYear, $filePath, $movie);
-        if (!$hasPoster) {
-            echo '$hasPoster error';
-        }
-
         $hasCorrectFolder = $this->renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder);
-        if (!$hasCorrectFolder) {
-            echo '$hasCorrectFolder error';
-        }
-
 
         if ($hasCorrectName && $hasIMDbLink && $hasPoster && $hasCorrectFolder) {
             return "$movieTitle ($movieYear)";
@@ -122,7 +112,7 @@ class MovieHandler
         return date('Y', strtotime($originalReleaseDate));
     }
 
-    private function renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt, $maxRetries = 5)
+    public function renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt, $maxRetries = 5)
     {
         $retries = 0;
         $success = @rename($file, "$filePath/$movieTitle ($movieYear).$fileExt");
@@ -134,7 +124,7 @@ class MovieHandler
         return $success;
     }
 
-    private function renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder, $maxRetries = 5)
+    public function renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder, $maxRetries = 5)
     {
         $newPath = "$movieFolder/$movieTitle ($movieYear)";
         if (is_dir($newPath)) {
@@ -151,7 +141,7 @@ class MovieHandler
         return $success;
     }
 
-    private function createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, Array $movie)
+    public function createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, array $movie)
     {
         $movie['info'] = [];
         // we don't want loose values without sections
@@ -207,7 +197,7 @@ class MovieHandler
         return Reader::read($iniFile) !== false;
     }
 
-    private function getIMDbLink($imdbId)
+    public function getIMDbLink($imdbId)
     {
         if (strpos($imdbId, 'tt') === false) {
             return 'http://www.imdb.com/title/tt' . $imdbId;
@@ -216,7 +206,7 @@ class MovieHandler
         }
     }
 
-    private function downloadMoviePoster($movieTitle, $movieYear, $filePath, Array $movie)
+    public function downloadMoviePoster($movieTitle, $movieYear, $filePath, array $movie)
     {
         $posterSrc = $this->tmdb->getImageUrl(
             $movie['poster_path'],
@@ -230,11 +220,26 @@ class MovieHandler
             file_get_contents($posterSrc)
         );
 
+        return $this->downloadIMDbScreenshot($movie['imdb_id'], $movieTitle, $movieYear, $filePath);
+    }
+
+    /**
+     * Downloads a screenshot of the movie's IMDb page.
+     *
+     * @param string $imdbId
+     * @param string $movieTitle
+     * @param int    $movieYear
+     * @param string $movieFolder
+     *
+     * @return bool
+     */
+    public function downloadIMDbScreenshot($imdbId, $movieTitle, $movieYear, $movieFolder)
+    {
         // take a screenshot with PhantomJS and save it
         $output = '';
-        $url = $this->getIMDbLink($movie['imdb_id']);
+        $url = $this->getIMDbLink($imdbId);
         $script = __DIR__.'/../rasterize.js';
-        $target = "$filePath/$movieTitle ($movieYear) - IMDb.png";
+        $target = "$movieFolder/$movieTitle ($movieYear) - IMDb.png";
         $cmd = "phantomjs $script \"$url\" \"$target\"";
         system($cmd, $output);
 
