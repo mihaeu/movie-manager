@@ -6,11 +6,12 @@ use Mihaeu\MovieManager\Config;
 use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\MovieFinder;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\DialogHelper;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 
 class ManageCommand extends Command
 {
@@ -50,7 +51,7 @@ class ManageCommand extends Command
         ;
         $table->render($output);
 
-        $this->manageMoviesInteractively($movieFiles, $output);
+        $this->manageMoviesInteractively($movieFiles, $input, $output);
     }
 
     /**
@@ -94,24 +95,29 @@ class ManageCommand extends Command
 
     /**
      * @param array $movieFiles
-     * 
+     *
+     * @param InputInterface $input
      * @param OutputInterface $output
      */
-    public function manageMoviesInteractively(array $movieFiles, OutputInterface $output)
+    public function manageMoviesInteractively(array $movieFiles, InputInterface $input, OutputInterface $output)
     {
-        /** @var DialogHelper $dialog */
-        $dialog = $this->getHelper('dialog');
+        /** @var QuestionHelper $dialog */
+        $helper = $this->getHelper('question');
+        $question = new ChoiceQuestion(
+            'Process movie?',
+            ['y' => 'yes', 'n' => 'no', 'q' => 'quit'],
+            'y'
+        );
 
         $index = 0;
         foreach ($movieFiles as $movie) {
             $output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
-            $answer = $dialog->select($output, 'Process movie?', ['y' => 'yes', 'n' => 'no', 'q' => 'quit'], 'y');
-
-            if ('n' === $answer) {
+            $answer = $helper->ask($input, $output, $question);
+            if ('no' === $answer) {
                 continue;
             }
 
-            if ('q' === $answer) {
+            if ('quit' === $answer) {
                 return;
             }
 
