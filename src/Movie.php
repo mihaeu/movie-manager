@@ -132,7 +132,7 @@ class Movie
     /**
      * @return boolean
      */
-    public function isAdult()
+    public function getAdult()
     {
         return $this->adult;
     }
@@ -511,5 +511,23 @@ class Movie
     public function setYear($year)
     {
         $this->year = $year;
+    }
+
+    /**
+     * Transforms this movie into array form.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $class = new \ReflectionClass(__CLASS__);
+        $properties = $class->getProperties();
+        $result = [];
+        foreach ($properties as $property) {
+            /** @var \ReflectionProperty */
+            $methodName = 'get'.ucfirst($property->name);
+            $result[$property->name] = $this->$methodName();
+        }
+        return $result;
     }
 }

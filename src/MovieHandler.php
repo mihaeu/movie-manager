@@ -177,6 +177,10 @@ class MovieHandler
     }
 
     /**
+     * Old version, please use createMovieInfo().
+     *
+     * @deprecated
+     *
      * @param $movieTitle
      * @param $movieYear
      * @param $filePath
@@ -186,51 +190,47 @@ class MovieHandler
      */
     public function createIMDbLink($movieTitle, $movieYear, $filePath, array $movie)
     {
-        $movie['info'] = [];
+        $url = $this->getIMDbLink($movie['imdb_id']);
+
+        $movieIni = ['info' => []];
         // we don't want loose values without sections and we don't want empty sections,
         // because we're going to render it into the INI format
         foreach ($movie as $key => $value) {
             if (!is_array($value)) {
-                $movie['info'][$key] = $value;
-                unset($movie[$key]);
+                $movieIni['info'][$key] = $value;
             } else {
                 switch ($key) {
                     case 'genres':
                         foreach ($movie['genres'] as $genre) {
-                            $movie['genres'][$genre['id']] = $genre['name'];
-                            unset($movie['genres'][$key]);
+                            $movieIni['genres'][$genre['id']] = $genre['name'];
                         }
                         break;
                     case 'production_companies':
                         foreach ($movie['production_companies'] as $company) {
-                            $movie['production_companies'][$company['id']] = $company['name'];
-                            unset($movie['production_companies'][$key]);
+                            $movieIni['production_companies'][$company['id']] = $company['name'];
                         }
                         break;
                     case 'production_countries':
                         foreach ($movie['production_countries'] as $country) {
-                            $movie['production_countries'][$country['iso_3166_1']] = $country['name'];
-                            unset($movie['production_countries'][$key]);
+                            $movieIni['production_countries'][$country['iso_3166_1']] = $country['name'];
                         }
                         break;
                     case 'spoken_languages':
                         foreach ($movie['spoken_languages'] as $language) {
                             // language key no (=Norsk) is not allowed in .ini files
                             // so we cannot use the iso shortcode for the key
-                            $movie['spoken_languages'][] = $language['name'];
-                            unset($movie['spoken_languages'][$key]);
+                            $movieIni['spoken_languages'][] = $language['name'];
                         }
                         break;
                 }
             }
         }
 
-        $url = $this->getIMDbLink($movie['imdb_id']);
         $iniArray = [
                 'InternetShortcut' => [
                     'URL' => $url
                 ]
-            ] + $movie;
+            ] + $movieIni;
 
         $iniFile = "$filePath/$movieTitle ($movieYear) - IMDb.url";
         Writer::write($iniFile,$iniArray);
@@ -299,5 +299,40 @@ class MovieHandler
         system($cmd, $output);
 
         return 0 === $output;
+    }
+
+    /**
+     * Creates the movie information file in .ini format, dressed up as a Windows
+     * .url link.
+     *
+     * @param Movie $movie
+     * @param $filePath
+     *
+     * @return bool
+     */
+    public function createMovieInfo(Movie $movie, $filePath)
+    {
+        $movieIni = ['info' => []];
+        // we don't want loose values without sections and we don't want empty sections,
+        // because we're going to render it into the INI format
+        foreach ($movie->toArray() as $key => $value) {
+            if (is_array($value)) {
+                $movieIni[$key] = $value;
+            } else {
+                $movieIni['info'][$key] = $value;
+            }
+        }
+
+        $iniArray = [
+                'InternetShortcut' => [
+                    'URL' => $this->getIMDbLink($movie->getImdbId())
+                ]
+            ] + $movieIni;
+
+        $iniFile = $filePath.'/'.$movie->getTitle().' ('.$movie->getYear().') - IMDb.url';
+        Writer::write($iniFile,$iniArray);
+
+        // this is not fast, but it doesn't really matter for this app
+        return Reader::read($iniFile) !== false;
     }
 }

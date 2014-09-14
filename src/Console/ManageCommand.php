@@ -3,7 +3,9 @@
 namespace Mihaeu\MovieManager\Console;
 
 use Mihaeu\MovieManager\Config;
+use Mihaeu\MovieManager\Factory\MovieFactory;
 use Mihaeu\MovieManager\Ini\Reader;
+use Mihaeu\MovieManager\MovieDatabase\IMDb;
 use Mihaeu\MovieManager\MovieDatabase\TMDb;
 use Mihaeu\MovieManager\MovieFinder;
 use Mihaeu\MovieManager\MovieHandler;
@@ -137,6 +139,7 @@ class ManageCommand extends Command
         $index = 0;
         $movieHandler = new MovieHandler($this->config);
         $tmdb = new TMDb($this->config->get('tmdb-api-key'));
+        $imdb = new IMDb();
         $oldTMDbHandler = $movieHandler->getTMDB();
         foreach ($movieFiles as $movie) {
             $this->output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
@@ -176,12 +179,11 @@ class ManageCommand extends Command
                 $titleChoice = $helper->ask($this->input, $this->output, $suggestionQuestion);
                 $tmdbId = preg_replace('/^.* \[(\d+)\]$/', '$1', $titleChoice);
 
-                $tmdbMovie = $oldTMDbHandler->getMovie($tmdbId);
-                $title = $tmdbMovie['title'];
-                $year = substr($tmdbMovie['release_date'], 0, 4);
+                $factory = new MovieFactory($tmdb, $imdb);
+                $parsedMovie = $factory->create($tmdbId);
 
-                $this->output->write('Downloading IMDb screenshot ...');
-                $result = $movieHandler->createIMDbLink($title, $year, $movie['path'], $tmdbMovie);
+                $this->output->write('Downloading IMDb screenshot ... ');
+                $result = $movieHandler->createMovieInfo($parsedMovie, $movie['path']);
                 $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
             }
 
@@ -193,13 +195,13 @@ class ManageCommand extends Command
 
                 $tmdbMovie = $oldTMDbHandler->getMovie($movieInfo['info']['id']);
                 if (!$movie['screenshot']) {
-                    $this->output->write('Downloading IMDb screenshot ...');
+                    $this->output->write('Downloading IMDb screenshot ... ');
                     $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
                     $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
                 }
 
                 if (!$movie['poster']) {
-                    $this->output->write('Downloading IMDb screenshot ...');
+                    $this->output->write('Downloading IMDb screenshot ... ');
                     $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
                     $oldTMDbHandler = $movieHandler->getTMDB();
                     $movieHandler->downloadMoviePoster(
