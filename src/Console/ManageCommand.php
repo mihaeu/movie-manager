@@ -137,6 +137,7 @@ class ManageCommand extends Command
         $index = 0;
         $movieHandler = new MovieHandler($this->config);
         $tmdb = new TMDb($this->config->get('tmdb-api-key'));
+        $oldTMDbHandler = $movieHandler->getTMDB();
         foreach ($movieFiles as $movie) {
             $this->output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
 
@@ -151,6 +152,9 @@ class ManageCommand extends Command
                     return;
                 }
             }
+
+            $title = preg_replace('/([^\(]+) \(\d+\).*/', '$1', $movie['name']);
+            $year = preg_replace('/[^\(]+ \((\d+)\).*/', '$1', $movie['name']);
 
             if (!$movie['link']) {
                 $query = $helper->ask($this->input, $this->output, $movieTitleQuestion);
@@ -174,30 +178,33 @@ class ManageCommand extends Command
                 );
                 $titleChoice = $helper->ask($this->input, $this->output, $suggestionQuestion);
                 $tmdbId = preg_replace('/^.* \[(\d+)\]$/', '$1', $titleChoice);
-                $this->output->writeln("<info>You chose: $tmdbId</info>");
+
+                $this->output->write('Downloading IMDb screenshot ...');
+                $tmdbMovie = $oldTMDbHandler->getMovie($tmdbId);
+                $result = $movieHandler->createIMDbLink($title, $year, $movie['path'], $tmdbMovie);
+                $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
             }
 
             if ($movie['link']) {
                 $infoFile = $movie['path'].DIRECTORY_SEPARATOR.basename($movie['path']).' - IMDb.url';
                 $movieInfo = Reader::read($infoFile);
 
-                $title = preg_replace('/([^\(]+) \(\d+\).*/', '$1', $movie['name']);
-                $year = preg_replace('/[^\(]+ \((\d+)\).*/', '$1', $movie['name']);
+                $tmdbMovie = $oldTMDbHandler->getMovie($movieInfo['info']['id']);
                 if (!$movie['screenshot']) {
-                    $this->output->write('Downloading IMDb screenshot: ');
+                    $this->output->write('Downloading IMDb screenshot ...');
                     $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
                     $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
                 }
 
                 if (!$movie['poster']) {
-                    $this->output->write('Downloading IMDb screenshot: ');
+                    $this->output->write('Downloading IMDb screenshot ...');
                     $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
-                    $tmdbHandler = $movieHandler->getTMDB();
+                    $oldTMDbHandler = $movieHandler->getTMDB();
                     $movieHandler->downloadMoviePoster(
                         $title,
                         $year,
                         $movie['path'],
-                        $tmdbHandler->getMovie($movie['info']['id'])
+                        $tmdbMovie
                     );
                     $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
                 }
@@ -205,14 +212,21 @@ class ManageCommand extends Command
         }
     }
 
+    /**
+     * Format suggestions for output for a 3 column Symfony console table.
+     *
+     * @param array $suggestions
+     *
+     * @return array
+     */
     public function formatSuggestionsForTable(array $suggestions)
     {
         return array_map(function (array $suggestion) {
-                return [
-                    $suggestion['title'],
-                    $suggestion['year'],
-                    'https://www.themoviedb.org/movie/'.$suggestion['id']
-                ];
-            }, $suggestions);
+            return [
+                $suggestion['title'],
+                $suggestion['year'],
+                'https://www.themoviedb.org/movie/'.$suggestion['id']
+            ];
+        }, $suggestions);
     }
 }

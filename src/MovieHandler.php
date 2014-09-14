@@ -87,7 +87,7 @@ class MovieHandler
         }
 
         $hasCorrectName = $this->renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt);
-        $hasIMDbLink = $this->createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, $movie);
+        $hasIMDbLink = $this->createIMDbLink($movieTitle, $movieYear, $filePath, $movie);
         $hasPoster = $this->downloadMoviePoster($movieTitle, $movieYear, $filePath, $movie);
         $hasCorrectFolder = $this->renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder);
         $hasScreenshot = $this->downloadIMDbScreenshot($imdbId, $movieTitle, $movieYear, $filePath);
@@ -180,12 +180,11 @@ class MovieHandler
      * @param $movieTitle
      * @param $movieYear
      * @param $filePath
-     * @param $imdbId
      * @param array $movie
      *
      * @return bool
      */
-    public function createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, array $movie)
+    public function createIMDbLink($movieTitle, $movieYear, $filePath, array $movie)
     {
         $movie['info'] = [];
         // we don't want loose values without sections
@@ -227,7 +226,7 @@ class MovieHandler
             }
         }
 
-        $url = $this->getIMDbLink($imdbId);
+        $url = $this->getIMDbLink($movie['imdb_id']);
         $iniArray = [
                 'InternetShortcut' => [
                     'URL' => $url
