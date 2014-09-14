@@ -153,9 +153,6 @@ class ManageCommand extends Command
                 }
             }
 
-            $title = preg_replace('/([^\(]+) \(\d+\).*/', '$1', $movie['name']);
-            $year = preg_replace('/[^\(]+ \((\d+)\).*/', '$1', $movie['name']);
-
             if (!$movie['link']) {
                 $query = $helper->ask($this->input, $this->output, $movieTitleQuestion);
                 $suggestions = $tmdb->getMovieSuggestionsFromQuery($query);
@@ -179,8 +176,11 @@ class ManageCommand extends Command
                 $titleChoice = $helper->ask($this->input, $this->output, $suggestionQuestion);
                 $tmdbId = preg_replace('/^.* \[(\d+)\]$/', '$1', $titleChoice);
 
-                $this->output->write('Downloading IMDb screenshot ...');
                 $tmdbMovie = $oldTMDbHandler->getMovie($tmdbId);
+                $title = $tmdbMovie['title'];
+                $year = substr($tmdbMovie['release_date'], 0, 4);
+
+                $this->output->write('Downloading IMDb screenshot ...');
                 $result = $movieHandler->createIMDbLink($title, $year, $movie['path'], $tmdbMovie);
                 $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
             }
@@ -188,6 +188,8 @@ class ManageCommand extends Command
             if ($movie['link']) {
                 $infoFile = $movie['path'].DIRECTORY_SEPARATOR.basename($movie['path']).' - IMDb.url';
                 $movieInfo = Reader::read($infoFile);
+                $title = $movieInfo['title'];
+                $year = substr($movieInfo['release_date'], 0, 4);
 
                 $tmdbMovie = $oldTMDbHandler->getMovie($movieInfo['info']['id']);
                 if (!$movie['screenshot']) {

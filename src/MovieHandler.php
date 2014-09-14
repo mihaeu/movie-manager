@@ -187,8 +187,7 @@ class MovieHandler
     public function createIMDbLink($movieTitle, $movieYear, $filePath, array $movie)
     {
         $movie['info'] = [];
-        // we don't want loose values without sections
-        // and we don't want empty section
+        // we don't want loose values without sections and we don't want empty sections,
         // because we're going to render it into the INI format
         foreach ($movie as $key => $value) {
             if (!is_array($value)) {

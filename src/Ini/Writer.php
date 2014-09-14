@@ -20,72 +20,48 @@ class Writer
     public static function write($file, $data)
     {
         $content = '';
-        if (is_array($data))
-        {
-            foreach ($data as $key => $value)
-            {
-                if (is_array($value))
-                {
-                    if ( ! empty($value))
-                    {
-                        $content .= "[$key]\r\n";
-                    }
-                    foreach ($value as $subkey => $subvalue)
-                    {
-                        if (is_array($subvalue))
-                        {
-                            if ( ! empty($value))
-                            {
-                                $content .= "[$key\\$subkey]\r\n";
-                            }
-                            foreach ($subvalue as $subsubkey => $subsubvalue)
-                            {
-                                if (is_numeric($subsubvalue))
-                                {
-                                    $content .= "$subsubkey=$subsubvalue\r\n";
-                                }
-                                else
-                                {
-                                    $subsubvalue = str_replace('"', "'", $subsubvalue);
-                                    $content .= "$subsubkey=\"$subsubvalue\"\r\n";
-                                }
-                            }
-                            $content .= "\r\n";
-                        }
-                        else
-                        {
-                            if (is_numeric($subvalue))
-                            {
-                                $content .= "$subkey=$subvalue\r\n";
-                            }
-                            else
-                            {
-                                $subvalue = str_replace('"', "'", $subvalue);
-                                $content .= "$subkey=\"$subvalue\"\r\n";
-                            }
-                        }
-                    }
-                    $content .= "\r\n";
-                }
-                else
-                {
-                    if (is_numeric($value))
-                    {
-                        $content .= "$key=$value\r\n";
-                    }
-                    else
-                    {
-                        $value = str_replace('"', "'", $value);
-                        $content .= "$key=\"$value\"\r\n";
-                    }
-                }
-            }
-        }
-        else
+        if (!is_array($data))
         {
             return false;
         }
 
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                if ( ! empty($value)) {
+                    $content .= "[$key]\r\n";
+                }
+                foreach ($value as $subKey => $subValue) {
+                    if (is_array($subValue)) {
+                        if ( ! empty($value)) {
+                            $content .= "[$key\\$subKey]\r\n";
+                        }
+                        foreach ($subValue as $subSubKey => $subSubValue) {
+                            self::formatIniKeyValue($subSubKey, $subSubValue);
+                        }
+                        $content .= "\r\n";
+                    } else {
+                        self::formatIniKeyValue($subKey, $subValue);
+                    }
+                }
+                $content .= "\r\n";
+            } else {
+                $content .= self::formatIniKeyValue($key, $value);
+            }
+        }
+
         return false !== @file_put_contents($file, $content);
+    }
+
+    /**
+     * Escapes/quotes values if necessary.
+     *
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @return string
+     */
+    public static function formatIniKeyValue($key, $value)
+    {
+        return $key.'='.is_numeric($value) ? $value : '"'.str_replace('"', "'", $value).'"';
     }
 }
