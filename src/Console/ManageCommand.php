@@ -129,12 +129,7 @@ class ManageCommand extends Command
     {
         /** @var QuestionHelper $dialog */
         $helper = $this->getHelper('question');
-        $processMovieQuestion = new ChoiceQuestion(
-            'Process movie?',
-            ['y' => 'yes', 'n' => 'no', 'q' => 'quit'],
-            'y'
-        );
-        $movieTitleQuestion =  new Question('Please enter the movie title: ');
+        $movieTitleQuestion =  new Question('Please enter the movie title [or hit ENTER to skip or q to quit]: ');
 
         $tmdb = new TMDb($this->config->get('tmdb-api-key'));
         $imdb = new IMDb();
@@ -147,20 +142,16 @@ class ManageCommand extends Command
         foreach ($movieFiles as $movie) {
             $this->output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
 
-            if (!$this->input->getOption('no-interaction')) {
-                $answer = $helper->ask($this->input, $this->output, $processMovieQuestion);
-
-                if ('no' === $answer) {
+            if (!$movie['link']) {
+                $query = $helper->ask($this->input, $this->output, $movieTitleQuestion);
+                if (empty($query)) {
                     continue;
                 }
 
-                if ('quit' === $answer) {
-                    return;
+                if ('q' === $query) {
+                    break;
                 }
-            }
 
-            if (!$movie['link']) {
-                $query = $helper->ask($this->input, $this->output, $movieTitleQuestion);
                 $suggestions = $tmdb->getMovieSuggestionsFromQuery($query);
 
                 $suggestionChoices = [];
