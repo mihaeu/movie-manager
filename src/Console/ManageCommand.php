@@ -20,6 +20,9 @@ use Symfony\Component\Console\Question\Question;
 
 class ManageCommand extends Command
 {
+    const CLI_OK = '<info>✔</info>';
+    const CLI_NOK = '<error>✘</error>';
+
     /**
      * @var Config
      */
@@ -174,7 +177,7 @@ class ManageCommand extends Command
                 $this->output->write('Creating movie information file ... ');
                 $parsedMovie = $factory->create($tmdbId);
                 $result = $movieHandler->createMovieInfo($parsedMovie, $movie['path']);
-                $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
+                $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
             }
 
             if ($movie['link']) {
@@ -187,7 +190,7 @@ class ManageCommand extends Command
                 if (!$movie['screenshot']) {
                     $this->output->write('Downloading IMDb screenshot ... ');
                     $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
-                    $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
+                    $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
                 }
 
                 if (!$movie['poster']) {
@@ -200,7 +203,7 @@ class ManageCommand extends Command
                         $movie['path'],
                         $tmdbMovie
                     );
-                    $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
+                    $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
                 }
             }
         }
