@@ -163,16 +163,14 @@ class ManageCommand extends Command
                 $query = $helper->ask($this->input, $this->output, $movieTitleQuestion);
                 $suggestions = $tmdb->getMovieSuggestionsFromQuery($query);
 
-                $table = $this->getHelper('table');
-                $table
-                    ->setHeaders(['Title', 'Year', 'Link'])
-                    ->setRows($this->formatSuggestionsForTable($suggestions))
-                ;
-                $table->render($this->output);
-
                 $suggestionChoices = [];
                 foreach ($suggestions as $suggestion) {
-                    $suggestionChoices[] = $suggestion['title'].' ('.$suggestion['year'].') ['.$suggestion['id'].']';
+                    $suggestionChoices[] = sprintf(
+                        '%-50s (%4d)   %s',
+                        $suggestion['title'],
+                        $suggestion['year'],
+                        'https://www.themoviedb.org/movie/'.$suggestion['id']
+                    );
                 }
                 $suggestion['q'] = 'quit';
                 $suggestionQuestion = new ChoiceQuestion(
@@ -180,11 +178,10 @@ class ManageCommand extends Command
                     $suggestionChoices
                 );
                 $titleChoice = $helper->ask($this->input, $this->output, $suggestionQuestion);
-                $tmdbId = preg_replace('/^.* \[(\d+)\]$/', '$1', $titleChoice);
-
-                $parsedMovie = $factory->create($tmdbId);
+                $tmdbId = preg_replace('/^.*\/movie\/(\d+)$/', '$1', $titleChoice);
 
                 $this->output->write('Creating movie information file ... ');
+                $parsedMovie = $factory->create($tmdbId);
                 $result = $movieHandler->createMovieInfo($parsedMovie, $movie['path']);
                 $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
             }
@@ -216,23 +213,5 @@ class ManageCommand extends Command
                 }
             }
         }
-    }
-
-    /**
-     * Format suggestions for output for a 3 column Symfony console table.
-     *
-     * @param array $suggestions
-     *
-     * @return array
-     */
-    public function formatSuggestionsForTable(array $suggestions)
-    {
-        return array_map(function (array $suggestion) {
-            return [
-                $suggestion['title'],
-                $suggestion['year'],
-                'https://www.themoviedb.org/movie/'.$suggestion['id']
-            ];
-        }, $suggestions);
     }
 }
