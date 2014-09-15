@@ -136,11 +136,14 @@ class ManageCommand extends Command
         );
         $movieTitleQuestion =  new Question('Please enter the movie title: ');
 
-        $index = 0;
-        $movieHandler = new MovieHandler($this->config);
         $tmdb = new TMDb($this->config->get('tmdb-api-key'));
         $imdb = new IMDb();
+        $factory = new MovieFactory($tmdb, $imdb);
+
+        $movieHandler = new MovieHandler($this->config);
         $oldTMDbHandler = $movieHandler->getTMDB();
+
+        $index = 0;
         foreach ($movieFiles as $movie) {
             $this->output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
 
@@ -179,7 +182,6 @@ class ManageCommand extends Command
                 $titleChoice = $helper->ask($this->input, $this->output, $suggestionQuestion);
                 $tmdbId = preg_replace('/^.* \[(\d+)\]$/', '$1', $titleChoice);
 
-                $factory = new MovieFactory($tmdb, $imdb);
                 $parsedMovie = $factory->create($tmdbId);
 
                 $this->output->write('Downloading IMDb screenshot ... ');
