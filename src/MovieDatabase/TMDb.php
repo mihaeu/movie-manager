@@ -2,17 +2,20 @@
 
 namespace Mihaeu\MovieManager\MovieDatabase;
 
-use Mihaeu\MovieManager\Movie\Suggestion;
-
 use Symfony\Component\DomCrawler\Crawler;
 use Tmdb\ApiToken;
 use Tmdb\Client;
+use Tmdb\Model\Collection\CreditsCollection;
 use Tmdb\Model\Collection\Genres;
+use Tmdb\Model\Collection\People\Cast;
+use Tmdb\Model\Collection\People\Crew;
 use Tmdb\Model\Common\GenericCollection;
 use Tmdb\Model\Genre;
 use Tmdb\Model\Movie;
 use Tmdb\Model\Common\SpokenLanguage;
 use Tmdb\Model\Company;
+use Tmdb\Model\Person\CastMember;
+use Tmdb\Model\Person\CrewMember;
 use Tmdb\Model\Search\SearchQuery\MovieSearchQuery;
 use Tmdb\Repository\MovieRepository;
 use Tmdb\Repository\SearchRepository;
@@ -97,6 +100,8 @@ class TMDb
 
         /** @var Movie $movieResult */
         $movieResult = $movieRepository->load($tmdbId);
+        /** @var CreditsCollection $credit */
+        $credit = $movieRepository->getCredits($tmdbId);
         $movie = [
             'id'                    => $movieResult->getId(),
             'imdbId'                => $movieResult->getImdbId(),
@@ -120,7 +125,10 @@ class TMDb
             'genres'                => $this->extractGenres($movieResult->getGenres()),
             'productionCompanies'   => $this->extractProductionCompanies($movieResult->getProductionCompanies()),
             'productionCountries'   => $this->extractProductionCountries($movieResult->getProductionCountries()),
-            'spokenLanguages'       => $this->extractSpokenLanguages($movieResult->getSpokenLanguages())
+            'spokenLanguages'       => $this->extractSpokenLanguages($movieResult->getSpokenLanguages()),
+            'cast'                  => $this->extractCast($credit->getCast($credit)),
+            'character'             => $this->extractCharacters($credit->getCast($credit)),
+            'directors'             => $this->extractDirectors($credit->getCrew($credit))
         ];
 
         return $movie;
@@ -192,6 +200,53 @@ class TMDb
             $plainLanguages[] = $spokenLanguage->getName();
         }
         return $plainLanguages;
+    }
+
+    /**
+     * @param Cast $cast
+     *
+     * @return array
+     */
+    public function extractCast(Cast $cast)
+    {
+        $castNames = [];
+        foreach ($cast->getCast() as $castMember) {
+            /** @var CastMember $castMember */
+            $castNames[$castMember->getId()] = $castMember->getName();
+        }
+        return $castNames;
+    }
+
+    /**
+     * @param Cast $cast
+     *
+     * @return array
+     */
+    public function extractCharacters(Cast $cast)
+    {
+        $characters = [];
+        foreach ($cast->getCast() as $castMember) {
+            /** @var CastMember $castMember */
+            $characters[$castMember->getId()] = $castMember->getCharacter();
+        }
+        return $characters;
+    }
+
+    /**
+     * @param Crew $crew
+     *
+     * @return array
+     */
+    public function extractDirectors(Crew $crew)
+    {
+        $directors = [];
+        foreach ($crew->getCrew() as $crewMember) {
+            /** @var CrewMember $crewMember */
+            if ('Director' === $crewMember->getJob()) {
+                $directors[$crewMember->getId()] = $crewMember->getName();
+            }
+        }
+        return $directors;
     }
 
     /**

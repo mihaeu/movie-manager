@@ -184,7 +184,7 @@ class ManageCommand extends Command
 
                 $parsedMovie = $factory->create($tmdbId);
 
-                $this->output->write('Downloading IMDb screenshot ... ');
+                $this->output->write('Creating movie information file ... ');
                 $result = $movieHandler->createMovieInfo($parsedMovie, $movie['path']);
                 $this->output->writeln($result ? '<info>✔</info>' : '<error>✘</error>');
             }

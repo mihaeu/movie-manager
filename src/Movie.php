@@ -130,6 +130,21 @@ class Movie
     private $imdbRating;
 
     /**
+     * @var array
+     */
+    private $cast;
+
+    /**
+     * @var array
+     */
+    private $character;
+
+    /**
+     * @var array
+     */
+    private $directors;
+
+    /**
      * @return boolean
      */
     public function getAdult()
@@ -511,6 +526,54 @@ class Movie
     public function setYear($year)
     {
         $this->year = $year;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCast()
+    {
+        return $this->cast;
+    }
+
+    /**
+     * @param array $cast
+     */
+    public function setCast($cast)
+    {
+        $this->cast = $cast;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCharacter()
+    {
+        return $this->character;
+    }
+
+    /**
+     * @param array $character
+     */
+    public function setCharacter($character)
+    {
+        $this->character = $character;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDirectors()
+    {
+        return $this->directors;
+    }
+
+    /**
+     * @param array $directors
+     */
+    public function setDirectors($directors)
+    {
+        $this->directors = $directors;
     }
 
     /**
