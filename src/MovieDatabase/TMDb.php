@@ -9,7 +9,9 @@ use Tmdb\Model\Collection\CreditsCollection;
 use Tmdb\Model\Collection\Genres;
 use Tmdb\Model\Collection\People\Cast;
 use Tmdb\Model\Collection\People\Crew;
+use Tmdb\Model\Collection\Videos;
 use Tmdb\Model\Common\GenericCollection;
+use Tmdb\Model\Common\Video;
 use Tmdb\Model\Genre;
 use Tmdb\Model\Movie;
 use Tmdb\Model\Common\SpokenLanguage;
@@ -128,7 +130,8 @@ class TMDb
             'spokenLanguages'       => $this->extractSpokenLanguages($movieResult->getSpokenLanguages()),
             'cast'                  => $this->extractCast($credit->getCast($credit)),
             'character'             => $this->extractCharacters($credit->getCast($credit)),
-            'directors'             => $this->extractDirectors($credit->getCrew($credit))
+            'directors'             => $this->extractDirectors($credit->getCrew($credit)),
+            'trailer'               => $this->extractTrailer($movieRepository->getVideos($tmdbId))
         ];
 
         return $movie;
@@ -247,6 +250,22 @@ class TMDb
             }
         }
         return $directors;
+    }
+
+    /**
+     * @param Videos $videos
+     *
+     * @return null|string
+     */
+    public function extractTrailer(Videos $videos)
+    {
+        foreach ($videos as $video) {
+            /** @var Video $video */
+            if ('Trailer' === $video->getType() && 'YouTube' === $video->getSite()) {
+                return 'https://www.youtube.com/watch?v='.$video->getKey();
+            }
+        }
+        return false;
     }
 
     /**

@@ -28,7 +28,7 @@ class Writer
             {
                 if (is_array($value))
                 {
-                    if ( ! empty($value))
+                    if (!empty($value))
                     {
                         $key = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $key));
                         $content .= "[$key]\r\n";
@@ -36,7 +36,7 @@ class Writer
                     foreach ($value as $subkey => $subvalue)
                     {
                         // ignore deep nesting
-                        if (!is_array($subvalue))
+                        if (!is_array($subvalue) && null !== $subvalue)
                         {
                             $subkey = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $subkey));
                             if (is_numeric($subvalue))

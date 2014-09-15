@@ -192,8 +192,8 @@ class ManageCommand extends Command
             if ($movie['link']) {
                 $infoFile = $movie['path'].DIRECTORY_SEPARATOR.basename($movie['path']).' - IMDb.url';
                 $movieInfo = Reader::read($infoFile);
-                $title = $movieInfo['title'];
-                $year = substr($movieInfo['release_date'], 0, 4);
+                $title = $movieInfo['info']['title'];
+                $year = $movieInfo['info']['year'];
 
                 $tmdbMovie = $oldTMDbHandler->getMovie($movieInfo['info']['id']);
                 if (!$movie['screenshot']) {

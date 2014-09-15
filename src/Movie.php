@@ -145,6 +145,11 @@ class Movie
     private $directors;
 
     /**
+     * @var string
+     */
+    private $trailer;
+
+    /**
      * @return boolean
      */
     public function getAdult()
@@ -574,6 +579,22 @@ class Movie
     public function setDirectors($directors)
     {
         $this->directors = $directors;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTrailer()
+    {
+        return $this->trailer;
+    }
+
+    /**
+     * @param string $trailer
+     */
+    public function setTrailer($trailer)
+    {
+        $this->trailer = $trailer;
     }
 
     /**
