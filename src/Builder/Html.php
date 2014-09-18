@@ -49,7 +49,7 @@ class Html
      * @param  int    $limit
      * @return string
      */
-    public function build($pathToMovies, $limit = -1)
+    public function build($pathToMovies, $limit = -1, $buildWithPosters = true)
     {
         $moviesJson     = [];
         $movieYears     = [];
@@ -108,7 +108,11 @@ class Html
                 // the poster should not be part of the json file, so let's add that later
                 $moviesJson[$movie['id']] = $movie;
 
-                $movie['poster'] = $this->getScaledPosterAsBase64($posterFile, 400, 266);
+                if ($buildWithPosters) {
+                    $movie['poster'] = $this->getScaledPosterAsBase64($posterFile, 400, 266);
+                } else {
+                    $movie['poster'] = '';
+                }
 
                 $movieYears[$movie['year']] = $movie['year'];
                 foreach ($movie['genre'] as $genre) {

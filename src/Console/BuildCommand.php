@@ -29,8 +29,15 @@ class BuildCommand extends Command
             )
             ->addOption(
                 'limit',
-                -1,
+                null,
                 InputOption::VALUE_REQUIRED,
+                'Limit the number of movies.',
+                -1
+            )
+            ->addOption(
+                'no-posters',
+                null,
+                InputOption::VALUE_NONE,
                 'Limit the number of movies.'
             )
         ;
@@ -41,14 +48,15 @@ class BuildCommand extends Command
         $builder = new Html();
 
         $path = realpath($input->getArgument('path'));
+        $buildWithPosters = !$input->getOption('no-posters');
         if (is_writable(dirname($input->getArgument('save')))) {
             $save = $input->getArgument('save');
             if (!is_writable(dirname($save))) {
                 throw new \InvalidArgumentException(dirname($save).' is not writable.');
             }
-            file_put_contents($save, $builder->build($path, $input->getOption('limit')));
+            file_put_contents($save, $builder->build($path, $input->getOption('limit'), $buildWithPosters));
         } else {
-            echo $builder->build($path, $input->getOption('limit'));
+            echo $builder->build($path, $input->getOption('limit'), $buildWithPosters);
         }
     }
 }
