@@ -19,8 +19,5 @@ if (is_file(__DIR__ . '/../vendor/autoload.php')) {
     );
 }
 
-$app = new \Symfony\Component\Console\Application();
-$app->add(new \Mihaeu\MovieManager\Console\BuildCommand());
-$app->add(new \Mihaeu\MovieManager\Console\ListCommand());
-$app->add(new \Mihaeu\MovieManager\Console\ManageCommand());
+$app = new \Mihaeu\MovieManager\Console\Application();
 $app->run();
