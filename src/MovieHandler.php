@@ -5,8 +5,14 @@ namespace Mihaeu\MovieManager;
 use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\Ini\Writer;
 use Mihaeu\MovieManager\MovieDatabase\TMDb;
-use Symfony\Component\DomCrawler\Crawler;
 
+/**
+ * Handles all tasks to get the movie into a proper format.
+ *
+ * @package Mihaeu\MovieManager
+ *
+ * @author Michael Haeuslmann (haeuslmann@gmail.com)
+ */
 class MovieHandler
 {
     /**
@@ -17,7 +23,7 @@ class MovieHandler
     /**
      * TMDb API Wrapper
      *
-     * @var Object
+     * @var \TMDb
      */
     private $tmdb;
 
@@ -32,6 +38,13 @@ class MovieHandler
         $this->tmdb = new \TMDb($this->config->get('tmdb-api-key'), 'en');
     }
 
+    /**
+     * @return \TMDb
+     */
+    public function GetTMDb()
+    {
+        return $this->tmdb;
+    }
 
     /**
      * Handles movie related tasts like renaming, downloading the poster etc.
@@ -74,35 +87,23 @@ class MovieHandler
         }
 
         $hasCorrectName = $this->renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt);
-        if (!$hasCorrectName) {
-            echo '$hasCorrectName failer';
-        }
-
-        $hasIMDbLink = $this->createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, $movie);
-        if (!$hasIMDbLink) {
-            echo '$hasIMDbLink failer';
-        }
-
+        $hasIMDbLink = $this->createIMDbLink($movieTitle, $movieYear, $filePath, $movie);
         $hasPoster = $this->downloadMoviePoster($movieTitle, $movieYear, $filePath, $movie);
-        if (!$hasPoster) {
-            echo '$hasPoster failer';
-        }
-
         $hasCorrectFolder = $this->renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder);
-        if (!$hasCorrectFolder) {
-            echo '$hasCorrectFolder failer';
-        }
+        $hasScreenshot = $this->downloadIMDbScreenshot($imdbId, $movieTitle, $movieYear, $filePath);
 
-
-        if ($hasCorrectName && $hasIMDbLink && $hasPoster && $hasCorrectFolder) {
+        if ($hasCorrectName && $hasIMDbLink && $hasPoster && $hasCorrectFolder && $hasScreenshot) {
             return "$movieTitle ($movieYear)";
         } else {
             return false;
         }
     }
 
-
-
+    /**
+     * @param $originalTitle
+     *
+     * @return mixed
+     */
     public function convertMovieTitle($originalTitle)
     {
         // : is not allowed in most OS, replace with - and add spaces
@@ -117,12 +118,27 @@ class MovieHandler
         return $movieTitle;
     }
 
+    /**
+     * @param $originalReleaseDate
+     *
+     * @return bool|string
+     */
     public function convertMovieYear($originalReleaseDate)
     {
         return date('Y', strtotime($originalReleaseDate));
     }
 
-    private function renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt, $maxRetries = 5)
+    /**
+     * @param $movieTitle
+     * @param $movieYear
+     * @param $file
+     * @param $filePath
+     * @param $fileExt
+     * @param int $maxRetries
+     *
+     * @return bool
+     */
+    public function renameFile($movieTitle, $movieYear, $file, $filePath, $fileExt, $maxRetries = 5)
     {
         $retries = 0;
         $success = @rename($file, "$filePath/$movieTitle ($movieYear).$fileExt");
@@ -134,7 +150,16 @@ class MovieHandler
         return $success;
     }
 
-    private function renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder, $maxRetries = 5)
+    /**
+     * @param $movieTitle
+     * @param $movieYear
+     * @param $filePath
+     * @param $movieFolder
+     * @param int $maxRetries
+     *
+     * @return bool
+     */
+    public function renameMovieFolder($movieTitle, $movieYear, $filePath, $movieFolder, $maxRetries = 5)
     {
         $newPath = "$movieFolder/$movieTitle ($movieYear)";
         if (is_dir($newPath)) {
@@ -151,54 +176,61 @@ class MovieHandler
         return $success;
     }
 
-    private function createIMDbLink($movieTitle, $movieYear, $filePath, $imdbId, Array $movie)
+    /**
+     * Old version, please use createMovieInfo().
+     *
+     * @deprecated
+     *
+     * @param $movieTitle
+     * @param $movieYear
+     * @param $filePath
+     * @param array $movie
+     *
+     * @return bool
+     */
+    public function createIMDbLink($movieTitle, $movieYear, $filePath, array $movie)
     {
-        $movie['info'] = [];
-        // we don't want loose values without sections
-        // and we don't want empty section
+        $url = $this->getIMDbLink($movie['imdb_id']);
+
+        $movieIni = ['info' => []];
+        // we don't want loose values without sections and we don't want empty sections,
         // because we're going to render it into the INI format
         foreach ($movie as $key => $value) {
             if (!is_array($value)) {
-                $movie['info'][$key] = $value;
-                unset($movie[$key]);
+                $movieIni['info'][$key] = $value;
             } else {
                 switch ($key) {
                     case 'genres':
                         foreach ($movie['genres'] as $genre) {
-                            $movie['genres'][$genre['id']] = $genre['name'];
-                            unset($movie['genres'][$key]);
+                            $movieIni['genres'][$genre['id']] = $genre['name'];
                         }
                         break;
                     case 'production_companies':
                         foreach ($movie['production_companies'] as $company) {
-                            $movie['production_companies'][$company['id']] = $company['name'];
-                            unset($movie['production_companies'][$key]);
+                            $movieIni['production_companies'][$company['id']] = $company['name'];
                         }
                         break;
                     case 'production_countries':
                         foreach ($movie['production_countries'] as $country) {
-                            $movie['production_countries'][$country['iso_3166_1']] = $country['name'];
-                            unset($movie['production_countries'][$key]);
+                            $movieIni['production_countries'][$country['iso_3166_1']] = $country['name'];
                         }
                         break;
                     case 'spoken_languages':
                         foreach ($movie['spoken_languages'] as $language) {
                             // language key no (=Norsk) is not allowed in .ini files
                             // so we cannot use the iso shortcode for the key
-                            $movie['spoken_languages'][] = $language['name'];
-                            unset($movie['spoken_languages'][$key]);
+                            $movieIni['spoken_languages'][] = $language['name'];
                         }
                         break;
                 }
             }
         }
 
-        $url = $this->getIMDbLink($imdbId);
         $iniArray = [
                 'InternetShortcut' => [
                     'URL' => $url
                 ]
-            ] + $movie;
+            ] + $movieIni;
 
         $iniFile = "$filePath/$movieTitle ($movieYear) - IMDb.url";
         Writer::write($iniFile,$iniArray);
@@ -207,7 +239,12 @@ class MovieHandler
         return Reader::read($iniFile) !== false;
     }
 
-    private function getIMDbLink($imdbId)
+    /**
+     * @param $imdbId
+     *
+     * @return string
+     */
+    public function getIMDbLink($imdbId)
     {
         if (strpos($imdbId, 'tt') === false) {
             return 'http://www.imdb.com/title/tt' . $imdbId;
@@ -216,7 +253,17 @@ class MovieHandler
         }
     }
 
-    private function downloadMoviePoster($movieTitle, $movieYear, $filePath, Array $movie)
+    /**
+     * @param $movieTitle
+     * @param $movieYear
+     * @param $filePath
+     * @param array $movie
+     *
+     * @return bool
+     *
+     * @throws \TMDbException
+     */
+    public function downloadMoviePoster($movieTitle, $movieYear, $filePath, array $movie)
     {
         $posterSrc = $this->tmdb->getImageUrl(
             $movie['poster_path'],
@@ -225,19 +272,67 @@ class MovieHandler
         );
         $srcExtension = substr(strrchr($posterSrc, '.'), 1);
 
-        file_put_contents(
-            "$filePath/$movieTitle ($movieYear) - Poster.$srcExtension",
-            file_get_contents($posterSrc)
-        );
+        $destination = "$filePath/$movieTitle ($movieYear) - Poster.$srcExtension";
+        file_put_contents($destination, file_get_contents($posterSrc));
 
+        return file_exists($destination);
+    }
+
+    /**
+     * Downloads a screenshot of the movie's IMDb page.
+     *
+     * @param string $imdbId
+     * @param string $movieTitle
+     * @param int    $movieYear
+     * @param string $movieFolder
+     *
+     * @return bool
+     */
+    public function downloadIMDbScreenshot($imdbId, $movieTitle, $movieYear, $movieFolder)
+    {
         // take a screenshot with PhantomJS and save it
         $output = '';
-        $url = $this->getIMDbLink($movie['imdb_id']);
+        $url = $this->getIMDbLink($imdbId);
         $script = __DIR__.'/../rasterize.js';
-        $target = "$filePath/$movieTitle ($movieYear) - IMDb.png";
+        $target = "$movieFolder/$movieTitle ($movieYear) - IMDb.png";
         $cmd = "phantomjs $script \"$url\" \"$target\"";
         system($cmd, $output);
 
         return 0 === $output;
+    }
+
+    /**
+     * Creates the movie information file in .ini format, dressed up as a Windows
+     * .url link.
+     *
+     * @param Movie $movie
+     * @param $filePath
+     *
+     * @return bool
+     */
+    public function createMovieInfo(Movie $movie, $filePath)
+    {
+        $movieIni = ['info' => []];
+        // we don't want loose values without sections and we don't want empty sections,
+        // because we're going to render it into the INI format
+        foreach ($movie->toArray() as $key => $value) {
+            if (is_array($value)) {
+                $movieIni[$key] = $value;
+            } else {
+                $movieIni['info'][$key] = $value;
+            }
+        }
+
+        $iniArray = [
+                'InternetShortcut' => [
+                    'URL' => $this->getIMDbLink($movie->getImdbId())
+                ]
+            ] + $movieIni;
+
+        $iniFile = $filePath.'/'.$movie->getTitle().' ('.$movie->getYear().') - IMDb.url';
+        Writer::write($iniFile,$iniArray);
+
+        // this is not fast, but it doesn't really matter for this app
+        return Reader::read($iniFile) !== false;
     }
 }

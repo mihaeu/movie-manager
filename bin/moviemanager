@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+chdir(__DIR__.'/..');
+
 // this approach is needed, because the dependencies are loaded from
 // different directories, depending on the type of install (library or global)
 // 1) is for git clones
@@ -20,4 +22,5 @@ if (is_file(__DIR__ . '/../vendor/autoload.php')) {
 $app = new \Symfony\Component\Console\Application();
 $app->add(new \Mihaeu\MovieManager\Console\BuildCommand());
 $app->add(new \Mihaeu\MovieManager\Console\ListCommand());
+$app->add(new \Mihaeu\MovieManager\Console\ManageCommand());
 $app->run();

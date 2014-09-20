@@ -24,12 +24,11 @@ class MovieFactory
     }
 
     /**
-     * @param  string $tmdbId
-     * @param  string $filename
+     * @param  int $tmdbId
      *
      * @return Movie
      */
-    public function create($tmdbId, $filename = '')
+    public function create($tmdbId)
     {
         $movie = new Movie();
 

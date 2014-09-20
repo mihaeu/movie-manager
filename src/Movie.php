@@ -130,9 +130,29 @@ class Movie
     private $imdbRating;
 
     /**
+     * @var array
+     */
+    private $cast;
+
+    /**
+     * @var array
+     */
+    private $character;
+
+    /**
+     * @var array
+     */
+    private $directors;
+
+    /**
+     * @var string
+     */
+    private $trailer;
+
+    /**
      * @return boolean
      */
-    public function isAdult()
+    public function getAdult()
     {
         return $this->adult;
     }
@@ -511,5 +531,87 @@ class Movie
     public function setYear($year)
     {
         $this->year = $year;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCast()
+    {
+        return $this->cast;
+    }
+
+    /**
+     * @param array $cast
+     */
+    public function setCast($cast)
+    {
+        $this->cast = $cast;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCharacter()
+    {
+        return $this->character;
+    }
+
+    /**
+     * @param array $character
+     */
+    public function setCharacter($character)
+    {
+        $this->character = $character;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDirectors()
+    {
+        return $this->directors;
+    }
+
+    /**
+     * @param array $directors
+     */
+    public function setDirectors($directors)
+    {
+        $this->directors = $directors;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTrailer()
+    {
+        return $this->trailer;
+    }
+
+    /**
+     * @param string $trailer
+     */
+    public function setTrailer($trailer)
+    {
+        $this->trailer = $trailer;
+    }
+
+    /**
+     * Transforms this movie into array form.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $class = new \ReflectionClass(__CLASS__);
+        $properties = $class->getProperties();
+        $result = [];
+        foreach ($properties as $property) {
+            /** @var \ReflectionProperty */
+            $methodName = 'get'.ucfirst($property->name);
+            $result[$property->name] = $this->$methodName();
+        }
+        return $result;
     }
 }

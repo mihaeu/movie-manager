@@ -6,6 +6,7 @@
         "silex/silex":                  "1.*",
         "guzzle/guzzle":                "3.*",
         "wtfzdotnet/php-tmdb-api":      "1.*",
+        "glamorous/tmdb-php-api":       "dev-master",
         "symfony/console":              "2.*",
         "symfony/filesystem":           "2.*",
         "symfony/dom-crawler":          "2.*",

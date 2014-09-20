@@ -12,6 +12,8 @@ class Writer
     /**
      * Convert and write a php array into an .ini file.
      *
+     * NOTE: Maximum depth is 1!
+     *
      * @param  string $file
      * @param  array  $data
      *
@@ -26,34 +28,17 @@ class Writer
             {
                 if (is_array($value))
                 {
-                    if ( ! empty($value))
+                    if (!empty($value))
                     {
+                        $key = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $key));
                         $content .= "[$key]\r\n";
                     }
                     foreach ($value as $subkey => $subvalue)
                     {
-                        if (is_array($subvalue))
+                        // ignore deep nesting
+                        if (!is_array($subvalue) && null !== $subvalue)
                         {
-                            if ( ! empty($value))
-                            {
-                                $content .= "[$key\\$subkey]\r\n";
-                            }
-                            foreach ($subvalue as $subsubkey => $subsubvalue)
-                            {
-                                if (is_numeric($subsubvalue))
-                                {
-                                    $content .= "$subsubkey=$subsubvalue\r\n";
-                                }
-                                else
-                                {
-                                    $subsubvalue = str_replace('"', "'", $subsubvalue);
-                                    $content .= "$subsubkey=\"$subsubvalue\"\r\n";
-                                }
-                            }
-                            $content .= "\r\n";
-                        }
-                        else
-                        {
+                            $subkey = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $subkey));
                             if (is_numeric($subvalue))
                             {
                                 $content .= "$subkey=$subvalue\r\n";
