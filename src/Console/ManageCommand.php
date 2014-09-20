@@ -3,13 +3,14 @@
 namespace Mihaeu\MovieManager\Console;
 
 use Mihaeu\MovieManager\Config;
+use Mihaeu\MovieManager\Factory\FileSetFactory;
 use Mihaeu\MovieManager\Factory\MovieFactory;
 use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\MovieDatabase\IMDb;
 use Mihaeu\MovieManager\MovieDatabase\TMDb;
 use Mihaeu\MovieManager\MovieFinder;
 use Mihaeu\MovieManager\MovieHandler;
-use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\Command as BaseCommand;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -18,10 +19,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 
-class ManageCommand extends Command
+class ManageCommand extends BaseCommand
 {
     const CLI_OK = '<info>✔</info>';
     const CLI_NOK = '<error>✘</error>';
+    const CLI_CELL_OK = '<fg=black;bg=green>   ✔   </fg=black;bg=green>';
+    const CLI_CELL_NOK = '<fg=black;bg=red>   ✘   </fg=black;bg=red>';
 
     /**
      * @var Config
@@ -39,8 +42,20 @@ class ManageCommand extends Command
     private $output;
 
     /**
-     * @inheritdoc
+     * @var MovieFactory
      */
+    private $movieFactory;
+
+    /**
+     * @var FileSetFactory
+     */
+    private $fileSetFactory;
+
+    /**
+     * @var TMDb
+     */
+    private $tmdb;
+
     public function configure()
     {
         $this
@@ -60,9 +75,6 @@ class ManageCommand extends Command
         ;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->config = new Config();
@@ -71,6 +83,11 @@ class ManageCommand extends Command
 
         $finder = new MovieFinder();
         $movieFiles = $finder->findMoviesInDir($input->getArgument('path'), $this->config->get('allowed-movie-formats'));
+
+        $tmdb = new TMDb($this->config->get('tmdb-api-key'));
+        $imdb = new IMDb();
+        $this->movieFactory = new MovieFactory($tmdb, $imdb);
+        $this->fileSetFactory = new FileSetFactory($input->getArgument('path'));
 
         if (!$input->getOption('show-all')) {
             $movieFiles = $this->filterBadMovies($movieFiles);
@@ -116,11 +133,11 @@ class ManageCommand extends Command
         return array_map(function (array $movie) {
             return [
                 substr($movie['name'], 0, 40),
-                $movie['format']        ? '<fg=black;bg=green>   ✔   </fg=black;bg=green>' : '<fg=black;bg=red>   ✘   </fg=black;bg=red>',
-                $movie['folder']        ? '<fg=black;bg=green>   ✔   </fg=black;bg=green>' : '<fg=black;bg=red>   ✘   </fg=black;bg=red>',
-                $movie['link']          ? '<fg=black;bg=green>   ✔   </fg=black;bg=green>' : '<fg=black;bg=red>   ✘   </fg=black;bg=red>',
-                $movie['screenshot']    ? '<fg=black;bg=green>   ✔   </fg=black;bg=green>' : '<fg=black;bg=red>   ✘   </fg=black;bg=red>',
-                $movie['poster']        ? '<fg=black;bg=green>   ✔   </fg=black;bg=green>' : '<fg=black;bg=red>   ✘   </fg=black;bg=red>'
+                $movie['format']        ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
+                $movie['folder']        ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
+                $movie['link']          ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
+                $movie['screenshot']    ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
+                $movie['poster']        ? self::CLI_CELL_OK : self::CLI_CELL_NOK
             ];
         }, $movieFiles);
     }
@@ -134,15 +151,12 @@ class ManageCommand extends Command
         $helper = $this->getHelper('question');
         $movieTitleQuestion =  new Question('Please enter the movie title [or hit ENTER to skip or q to quit]: ');
 
-        $tmdb = new TMDb($this->config->get('tmdb-api-key'));
-        $imdb = new IMDb();
-        $factory = new MovieFactory($tmdb, $imdb);
-
         $movieHandler = new MovieHandler($this->config);
         $oldTMDbHandler = $movieHandler->getTMDB();
 
         $index = 0;
         foreach ($movieFiles as $movie) {
+
             $this->output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
 
             if (!$movie['link']) {
@@ -155,8 +169,7 @@ class ManageCommand extends Command
                     break;
                 }
 
-                $suggestions = $tmdb->getMovieSuggestionsFromQuery($query);
-
+                $suggestions = $this->tmdb->getMovieSuggestionsFromQuery($query);
                 $suggestionChoices = [];
                 foreach ($suggestions as $suggestion) {
                     $suggestionChoices[] = sprintf(
@@ -175,7 +188,7 @@ class ManageCommand extends Command
                 $tmdbId = preg_replace('/^.*\/movie\/(\d+)$/', '$1', $titleChoice);
 
                 $this->output->write('Creating movie information file ... ');
-                $parsedMovie = $factory->create($tmdbId);
+                $parsedMovie = $this->movieFactory->create($tmdbId);
                 $result = $movieHandler->createMovieInfo($parsedMovie, $movie['path']);
                 $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
             }
@@ -194,7 +207,7 @@ class ManageCommand extends Command
                 }
 
                 if (!$movie['poster']) {
-                    $this->output->write('Downloading IMDb screenshot ... ');
+                    $this->output->write('Downloading movie poster ... ');
                     $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
                     $oldTMDbHandler = $movieHandler->getTMDB();
                     $movieHandler->downloadMoviePoster(

@@ -17,7 +17,8 @@ class FileSetFactory
     private $root;
 
     /**
-     * %s is the base name of the movie so for `Lawrence of Arabia (1962).mkv` it would be `Lawrence of Arabia (1962)`
+     * %s is the base name of the movie so for `Lawrence of Arabia (1962).mkv`
+     * it would be `Lawrence of Arabia (1962)`
      */
     const POSTER_FORMAT             = '%s - Poster.jpg';
     const INFO_FILE_FORMAT          = '%s - IMDb.url';
