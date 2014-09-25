@@ -21,10 +21,10 @@ use Symfony\Component\Console\Question\Question;
 
 class ManageCommand extends BaseCommand
 {
-    const CLI_OK = '<info>✔</info>';
-    const CLI_NOK = '<error>✘</error>';
-    const CLI_CELL_OK = '<fg=black;bg=green>   ✔   </fg=black;bg=green>';
-    const CLI_CELL_NOK = '<fg=black;bg=red>   ✘   </fg=black;bg=red>';
+    const CLI_OK        = '<info>✔</info>';
+    const CLI_NOK       = '<error>✘</error>';
+    const CLI_CELL_OK   = '<fg=black;bg=green>   ✔   </fg=black;bg=green>';
+    const CLI_CELL_NOK  = '<fg=black;bg=red>   ✘   </fg=black;bg=red>';
 
     /**
      * @var Config
@@ -50,6 +50,11 @@ class ManageCommand extends BaseCommand
      * @var FileSetFactory
      */
     private $fileSetFactory;
+
+    /**
+     * @var \SplFileInfo
+     */
+    private $movieRoot;
 
     /**
      * @var TMDb
@@ -81,13 +86,17 @@ class ManageCommand extends BaseCommand
         $this->input = $input;
         $this->output = $output;
 
+        $this->movieRoot = new \SplFileInfo($input->getArgument('path'));
         $finder = new MovieFinder();
-        $movieFiles = $finder->findMoviesInDir($input->getArgument('path'), $this->config->get('allowed-movie-formats'));
+        $movieFiles = $finder->findMoviesInDir(
+            $this->movieRoot->getRealPath(),
+            $this->config->get('allowed-movie-formats')
+        );
 
         $tmdb = new TMDb($this->config->get('tmdb-api-key'));
         $imdb = new IMDb();
         $this->movieFactory = new MovieFactory($tmdb, $imdb);
-        $this->fileSetFactory = new FileSetFactory($input->getArgument('path'));
+        $this->fileSetFactory = new FileSetFactory($this->movieRoot);
 
         if (!$input->getOption('show-all')) {
             $movieFiles = $this->filterBadMovies($movieFiles);
@@ -159,6 +168,10 @@ class ManageCommand extends BaseCommand
 
             $this->output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
 
+            if ($this->movieIsNotInSeparateFolder($movie['fullname'])) {
+                $movie['fullname'] = $this->moveMovieToSeparateFolder($movie['fullname']);
+            }
+
             if (!$movie['link']) {
                 $query = $helper->ask($this->input, $this->output, $movieTitleQuestion);
                 if (empty($query)) {
@@ -193,32 +206,67 @@ class ManageCommand extends BaseCommand
                 $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
             }
 
-            if ($movie['link']) {
-                $infoFile = $movie['path'].DIRECTORY_SEPARATOR.basename($movie['path']).' - IMDb.url';
-                $movieInfo = Reader::read($infoFile);
-                $title = $movieInfo['info']['title'];
-                $year = $movieInfo['info']['year'];
+            // check again if the link exists now, if it doesn't there's nothing we can do
+            if (!$movie['link']) {
+                continue;
+            }
 
-                $tmdbMovie = $oldTMDbHandler->getMovie($movieInfo['info']['id']);
-                if (!$movie['screenshot']) {
-                    $this->output->write('Downloading IMDb screenshot ... ');
-                    $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
-                    $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
-                }
+            $infoFile = $movie['path'].DIRECTORY_SEPARATOR.basename($movie['path']).' - IMDb.url';
+            $movieInfo = Reader::read($infoFile);
+            $title = $movieInfo['info']['title'];
+            $year = $movieInfo['info']['year'];
 
-                if (!$movie['poster']) {
-                    $this->output->write('Downloading movie poster ... ');
-                    $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
-                    $oldTMDbHandler = $movieHandler->getTMDB();
-                    $movieHandler->downloadMoviePoster(
-                        $title,
-                        $year,
-                        $movie['path'],
-                        $tmdbMovie
-                    );
-                    $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
-                }
+            $tmdbMovie = $oldTMDbHandler->getMovie($movieInfo['info']['id']);
+            if (!$movie['screenshot']) {
+                $this->output->write('Downloading IMDb screenshot ... ');
+                $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
+                $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
+            }
+
+            if (!$movie['poster']) {
+                $this->output->write('Downloading movie poster ... ');
+                $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
+                $oldTMDbHandler = $movieHandler->getTMDB();
+                $movieHandler->downloadMoviePoster(
+                    $title,
+                    $year,
+                    $movie['path'],
+                    $tmdbMovie
+                );
+                $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
             }
         }
+    }
+
+    /**
+     * Check that every movie is in it's own folder e.g. ~/movies/Avatar/Avatar.mkv would be valid
+     * but ~/movies/Avatar.mkv wouldn't, if the path argument was ~/movies
+     *
+     * @param $path
+     * @return bool
+     */
+    public function movieIsNotInSeparateFolder($path)
+    {
+        $fileSet = $this->fileSetFactory->create($path);
+        $movieRoot = $this->movieRoot->getRealPath();
+        $parentOfMovieParent = $fileSet->getParentFolder()->getPathInfo()->getRealPath();
+        return $parentOfMovieParent !== $movieRoot;
+    }
+
+    /**
+     * @param $path
+     * @return string
+     */
+    public function moveMovieToSeparateFolder($path)
+    {
+        $fileSet = $this->fileSetFactory->create($path);
+        $newMovieFolder =
+            $this->movieRoot->getRealPath()
+            .DIRECTORY_SEPARATOR
+            .$fileSet->getMovieFile()->getFilename().time();
+        $newPath = $newMovieFolder.DIRECTORY_SEPARATOR.basename($path);
+        mkdir($newMovieFolder);
+        rename($path, $newPath);
+        return $newPath;
     }
 }

@@ -25,46 +25,49 @@ class MovieFinder
             new \RecursiveDirectoryIterator($path),
             \RecursiveIteratorIterator::SELF_FIRST
         );
-        $allowedExtensionsRegex = '/(' . implode('|', $allowedFormats) . ')/i';
+        $allowedExtensionsRegex = '/(' . implode('|', $allowedFormats) . ')$/i';
         foreach ($files as $name => $file) {
-            if (preg_match($allowedExtensionsRegex, $file->getExtension())
-                && !preg_match('/.*CD2\.\w+$/', $name)
+            if (!$file->isFile()
+                || !preg_match($allowedExtensionsRegex, $file->getExtension())
+                || preg_match('/.*CD[2-9]\.\w+$/', $name)
             ) {
-                $filename = $file->getBasename();
-                $matches = [];
-                preg_match('/^(.*)\.[a-z0-9]{2,4}$/i', $filename, $matches);
-                $filenameWithoutExt = $matches[1];
-
-                $chunks = preg_replace('/[\:\-\._\(\)\[\]]/', ' ', $filenameWithoutExt);
-                $chunks = preg_replace('/  +/', ' ', $chunks);
-
-                $folder = $link = $screenshot = $poster = false;
-                $formatOk = preg_match('/.+ \(\d{4}\)\.[a-z0-9]{2,4}/i', $filename);
-                if ($formatOk) {
-                    $folder = is_dir(realpath($file->getPath() . '/../' . $filenameWithoutExt));
-
-                    $linkFile = $file->getPath() . '/' . $filenameWithoutExt . ' - IMDb.url';
-                    $link = file_exists($linkFile);
-
-                    $screenshotFile = $file->getPath() . '/' . $filenameWithoutExt . ' - IMDb.png';
-                    $screenshot = file_exists($screenshotFile);
-
-                    $posterFile = $file->getPath() . '/' . $filenameWithoutExt . ' - Poster.jpg';
-                    $poster = file_exists($posterFile);
-                }
-
-                $filenameChunks[$file->getBasename()] = [
-                    'name'          => $filename,
-                    'fullname'      => $name,
-                    'path'          => $file->getPath(),
-                    'chunks'        => explode(' ', trim($chunks)),
-                    'format'        => (bool)$formatOk,
-                    'folder'        => $folder,
-                    'link'          => $link,
-                    'screenshot'    => $screenshot,
-                    'poster'        => $poster
-                ];
+                continue;
             }
+
+            $filename = $file->getBasename();
+            $matches = [];
+            preg_match('/^(.*)\.[a-z0-9]{2,4}$/i', $filename, $matches);
+            $filenameWithoutExt = $matches[1];
+
+            $chunks = preg_replace('/[\:\-\._\(\)\[\]]/', ' ', $filenameWithoutExt);
+            $chunks = preg_replace('/  +/', ' ', $chunks);
+
+            $folder = $link = $screenshot = $poster = false;
+            $formatOk = preg_match('/.+ \(\d{4}\)\.[a-z0-9]{2,4}/i', $filename);
+            if ($formatOk) {
+                $folder = is_dir(realpath($file->getPath() . '/../' . $filenameWithoutExt));
+
+                $linkFile = $file->getPath() . '/' . $filenameWithoutExt . ' - IMDb.url';
+                $link = file_exists($linkFile);
+
+                $screenshotFile = $file->getPath() . '/' . $filenameWithoutExt . ' - IMDb.png';
+                $screenshot = file_exists($screenshotFile);
+
+                $posterFile = $file->getPath() . '/' . $filenameWithoutExt . ' - Poster.jpg';
+                $poster = file_exists($posterFile);
+            }
+
+            $filenameChunks[$file->getBasename()] = [
+                'name'          => $filename,
+                'fullname'      => $name,
+                'path'          => $file->getPath(),
+                'chunks'        => explode(' ', trim($chunks)),
+                'format'        => (bool)$formatOk,
+                'folder'        => $folder,
+                'link'          => $link,
+                'screenshot'    => $screenshot,
+                'poster'        => $poster
+            ];
         }
 
         ksort($filenameChunks);

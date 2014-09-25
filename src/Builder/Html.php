@@ -47,6 +47,8 @@ class Html
      *
      * @param  string $pathToMovies
      * @param  int    $limit
+     * @param  bool   $buildWithPosters
+     *
      * @return string
      */
     public function build($pathToMovies, $limit = -1, $buildWithPosters = true)
@@ -79,8 +81,8 @@ class Html
                             $character = $movieInfo['character'][$id];
                         }
                         $cast[] = [
-                            'id' => $id,
-                            'name' => $name,
+                            'id'        => $id,
+                            'name'      => $name,
                             'character' => $character
                         ];
                     }
@@ -92,15 +94,17 @@ class Html
                     'year'       => preg_replace('/(\d{4}).*/', '$1', $movieInfo['info']['release_date']),
                     'directors'  => isset($movieInfo['directors']) ? $movieInfo['directors'] : '',
                     'cast'       => isset($cast) ? $cast : '',
-                    'rating'     => isset($movieInfo['info']['imdb_rating']) ? $movieInfo['info']['imdb_rating'] : $movieInfo['info']['vote_average'],
+                    'rating'     => isset($movieInfo['info']['imdb_rating'])
+                                        ? $movieInfo['info']['imdb_rating']
+                                        : $movieInfo['info']['vote_average'],
                     'length'     => $movieInfo['info']['runtime'],
                     'genre'      => isset($movieInfo['genres']) ? array_values($movieInfo['genres']) : [],
-                    'languages'  => isset($movieInfo['spoken_languages']) ? array_values(
-                                        $movieInfo['spoken_languages']
-                                    ) : [],
-                    'countries'  => isset($movieInfo['production_countries']) ? array_values(
-                                        $movieInfo['production_countries']
-                                    ) : [],
+                    'languages'  => isset($movieInfo['spoken_languages'])
+                                        ? array_values($movieInfo['spoken_languages'])
+                                        : [],
+                    'countries'  => isset($movieInfo['production_countries'])
+                                        ? array_values($movieInfo['production_countries'])
+                                        : [],
                     'plot'       => $movieInfo['info']['overview'],
                     'tagline'    => $movieInfo['info']['tagline']
                 ];

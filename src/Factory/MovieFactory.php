@@ -24,7 +24,7 @@ class MovieFactory
     }
 
     /**
-     * @param  int $tmdbId
+     * @param int $tmdbId
      *
      * @return Movie
      */
