@@ -33,7 +33,8 @@ class MovieFactory
         $movie = new Movie();
 
         // set TMDb data
-        foreach ($this->tmdb->getMovieFromTmdbId($tmdbId) as $key => $value) {
+        $tmdbMovie = $this->tmdb->getMovieFromTmdbId($tmdbId);
+        foreach ($tmdbMovie as $key => $value) {
             // determines the name of the setter method
             // e.g. productionCountries => setProductionCountries
             $setterName = 'set'.ucfirst($key);

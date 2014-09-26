@@ -27,6 +27,7 @@ class MovieFinder
         );
         $allowedExtensionsRegex = '/(' . implode('|', $allowedFormats) . ')$/i';
         foreach ($files as $name => $file) {
+            /** @var \SplFileInfo $file */
             if (!$file->isFile()
                 || !preg_match($allowedExtensionsRegex, $file->getExtension())
                 || preg_match('/.*CD[2-9]\.\w+$/', $name)
@@ -35,9 +36,7 @@ class MovieFinder
             }
 
             $filename = $file->getBasename();
-            $matches = [];
-            preg_match('/^(.*)\.[a-z0-9]{2,4}$/i', $filename, $matches);
-            $filenameWithoutExt = $matches[1];
+            $filenameWithoutExt = $file->getBasename('.'.$file->getExtension());
 
             $chunks = preg_replace('/[\:\-\._\(\)\[\]]/', ' ', $filenameWithoutExt);
             $chunks = preg_replace('/  +/', ' ', $chunks);

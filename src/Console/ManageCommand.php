@@ -93,9 +93,9 @@ class ManageCommand extends BaseCommand
             $this->config->get('allowed-movie-formats')
         );
 
-        $tmdb = new TMDb($this->config->get('tmdb-api-key'));
+        $this->tmdb = new TMDb($this->config->get('tmdb-api-key'));
         $imdb = new IMDb();
-        $this->movieFactory = new MovieFactory($tmdb, $imdb);
+        $this->movieFactory = new MovieFactory($this->tmdb, $imdb);
         $this->fileSetFactory = new FileSetFactory($this->movieRoot);
 
         if (!$input->getOption('show-all')) {
@@ -153,12 +153,14 @@ class ManageCommand extends BaseCommand
 
     /**
      * @param array $movieFiles
+     *
+     * @throws \Exception
      */
     public function manageMoviesInteractively(array $movieFiles)
     {
         /** @var QuestionHelper $dialog */
         $helper = $this->getHelper('question');
-        $movieTitleQuestion =  new Question('Please enter the movie title [or hit ENTER to skip or q to quit]: ');
+        $movieTitleQuestion =  new Question('Please enter the movie title [or hit ENTER to skip, p to play, q to quit]: ');
 
         $movieHandler = new MovieHandler($this->config);
         $oldTMDbHandler = $movieHandler->getTMDB();
@@ -170,6 +172,10 @@ class ManageCommand extends BaseCommand
 
             if ($this->movieIsNotInSeparateFolder($movie['fullname'])) {
                 $movie['fullname'] = $this->moveMovieToSeparateFolder($movie['fullname']);
+                $movie['path'] = dirname($movie['fullname']);
+                $movie['link'] = false;
+                $movie['poster'] = false;
+                $movie['screenshot'] = false;
             }
 
             if (!$movie['link']) {
@@ -182,7 +188,26 @@ class ManageCommand extends BaseCommand
                     break;
                 }
 
+                if ('p' === $query) {
+                    system('vlc "'.$movie['fullname'].'"');
+                    $query = $helper->ask($this->input, $this->output, $movieTitleQuestion);
+
+                    if (empty($query)) {
+                        continue;
+                    }
+
+                    if ('q' === $query) {
+                        break;
+                    }
+                }
+
                 $suggestions = $this->tmdb->getMovieSuggestionsFromQuery($query);
+
+                if (empty($suggestions)) {
+                    $this->output->writeln('<error>No matches for your query.</error>');
+                    continue;
+                }
+
                 $suggestionChoices = [];
                 foreach ($suggestions as $suggestion) {
                     $suggestionChoices[] = sprintf(
@@ -204,37 +229,48 @@ class ManageCommand extends BaseCommand
                 $parsedMovie = $this->movieFactory->create($tmdbId);
                 $result = $movieHandler->createMovieInfo($parsedMovie, $movie['path']);
                 $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
+
+                $title  = $parsedMovie->getTitle();
+                $year   = $parsedMovie->getYear();
+                $tmdbId = $parsedMovie->getId();
+                $imdbId = $parsedMovie->getImdbId();
+            } else {
+                $movieFile = new \SplFileObject($movie['fullname']);
+                $infoFile = $movieFile->getPath().DIRECTORY_SEPARATOR.$movieFile->getBasename('.'.$movieFile->getExtension()).' - IMDb.url';
+                if (!file_exists($infoFile)) {
+                    throw new \Exception('Movie info file does not exist, movie cannot be processed.'.PHP_EOL.$infoFile);
+                }
+                $movieInfo = Reader::read($infoFile);
+
+                $title  = $movieInfo['info']['title'];
+                $year   = $movieInfo['info']['year'];
+                $tmdbId = $movieInfo['info']['id'];
+                $imdbId = $movieInfo['info']['imdb_id'];
             }
 
-            // check again if the link exists now, if it doesn't there's nothing we can do
-            if (!$movie['link']) {
-                continue;
-            }
-
-            $infoFile = $movie['path'].DIRECTORY_SEPARATOR.basename($movie['path']).' - IMDb.url';
-            $movieInfo = Reader::read($infoFile);
-            $title = $movieInfo['info']['title'];
-            $year = $movieInfo['info']['year'];
-
-            $tmdbMovie = $oldTMDbHandler->getMovie($movieInfo['info']['id']);
+            $tmdbMovie = $oldTMDbHandler->getMovie($tmdbId);
             if (!$movie['screenshot']) {
                 $this->output->write('Downloading IMDb screenshot ... ');
-                $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
+                $result = $movieHandler->downloadIMDbScreenshot($imdbId, $title, $year, $movie['path']);
                 $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
             }
 
             if (!$movie['poster']) {
                 $this->output->write('Downloading movie poster ... ');
-                $result = $movieHandler->downloadIMDbScreenshot($movieInfo['info']['imdb_id'], $title, $year, $movie['path']);
+                $result = $movieHandler->downloadIMDbScreenshot($imdbId, $title, $year, $movie['path']);
                 $oldTMDbHandler = $movieHandler->getTMDB();
-                $movieHandler->downloadMoviePoster(
-                    $title,
-                    $year,
-                    $movie['path'],
-                    $tmdbMovie
-                );
+                $movieHandler->downloadMoviePoster($title, $year, $movie['path'], $tmdbMovie);
                 $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
             }
+
+            $fileObject = new \SplFileObject($movie['fullname']);
+            $this->output->write('Renaming file ... ');
+            $result = $movieHandler->renameMovie($title, $year, $fileObject);
+            $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
+
+            $this->output->write('Renaming folder ... ');
+            $result = $movieHandler->_renameMovieFolder($title, $year, $fileObject);
+            $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
         }
     }
 
@@ -242,7 +278,7 @@ class ManageCommand extends BaseCommand
      * Check that every movie is in it's own folder e.g. ~/movies/Avatar/Avatar.mkv would be valid
      * but ~/movies/Avatar.mkv wouldn't, if the path argument was ~/movies
      *
-     * @param $path
+     * @param string $path
      * @return bool
      */
     public function movieIsNotInSeparateFolder($path)
@@ -254,8 +290,8 @@ class ManageCommand extends BaseCommand
     }
 
     /**
-     * @param $path
-     * @return string
+     * @param string $path
+     * @return string Returns the full path to the moved movie file.
      */
     public function moveMovieToSeparateFolder($path)
     {
