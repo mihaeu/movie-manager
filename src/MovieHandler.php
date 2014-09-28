@@ -162,11 +162,13 @@ class MovieHandler
     {
         $newName = $movieFile->getPath().DIRECTORY_SEPARATOR.$this->convertMovieTitle($movieTitle).' ('.$movieYear.').'.$movieFile->getExtension();
 
-        if (!file_exists($newName)) {
-            $fs = new Filesystem();
-            $fs->rename($movieFile->getRealPath(), $newName);
+        if (file_exists($newName)) {
+            return false;
         }
-        return file_exists($newName);
+
+        $fs = new Filesystem();
+        $fs->rename($movieFile->getRealPath(), $newName);
+        return $newName;
     }
 
     /**
@@ -200,16 +202,18 @@ class MovieHandler
      * @param $movieYear
      * @param \SplFileObject $movieFile
      *
-     * @return bool
+     * @return bool|string
      */
     public function _renameMovieFolder($movieTitle, $movieYear,  \SplFileObject $movieFile)
     {
         $newName = $movieFile->getPathInfo()->getPath().DIRECTORY_SEPARATOR.$this->convertMovieTitle($movieTitle).' ('.$movieYear.')';
-        if (!file_exists($newName)) {
-            $fs = new Filesystem();
-            $fs->rename($movieFile->getPath(), $newName);
+        if (file_exists($newName)) {
+            return false;
         }
-        return file_exists($newName);
+
+        $fs = new Filesystem();
+        $fs->rename($movieFile->getPath(), $newName);
+        return $newName;
     }
 
     /**
@@ -268,7 +272,7 @@ class MovieHandler
                 ]
             ] + $movieIni;
 
-        $iniFile = "$filePath/$movieTitle ($movieYear) - IMDb.url";
+        $iniFile = "$filePath/".$this->convertMovieTitle($movieTitle)." ($movieYear) - IMDb.url";
         Writer::write($iniFile,$iniArray);
 
         // this is not fast, but it doesn't really matter for this app
@@ -308,7 +312,7 @@ class MovieHandler
         );
         $srcExtension = substr(strrchr($posterSrc, '.'), 1);
 
-        $destination = "$filePath/$movieTitle ($movieYear) - Poster.$srcExtension";
+        $destination = "$filePath/".$this->convertMovieTitle($movieTitle)." ($movieYear) - Poster.$srcExtension";
         file_put_contents($destination, file_get_contents($posterSrc));
 
         return file_exists($destination);
@@ -330,7 +334,7 @@ class MovieHandler
         $output = '';
         $url = $this->getIMDbLink($imdbId);
         $script = __DIR__.'/../rasterize.js';
-        $target = "$movieFolder/$movieTitle ($movieYear) - IMDb.png";
+        $target = "$movieFolder/".$this->convertMovieTitle($movieTitle)." ($movieYear) - IMDb.png";
         $cmd = "phantomjs $script \"$url\" \"$target\"";
         system($cmd, $output);
 
@@ -365,7 +369,7 @@ class MovieHandler
                 ]
             ] + $movieIni;
 
-        $iniFile = $movieDirectory.'/'.$movie->getTitle().' ('.$movie->getYear().') - IMDb.url';
+        $iniFile = $movieDirectory.'/'.$this->convertMovieTitle($movie->getTitle()).' ('.$movie->getYear().') - IMDb.url';
         Writer::write($iniFile, $iniArray);
 
         // this is not fast, but it doesn't really matter for this app

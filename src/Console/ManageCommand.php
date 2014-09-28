@@ -11,13 +11,13 @@ use Mihaeu\MovieManager\MovieDatabase\TMDb;
 use Mihaeu\MovieManager\MovieFinder;
 use Mihaeu\MovieManager\MovieHandler;
 use Symfony\Component\Console\Command\Command as BaseCommand;
-use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Filesystem\Filesystem;
 
 class ManageCommand extends BaseCommand
 {
@@ -26,20 +26,21 @@ class ManageCommand extends BaseCommand
     const CLI_CELL_OK   = '<fg=black;bg=green>   ✔   </fg=black;bg=green>';
     const CLI_CELL_NOK  = '<fg=black;bg=red>   ✘   </fg=black;bg=red>';
 
+    const MSG_TITLE                     = '<info>[%d/%d] %s</info>';
+    const MSG_CREATE_INFO               = '[%s] Creating movie information file ... ';
+    const MSG_CREATE_SCREENY            = '[%s] Downloading IMDb screenshot ... ';
+    const MSG_CREATE_POSTER             = '[%s] Downloading poster ... ';
+    const MSG_MOVE_FILE                 = '[%s] Renaming movie file ... ';
+    const MSG_MOVE_DIRECTORY            = '[%s] Renaming movie directory ... ';
+    const MSG_MOVE_SEPARATE_DIRECTORY   = '[%s] Moving to separate movie directory ... ';
+    const MSG_MOVE_TO_ROOT              = '[%s] Moving to new destination ... ';
+    const MSG_NO_MOVIES                 = '<info>Couldn\'t find any movies.</info>';
+    const MSG_NO_MATCHES                = '<error>No matches for your query.</error>';
+
     /**
      * @var Config
      */
     private $config;
-
-    /**
-     * @var InputInterface
-     */
-    private $input;
-
-    /**
-     * @var OutputInterface
-     */
-    private $output;
 
     /**
      * @var MovieFactory
@@ -61,6 +62,11 @@ class ManageCommand extends BaseCommand
      */
     private $tmdb;
 
+    /**
+     * @var IO
+     */
+    private $io;
+
     public function configure()
     {
         $this
@@ -77,14 +83,19 @@ class ManageCommand extends BaseCommand
                 InputOption::VALUE_NONE,
                 'Shows all movies instead of only bad ones.'
             )
+            ->addOption(
+                'move-to',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Moves the parsed file to another directory.'
+            )
         ;
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->config = new Config();
-        $this->input = $input;
-        $this->output = $output;
+        $this->io = new IO($input, $output, $this->getHelperSet());
 
         $this->movieRoot = new \SplFileInfo($input->getArgument('path'));
         $finder = new MovieFinder();
@@ -100,6 +111,11 @@ class ManageCommand extends BaseCommand
 
         if (!$input->getOption('show-all')) {
             $movieFiles = $this->filterBadMovies($movieFiles);
+        }
+
+        if (empty($movieFiles)) {
+            $this->io->write(self::MSG_NO_MOVIES);
+            return;
         }
 
         $table = $this->getHelper('table');
@@ -158,8 +174,6 @@ class ManageCommand extends BaseCommand
      */
     public function manageMoviesInteractively(array $movieFiles)
     {
-        /** @var QuestionHelper $dialog */
-        $helper = $this->getHelper('question');
         $movieTitleQuestion =  new Question('Please enter the movie title [or hit ENTER to skip, p to play, q to quit]: ');
 
         $movieHandler = new MovieHandler($this->config);
@@ -168,18 +182,10 @@ class ManageCommand extends BaseCommand
         $index = 0;
         foreach ($movieFiles as $movie) {
 
-            $this->output->writeln(sprintf("\n<info>[%d/%d] %s</info>", ++$index, count($movieFiles), $movie['name']));
-
-            if ($this->movieIsNotInSeparateFolder($movie['fullname'])) {
-                $movie['fullname'] = $this->moveMovieToSeparateFolder($movie['fullname']);
-                $movie['path'] = dirname($movie['fullname']);
-                $movie['link'] = false;
-                $movie['poster'] = false;
-                $movie['screenshot'] = false;
-            }
+            $this->io->write(sprintf(self::MSG_TITLE, ++$index, count($movieFiles), $movie['name']));
 
             if (!$movie['link']) {
-                $query = $helper->ask($this->input, $this->output, $movieTitleQuestion);
+                $query = $this->io->askQuestion($movieTitleQuestion);
                 if (empty($query)) {
                     continue;
                 }
@@ -190,7 +196,7 @@ class ManageCommand extends BaseCommand
 
                 if ('p' === $query) {
                     system('vlc "'.$movie['fullname'].'"');
-                    $query = $helper->ask($this->input, $this->output, $movieTitleQuestion);
+                    $query = $this->io->askQuestion($movieTitleQuestion);
 
                     if (empty($query)) {
                         continue;
@@ -204,7 +210,7 @@ class ManageCommand extends BaseCommand
                 $suggestions = $this->tmdb->getMovieSuggestionsFromQuery($query);
 
                 if (empty($suggestions)) {
-                    $this->output->writeln('<error>No matches for your query.</error>');
+                    $this->io->write(self::MSG_NO_MATCHES);
                     continue;
                 }
 
@@ -222,13 +228,22 @@ class ManageCommand extends BaseCommand
                     'What is the correct title?',
                     $suggestionChoices
                 );
-                $titleChoice = $helper->ask($this->input, $this->output, $suggestionQuestion);
+                $titleChoice = $this->io->askQuestion($suggestionQuestion);
                 $tmdbId = preg_replace('/^.*\/movie\/(\d+)$/', '$1', $titleChoice);
 
-                $this->output->write('Creating movie information file ... ');
+                if ($this->movieIsNotInSeparateFolder($movie['fullname'])) {
+                    $movie['fullname'] = $this->moveMovieToSeparateFolder($movie['fullname']);
+                    $movie['path'] = dirname($movie['fullname']);
+                    $movie['link'] = false;
+                    $movie['poster'] = false;
+                    $movie['screenshot'] = false;
+                    $this->io->write(sprintf(self::MSG_MOVE_SEPARATE_DIRECTORY, self::CLI_OK));
+                }
+
+                $this->io->write(sprintf(self::MSG_CREATE_INFO, ' '), false);
                 $parsedMovie = $this->movieFactory->create($tmdbId);
                 $result = $movieHandler->createMovieInfo($parsedMovie, $movie['path']);
-                $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
+                $this->io->overwrite(sprintf(self::MSG_CREATE_INFO, $result ? self::CLI_OK : self::CLI_NOK));
 
                 $title  = $parsedMovie->getTitle();
                 $year   = $parsedMovie->getYear();
@@ -250,27 +265,35 @@ class ManageCommand extends BaseCommand
 
             $tmdbMovie = $oldTMDbHandler->getMovie($tmdbId);
             if (!$movie['screenshot']) {
-                $this->output->write('Downloading IMDb screenshot ... ');
+                $this->io->write(sprintf(self::MSG_CREATE_SCREENY, ' '), false);
                 $result = $movieHandler->downloadIMDbScreenshot($imdbId, $title, $year, $movie['path']);
-                $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
+                $this->io->overwrite(sprintf(self::MSG_CREATE_SCREENY, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
             if (!$movie['poster']) {
-                $this->output->write('Downloading movie poster ... ');
-                $result = $movieHandler->downloadIMDbScreenshot($imdbId, $title, $year, $movie['path']);
+                $this->io->write(sprintf(self::MSG_CREATE_POSTER, ' '), false);
                 $oldTMDbHandler = $movieHandler->getTMDB();
-                $movieHandler->downloadMoviePoster($title, $year, $movie['path'], $tmdbMovie);
-                $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
+                $result = $movieHandler->downloadMoviePoster($title, $year, $movie['path'], $tmdbMovie);
+                $this->io->overwrite(sprintf(self::MSG_CREATE_POSTER, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
             $fileObject = new \SplFileObject($movie['fullname']);
-            $this->output->write('Renaming file ... ');
-            $result = $movieHandler->renameMovie($title, $year, $fileObject);
-            $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
+            $movieWasRenamed = $movieHandler->renameMovie($title, $year, $fileObject);
+            if ($movieWasRenamed) {
+                $this->io->write(sprintf(self::MSG_MOVE_FILE, self::CLI_OK));
+            }
 
-            $this->output->write('Renaming folder ... ');
-            $result = $movieHandler->_renameMovieFolder($title, $year, $fileObject);
-            $this->output->writeln($result ? self::CLI_OK : self::CLI_NOK);
+            $newDirectory = $movieHandler->_renameMovieFolder($title, $year, $fileObject);
+            if ($newDirectory) {
+                $this->io->write(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_OK));
+            }
+
+            if ($this->io->getOption('move-to')) {
+                $targetDirectory = $this->io->getOption('move-to');
+                $fileSystem = new Filesystem();
+                $fileSystem->rename($newDirectory, $targetDirectory.DIRECTORY_SEPARATOR.basename($newDirectory));
+                $this->io->write(sprintf(self::MSG_MOVE_TO_ROOT, self::CLI_OK));
+            }
         }
     }
 
