@@ -45,4 +45,4 @@ class IMDb
 
         return (string) $body;
     }
-} 
+}

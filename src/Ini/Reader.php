@@ -19,7 +19,7 @@ class Reader
      */
     public static function read($file, $sections = true)
     {
-        $iniContent = @file_get_contents($file);
+        $iniContent = file_get_contents($file);
         if (false === $iniContent) {
             return false;
         }
@@ -38,6 +38,6 @@ class Reader
         ];
         $saveIniContent = str_replace(array_keys($replacements), array_values($replacements), $iniContent);
 
-        return @parse_ini_string($saveIniContent, $sections);
+        return parse_ini_string($saveIniContent, $sections);
     }
-} 
+}

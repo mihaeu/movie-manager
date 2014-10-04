@@ -8,7 +8,7 @@ $(function() {
 	// imdb fancybox
 	$('.fancybox').fancybox();
 
-	// sort function 
+	// sort function
 	$("input[type=radio]").bind("change", function() {
 		var sortBy = $('input[name=order]:checked').val();
 		var order = $('input[name=direction]:checked').val();
@@ -52,7 +52,7 @@ $(function() {
 			if (selectedGenre === "all") {
 				return true;
 			}
-			
+
 			var matchFound = false;
 			$.map(movieData, function(movie, id) {
 				if ($.inArray(selectedGenre, movieGenres) !== -1)
@@ -64,7 +64,7 @@ $(function() {
 		};
 
 		this.year = function (selectedYearFrom, selectedYearTo, movieYear) {
-			return movieYear >= selectedYearFrom 
+			return movieYear >= selectedYearFrom
 				&& movieYear <= selectedYearTo;
 		};
 
@@ -120,7 +120,7 @@ $(function() {
 	$("#languages, #country, #year-from, #year-to, #genre, #rating").change(function() {
 
 		$.each(movieData, function (id, movie) {
-			
+
 			if (Filters.all(movie)) {
 				$("#" + id).show();
 			} else {
