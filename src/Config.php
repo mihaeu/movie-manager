@@ -21,7 +21,7 @@ class Config
     {
         $configFile = __DIR__ . '/../config.json';
         if (!file_exists($configFile)) {
-            throw new \Exception($configFile . ' does not exist, please create it or rename config.sample.json.' . PHP_EOL);
+            throw new \Exception($configFile . ' does not exist, please create it or rename config.sample.json.'.PHP_EOL);
         }
 
         $this->config = json_decode(file_get_contents($configFile), true);

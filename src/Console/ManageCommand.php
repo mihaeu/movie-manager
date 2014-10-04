@@ -176,8 +176,8 @@ class ManageCommand extends BaseCommand
     {
         $movieTitleQuestion =  new Question('Please enter the movie title [or hit ENTER to skip, p to play, q to quit]: ');
 
-        $movieHandler = new MovieHandler($this->config);
-        $oldTMDbHandler = $movieHandler->getTMDB();
+        $oldTMDbHandler = new \TMDb($this->config->get('tmdb-api-key'), 'en');
+        $movieHandler = new MovieHandler();
 
         $index = 0;
         foreach ($movieFiles as $movie) {
@@ -263,7 +263,6 @@ class ManageCommand extends BaseCommand
                 $imdbId = $movieInfo['info']['imdb_id'];
             }
 
-            $tmdbMovie = $oldTMDbHandler->getMovie($tmdbId);
             if (!$movie['screenshot']) {
                 $this->io->write(sprintf(self::MSG_CREATE_SCREENY, ' '), false);
                 $result = $movieHandler->downloadIMDbScreenshot($imdbId, $title, $year, $movie['path']);
@@ -272,8 +271,13 @@ class ManageCommand extends BaseCommand
 
             if (!$movie['poster']) {
                 $this->io->write(sprintf(self::MSG_CREATE_POSTER, ' '), false);
-                $oldTMDbHandler = $movieHandler->getTMDB();
-                $result = $movieHandler->downloadMoviePoster($title, $year, $movie['path'], $tmdbMovie);
+                $oldTmdbMovie = $oldTMDbHandler->getMovie($tmdbId);
+                $posterSrc = $oldTMDbHandler->getImageUrl(
+                    $oldTmdbMovie['poster_path'],
+                    \TMDb::IMAGE_PROFILE,
+                    'original'
+                );
+                $result = $movieHandler->downloadMoviePoster($title, $year, $posterSrc, $movie['path']);
                 $this->io->overwrite(sprintf(self::MSG_CREATE_POSTER, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
@@ -283,7 +287,7 @@ class ManageCommand extends BaseCommand
                 $this->io->write(sprintf(self::MSG_MOVE_FILE, self::CLI_OK));
             }
 
-            $newDirectory = $movieHandler->_renameMovieFolder($title, $year, $fileObject);
+            $newDirectory = $movieHandler->renameMovieFolder($title, $year, $fileObject);
             if ($newDirectory) {
                 $this->io->write(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_OK));
             }
@@ -301,31 +305,29 @@ class ManageCommand extends BaseCommand
      * Check that every movie is in it's own folder e.g. ~/movies/Avatar/Avatar.mkv would be valid
      * but ~/movies/Avatar.mkv wouldn't, if the path argument was ~/movies
      *
-     * @param string $path
+     * @param string $moviePath
      * @return bool
      */
-    public function movieIsNotInSeparateFolder($path)
+    public function movieIsNotInSeparateFolder($moviePath)
     {
-        $fileSet = $this->fileSetFactory->create($path);
         $movieRoot = $this->movieRoot->getRealPath();
-        $parentOfMovieParent = $fileSet->getParentFolder()->getPathInfo()->getRealPath();
+        $parentOfMovieParent = dirname(dirname($moviePath));
         return $parentOfMovieParent !== $movieRoot;
     }
 
     /**
-     * @param string $path
+     * @param string $moviePath
      * @return string Returns the full path to the moved movie file.
      */
-    public function moveMovieToSeparateFolder($path)
+    public function moveMovieToSeparateFolder($moviePath)
     {
-        $fileSet = $this->fileSetFactory->create($path);
         $newMovieFolder =
             $this->movieRoot->getRealPath()
             .DIRECTORY_SEPARATOR
-            .$fileSet->getMovieFile()->getFilename().time();
-        $newPath = $newMovieFolder.DIRECTORY_SEPARATOR.basename($path);
+            .basename($moviePath).time();
+        $newPath = $newMovieFolder.DIRECTORY_SEPARATOR.basename($moviePath);
         mkdir($newMovieFolder);
-        rename($path, $newPath);
+        rename($moviePath, $newPath);
         return $newPath;
     }
 }
