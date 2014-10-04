@@ -3,7 +3,6 @@
 namespace Mihaeu\MovieManager\Console;
 
 use Mihaeu\MovieManager\Config;
-use Mihaeu\MovieManager\Factory\FileSetFactory;
 use Mihaeu\MovieManager\Factory\MovieFactory;
 use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\MovieDatabase\IMDb;
