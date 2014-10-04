@@ -7,7 +7,7 @@ use Symfony\Component\Console\Application as BaseApplication;
 class Application extends BaseApplication
 {
     /**
-     * Initializes all the composer commands
+     * {@inheritdoc}
      */
     protected function getDefaultCommands()
     {

@@ -12,6 +12,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class BuildCommand extends BaseCommand
 {
+    /**
+     * {@inheritdoc}
+     */
     public function configure()
     {
         $this
@@ -44,6 +47,9 @@ class BuildCommand extends BaseCommand
         ;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $builder = new Html();

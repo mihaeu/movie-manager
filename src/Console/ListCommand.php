@@ -27,6 +27,9 @@ class ListCommand extends Command
      */
     private $options;
 
+    /**
+     * {@inheritdoc}
+     */
     public function configure()
     {
         parent::configure();
@@ -43,6 +46,9 @@ class ListCommand extends Command
         ;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->options = $input->getOptions();
