@@ -236,8 +236,8 @@ class ManageCommand extends BaseCommand
                 $tmdbId = preg_replace('/^.*\/movie\/(\d+)$/', '$1', $titleChoice);
 
                 if ($movieHandler->movieIsNotInSeparateFolder($this->movieRoot, $movieFile)) {
-                    $movie['fullname'] = $movieHandler->moveMovieToSeparateFolder($this->movieRoot, $movieFile);
-                    $movie['path'] = dirname($movie['fullname']);
+                    $newFilename = $movieHandler->moveMovieToSeparateFolder($this->movieRoot, $movieFile);
+                    $movieFile = new \SplFileObject($newFilename);
                     $movie['link'] = false;
                     $movie['poster'] = false;
                     $movie['screenshot'] = false;

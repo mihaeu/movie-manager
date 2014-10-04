@@ -25,7 +25,8 @@ class BuildCommand extends BaseCommand
             ->addArgument(
                 'save',
                 InputArgument::OPTIONAL,
-                'Save the result to a file.'
+                'Save the result to a file.',
+                'php://output'
             )
             ->addOption(
                 'limit',
@@ -49,14 +50,9 @@ class BuildCommand extends BaseCommand
 
         $path = realpath($input->getArgument('path'));
         $buildWithPosters = !$input->getOption('no-posters');
-        if (is_writable(dirname($input->getArgument('save')))) {
-            $save = $input->getArgument('save');
-            if (!is_writable(dirname($save))) {
-                throw new \InvalidArgumentException(dirname($save).' is not writable.');
-            }
-            file_put_contents($save, $builder->build($path, $input->getOption('limit'), $buildWithPosters));
-        } else {
-            echo $builder->build($path, $input->getOption('limit'), $buildWithPosters);
-        }
+        file_put_contents(
+            $input->getArgument('save'),
+            $builder->build($path, $input->getOption('limit'), $buildWithPosters)
+        );
     }
 }
