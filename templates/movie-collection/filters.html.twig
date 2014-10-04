@@ -29,7 +29,7 @@
 			<img width="16" height="16" alt="desc" src="data:image/png;base64,{{ base64filedump('assets/img/down_arrow.png') }}" />
 		</label>
 	</div>
-	
+
 	<div class="form-group">
 		<label for="filter">Filter:
 			<input type="text" id="filter" name="filter" class="form-control input-sm filter" placeholder="Filter by name, cast or director ..." />
@@ -42,7 +42,7 @@
 		<select id="languages" name="languages" class="languages form-control input-sm">
 			<option value="all">(all)</option>
 			{% for language in languages|sort %}
-				<option value="{{ language }}">{{ language }}</option>						    
+				<option value="{{ language }}">{{ language }}</option>
 			{% endfor %}
 		</select>
 	</label>
@@ -51,7 +51,7 @@
 		<select id="genre" name="genre" class="form-control input-sm">
 			<option value="all">(all)</option>
 			{% for genre in genres|sort %}
-				<option value="{{ genre }}">{{ genre }}</option>						    
+				<option value="{{ genre }}">{{ genre }}</option>
 			{% endfor %}
 		</select>
 	</label>
@@ -60,7 +60,7 @@
 		<select id="country" name="country" class="form-control input-sm">
 			<option value="all">(all)</option>
 			{% for country in countries|sort %}
-				<option value="{{ country }}">{{ country }}</option>						    
+				<option value="{{ country }}">{{ country }}</option>
 			{% endfor %}
 		</select>
 	</label>
@@ -76,7 +76,7 @@
 	<label for="year-from">From:
 		<select id="year-from" name="year-from" class="form-control input-sm year-from">
 			{% for year in years %}
-				<option>{{ year }}</option>						    
+				<option>{{ year }}</option>
 			{% endfor %}
 		</select>
 	</label>
@@ -84,7 +84,7 @@
 	<label for="year-to">To:
 		<select id="year-to" name="year-to" class="form-control input-sm year-to">
 			{% for year in years|reverse %}
-				<option>{{ year }}</option>						    
+				<option>{{ year }}</option>
 			{% endfor %}
 		</select>
 	</label>

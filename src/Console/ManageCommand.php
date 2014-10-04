@@ -48,11 +48,6 @@ class ManageCommand extends BaseCommand
     private $movieFactory;
 
     /**
-     * @var FileSetFactory
-     */
-    private $fileSetFactory;
-
-    /**
      * @var \SplFileInfo
      */
     private $movieRoot;
@@ -113,7 +108,6 @@ class ManageCommand extends BaseCommand
         $this->tmdb = new TMDb($this->config->get('tmdb-api-key'));
         $imdb = new IMDb();
         $this->movieFactory = new MovieFactory($this->tmdb, $imdb);
-        $this->fileSetFactory = new FileSetFactory($this->movieRoot);
 
         if (!$input->getOption('show-all')) {
             $movieFiles = $this->filterBadMovies($movieFiles);

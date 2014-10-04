@@ -188,7 +188,7 @@ class Html
             $newWidth = $width / ($height / $newHeight);
         }
 
-        $original = @imagecreatefromjpeg($file);
+        $original = imagecreatefromjpeg($file);
         if ($original === false) {
             return '';
         }
