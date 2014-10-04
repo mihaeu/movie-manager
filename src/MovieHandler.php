@@ -4,7 +4,6 @@ namespace Mihaeu\MovieManager;
 
 use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\Ini\Writer;
-use Mihaeu\MovieManager\MovieDatabase\TMDb;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -16,6 +15,16 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class MovieHandler
 {
+    /**
+     * @var Filesystem
+     */
+    private $filesystem;
+
+    public function __construct(Filesystem $filesystem)
+    {
+        $this->filesystem = $filesystem;
+    }
+
     /**
      * @param string $originalTitle
      *
@@ -46,41 +55,37 @@ class MovieHandler
     }
 
     /**
-     * @param $movieTitle
-     * @param $movieYear
-     * @param \SplFileObject $movieFile
+     * @param Movie          $movie
+     * @param \SplFileInfo   $movieFile
      *
      * @return bool
      */
-    public function renameMovie($movieTitle, $movieYear, \SplFileObject $movieFile)
+    public function renameMovie(Movie $movie, \SplFileInfo $movieFile)
     {
-        $newName = $movieFile->getPath().DIRECTORY_SEPARATOR.$this->convertMovieTitle($movieTitle).' ('.$movieYear.').'.$movieFile->getExtension();
+        $newName = $this->generateFileName($movie, $movieFile, '.'.$movieFile->getExtension());
 
         if (file_exists($newName)) {
             return false;
         }
 
-        $fs = new Filesystem();
-        $fs->rename($movieFile->getRealPath(), $newName);
+        $this->filesystem->rename($movieFile->getRealPath(), $newName);
         return $newName;
     }
 
     /**
-     * @param $movieTitle
-     * @param $movieYear
-     * @param \SplFileObject $movieFile
+     * @param Movie          $movie
+     * @param \SplFileInfo   $movieFile
      *
      * @return bool|string
      */
-    public function renameMovieFolder($movieTitle, $movieYear,  \SplFileObject $movieFile)
+    public function renameMovieFolder(Movie $movie, \SplFileInfo $movieFile)
     {
-        $newName = $movieFile->getPathInfo()->getPath().DIRECTORY_SEPARATOR.$this->convertMovieTitle($movieTitle).' ('.$movieYear.')';
+        $newName = $this->generateFileName($movie, $movieFile->getPathInfo());
         if (file_exists($newName)) {
             return false;
         }
 
-        $fs = new Filesystem();
-        $fs->rename($movieFile->getPath(), $newName);
+        $this->filesystem->rename($movieFile->getPath(), $newName);
         return $newName;
     }
 
@@ -99,20 +104,18 @@ class MovieHandler
     }
 
     /**
-     * @param string $movieTitle
-     * @param int    $movieYear
-     * @param string $posterSrc
-     * @param string $filePath
+     * @param Movie          $movie
+     * @param \SplFileInfo   $movieFile
      *
      * @return bool
      *
      * @throws \TMDbException
      */
-    public function downloadMoviePoster($movieTitle, $movieYear, $posterSrc, $filePath)
+    public function downloadMoviePoster(Movie $movie, \SplFileInfo $movieFile)
     {
-        $srcExtension = substr(strrchr($posterSrc, '.'), 1);
-        $destination = $filePath.DIRECTORY_SEPARATOR.$this->convertMovieTitle($movieTitle)." ($movieYear) - Poster.$srcExtension";
-        file_put_contents($destination, file_get_contents($posterSrc));
+        $srcExtension = substr(strrchr($movie->getPosterUrl(), '.'), 1);
+        $destination = $this->generateFileName($movie, $movieFile, ' - Poster.'.$srcExtension);
+        file_put_contents($destination, file_get_contents($movie->getPosterUrl()));
 
         return file_exists($destination);
     }
@@ -120,23 +123,21 @@ class MovieHandler
     /**
      * Downloads a screenshot of the movie's IMDb page.
      *
-     * @param string $imdbId
-     * @param string $movieTitle
-     * @param int    $movieYear
-     * @param string $movieFolder
+     * @param Movie          $movie
+     * @param \SplFileInfo   $movieFile
      *
      * @return bool
      */
-    public function downloadIMDbScreenshot($imdbId, $movieTitle, $movieYear, $movieFolder)
+    public function downloadIMDbScreenshot(Movie $movie, \SplFileInfo $movieFile)
     {
         // check if phantomjs exists in the right version
         if (exec('phantomjs --version') < 1) {
             return false;
         }
 
-        $url = $this->getIMDbLink($imdbId);
+        $url = $this->getIMDbLink($movie->getImdbId());
         $script = __DIR__.'/../rasterize.js';
-        $target = $movieFolder.DIRECTORY_SEPARATOR.$this->convertMovieTitle($movieTitle)." ($movieYear) - IMDb.png";
+        $target = $this->generateFileName($movie, $movieFile, ' - IMDb.png');
         $cmd = "phantomjs $script \"$url\" \"$target\"";
         $returnVal = false;
         exec($cmd, $returnVal);
@@ -148,12 +149,12 @@ class MovieHandler
      * Creates the movie information file in .ini format, dressed up as a Windows
      * .url link.
      *
-     * @param Movie $movie
-     * @param $movieDirectory
+     * @param Movie          $movie
+     * @param \SplFileInfo   $movieFile
      *
      * @return bool
      */
-    public function createMovieInfo(Movie $movie, $movieDirectory)
+    public function createMovieInfo(Movie $movie, \SplFileInfo $movieFile)
     {
         $movieIni = ['info' => []];
         // we don't want loose values without sections and we don't want empty sections,
@@ -172,10 +173,67 @@ class MovieHandler
                 ]
             ] + $movieIni;
 
-        $iniFile = $movieDirectory.DIRECTORY_SEPARATOR.$this->convertMovieTitle($movie->getTitle()).' ('.$movie->getYear().') - IMDb.url';
+        $iniFile = $this->generateFileName($movie, $movieFile, ' - IMDb.url');
         Writer::write($iniFile, $iniArray);
 
         // this is not fast, but it doesn't really matter for this app
         return Reader::read($iniFile) !== false;
+    }
+
+    /**
+     * @param Movie          $movie
+     * @param \SplFileInfo   $movieFile
+     * @param string         $suffix
+     *
+     * @return string
+     */
+    public function generateFileName(Movie $movie, \SplFileInfo $movieFile, $suffix = '')
+    {
+        return $movieFile->getPath()
+            .DIRECTORY_SEPARATOR
+            .$this->convertMovieTitle($movie->getTitle()).' ('.$movie->getYear().')'.$suffix;
+    }
+
+    /**
+     * @param \SplFileInfo $movieFile
+     * @param string       $targetDirectory
+     */
+    public function moveTo(\SplFileInfo $movieFile, $targetDirectory)
+    {
+        $this->filesystem->rename($movieFile->getPath(), $targetDirectory.DIRECTORY_SEPARATOR.$movieFile->getPathInfo()->getBasename());
+    }
+
+
+    /**
+     * Check that every movie is in it's own folder e.g. ~/movies/Avatar/Avatar.mkv would be valid
+     * but ~/movies/Avatar.mkv wouldn't, if the path argument was ~/movies
+     *
+     * @param \SplFileInfo $movieRoot
+     * @param \SplFileInfo $movieFile
+     *
+     * @return bool
+     */
+    public function movieIsNotInSeparateFolder(\SplFileInfo $movieRoot, \SplFileInfo $movieFile)
+    {
+        $movieRoot = $movieRoot->getRealPath();
+        $parentOfMovieParent = $movieFile->getPathInfo()->getPath();
+        return $parentOfMovieParent !== $movieRoot;
+    }
+
+    /**
+     * @param \SplFileInfo $movieRoot
+     * @param \SplFileInfo $movieFile
+     *
+     * @return string Returns the full path to the moved movie file.
+     */
+    public function moveMovieToSeparateFolder(\SplFileInfo $movieRoot, \SplFileInfo $movieFile)
+    {
+        $newMovieFolder = $movieRoot->getRealPath().DIRECTORY_SEPARATOR.$movieFile->getBasename().time();
+        mkdir($newMovieFolder);
+
+        $newPath = $newMovieFolder.DIRECTORY_SEPARATOR.$movieFile->getBasename();
+        rename($movieFile->getRealPath(), $newPath);
+
+        return $newPath;
     }
 }

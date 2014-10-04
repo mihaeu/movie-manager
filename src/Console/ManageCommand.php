@@ -67,6 +67,9 @@ class ManageCommand extends BaseCommand
      */
     private $io;
 
+    /**
+     * {@inheritdoc}
+     */
     public function configure()
     {
         $this
@@ -92,6 +95,9 @@ class ManageCommand extends BaseCommand
         ;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->config = new Config();
@@ -175,13 +181,11 @@ class ManageCommand extends BaseCommand
     public function manageMoviesInteractively(array $movieFiles)
     {
         $movieTitleQuestion =  new Question('Please enter the movie title [or hit ENTER to skip, p to play, q to quit]: ');
-
-        $oldTMDbHandler = new \TMDb($this->config->get('tmdb-api-key'), 'en');
-        $movieHandler = new MovieHandler();
+        $movieHandler = new MovieHandler(new Filesystem());
 
         $index = 0;
         foreach ($movieFiles as $movie) {
-
+            $movieFile = new \SplFileObject($movie['fullname']);
             $this->io->write(sprintf(self::MSG_TITLE, ++$index, count($movieFiles), $movie['name']));
 
             if (!$movie['link']) {
@@ -231,8 +235,8 @@ class ManageCommand extends BaseCommand
                 $titleChoice = $this->io->askQuestion($suggestionQuestion);
                 $tmdbId = preg_replace('/^.*\/movie\/(\d+)$/', '$1', $titleChoice);
 
-                if ($this->movieIsNotInSeparateFolder($movie['fullname'])) {
-                    $movie['fullname'] = $this->moveMovieToSeparateFolder($movie['fullname']);
+                if ($movieHandler->movieIsNotInSeparateFolder($this->movieRoot, $movieFile)) {
+                    $movie['fullname'] = $movieHandler->moveMovieToSeparateFolder($this->movieRoot, $movieFile);
                     $movie['path'] = dirname($movie['fullname']);
                     $movie['link'] = false;
                     $movie['poster'] = false;
@@ -242,92 +246,44 @@ class ManageCommand extends BaseCommand
 
                 $this->io->write(sprintf(self::MSG_CREATE_INFO, ' '), false);
                 $parsedMovie = $this->movieFactory->create($tmdbId);
-                $result = $movieHandler->createMovieInfo($parsedMovie, $movie['path']);
+                $result = $movieHandler->createMovieInfo($parsedMovie, $movieFile);
                 $this->io->overwrite(sprintf(self::MSG_CREATE_INFO, $result ? self::CLI_OK : self::CLI_NOK));
-
-                $title  = $parsedMovie->getTitle();
-                $year   = $parsedMovie->getYear();
-                $tmdbId = $parsedMovie->getId();
-                $imdbId = $parsedMovie->getImdbId();
             } else {
-                $movieFile = new \SplFileObject($movie['fullname']);
                 $infoFile = $movieFile->getPath().DIRECTORY_SEPARATOR.$movieFile->getBasename('.'.$movieFile->getExtension()).' - IMDb.url';
                 if (!file_exists($infoFile)) {
                     throw new \Exception('Movie info file does not exist, movie cannot be processed.'.PHP_EOL.$infoFile);
                 }
                 $movieInfo = Reader::read($infoFile);
 
-                $title  = $movieInfo['info']['title'];
-                $year   = $movieInfo['info']['year'];
-                $tmdbId = $movieInfo['info']['id'];
-                $imdbId = $movieInfo['info']['imdb_id'];
+                $parsedMovie = $this->movieFactory->create($movieInfo['info']['id']);
             }
 
             if (!$movie['screenshot']) {
                 $this->io->write(sprintf(self::MSG_CREATE_SCREENY, ' '), false);
-                $result = $movieHandler->downloadIMDbScreenshot($imdbId, $title, $year, $movie['path']);
+                $result = $movieHandler->downloadIMDbScreenshot($parsedMovie, $movieFile);
                 $this->io->overwrite(sprintf(self::MSG_CREATE_SCREENY, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
             if (!$movie['poster']) {
                 $this->io->write(sprintf(self::MSG_CREATE_POSTER, ' '), false);
-                $oldTmdbMovie = $oldTMDbHandler->getMovie($tmdbId);
-                $posterSrc = $oldTMDbHandler->getImageUrl(
-                    $oldTmdbMovie['poster_path'],
-                    \TMDb::IMAGE_PROFILE,
-                    'original'
-                );
-                $result = $movieHandler->downloadMoviePoster($title, $year, $posterSrc, $movie['path']);
+                $result = $movieHandler->downloadMoviePoster($parsedMovie, $movieFile);
                 $this->io->overwrite(sprintf(self::MSG_CREATE_POSTER, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
-            $fileObject = new \SplFileObject($movie['fullname']);
-            $movieWasRenamed = $movieHandler->renameMovie($title, $year, $fileObject);
+            $movieWasRenamed = $movieHandler->renameMovie($parsedMovie, $movieFile);
             if ($movieWasRenamed) {
                 $this->io->write(sprintf(self::MSG_MOVE_FILE, self::CLI_OK));
             }
 
-            $newDirectory = $movieHandler->renameMovieFolder($title, $year, $fileObject);
+            $newDirectory = $movieHandler->renameMovieFolder($parsedMovie, $movieFile);
             if ($newDirectory) {
                 $this->io->write(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_OK));
             }
 
             if ($this->io->getOption('move-to')) {
-                $targetDirectory = $this->io->getOption('move-to');
-                $fileSystem = new Filesystem();
-                $fileSystem->rename($newDirectory, $targetDirectory.DIRECTORY_SEPARATOR.basename($newDirectory));
+                $movieHandler->moveTo($movieFile, $this->io->getOption('move-to'));
                 $this->io->write(sprintf(self::MSG_MOVE_TO_ROOT, self::CLI_OK));
             }
         }
-    }
-
-    /**
-     * Check that every movie is in it's own folder e.g. ~/movies/Avatar/Avatar.mkv would be valid
-     * but ~/movies/Avatar.mkv wouldn't, if the path argument was ~/movies
-     *
-     * @param string $moviePath
-     * @return bool
-     */
-    public function movieIsNotInSeparateFolder($moviePath)
-    {
-        $movieRoot = $this->movieRoot->getRealPath();
-        $parentOfMovieParent = dirname(dirname($moviePath));
-        return $parentOfMovieParent !== $movieRoot;
-    }
-
-    /**
-     * @param string $moviePath
-     * @return string Returns the full path to the moved movie file.
-     */
-    public function moveMovieToSeparateFolder($moviePath)
-    {
-        $newMovieFolder =
-            $this->movieRoot->getRealPath()
-            .DIRECTORY_SEPARATOR
-            .basename($moviePath).time();
-        $newPath = $newMovieFolder.DIRECTORY_SEPARATOR.basename($moviePath);
-        mkdir($newMovieFolder);
-        rename($moviePath, $newPath);
-        return $newPath;
     }
 }
