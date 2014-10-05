@@ -2,74 +2,74 @@
 
 namespace Mihaeu\MovieManager;
 
+use Mihaeu\MovieManager\Factory\FileSetFactory;
+
 class MovieFinder
 {
     /**
+     * @var FileSetFactory
+     */
+    private $fileSetFactory;
+
+    /**
+     * @var string
+     */
+    private $allowedExtensionsRegex;
+
+    /**
+     * @param FileSetFactory $fileSetFactory
+     * @param  array  $allowedFormats   Movie formats (extensions) which are allowed.
+     */
+    public function __construct(FileSetFactory $fileSetFactory, array $allowedFormats)
+    {
+        $this->fileSetFactory = $fileSetFactory;
+        $this->allowedExtensionsRegex = '/(' . implode('|', $allowedFormats) . ')$/i';
+    }
+
+    /**
      * Looks recursively for movie files in a directory.
      *
-     * @param  string $path             Path which contains the movies.
-     * @param  array  $allowedFormats   Movie formats (extensions) which are allowed.
+     * @param  string $path Path which contains the movies.
      *
-     * @return array          matched movies
+     * @return array matched movies
      */
-    public function findMoviesInDir($path = '', array $allowedFormats)
+    public function findMoviesInDir($path = '')
     {
-        if (!is_dir($path)) {
-            return [];
-        }
-
-        $path = realpath($path);
-
-        $filenameChunks = [];
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($path),
             \RecursiveIteratorIterator::SELF_FIRST
         );
-        $allowedExtensionsRegex = '/(' . implode('|', $allowedFormats) . ')$/i';
+
+        $fileSets = [];
         foreach ($files as $name => $file) {
             /** @var \SplFileInfo $file */
-            if (!$file->isFile()
-                || !preg_match($allowedExtensionsRegex, $file->getExtension())
-                || preg_match('/.*CD[2-9]\.\w+$/', $name)
-            ) {
-                continue;
+            if ($file->isFile() && $this->isCorrectMovieFormat($file->getExtension()) || $this->isNotMultiPartMovie($name)) {
+                $fileSets = $this->fileSetFactory->create($file->getRealPath());
             }
 
-            $filename = $file->getBasename();
-            $filenameWithoutExt = $file->getBasename('.'.$file->getExtension());
-
-            $chunks = preg_replace('/[\:\-\._\(\)\[\]]/', ' ', $filenameWithoutExt);
-            $chunks = preg_replace('/  +/', ' ', $chunks);
-
-            $folder = $link = $screenshot = $poster = false;
-            $formatOk = preg_match('/.+ \(\d{4}\)\.[a-z0-9]{2,4}/i', $filename);
-            if ($formatOk) {
-                $folder = is_dir(realpath($file->getPath() . '/../' . $filenameWithoutExt));
-
-                $linkFile = $file->getPath() . '/' . $filenameWithoutExt . ' - IMDb.url';
-                $link = file_exists($linkFile);
-
-                $screenshotFile = $file->getPath() . '/' . $filenameWithoutExt . ' - IMDb.png';
-                $screenshot = file_exists($screenshotFile);
-
-                $posterFile = $file->getPath() . '/' . $filenameWithoutExt . ' - Poster.jpg';
-                $poster = file_exists($posterFile);
-            }
-
-            $filenameChunks[$file->getBasename()] = [
-                'name'          => $filename,
-                'fullname'      => $name,
-                'path'          => $file->getPath(),
-                'chunks'        => explode(' ', trim($chunks)),
-                'format'        => (bool)$formatOk,
-                'folder'        => $folder,
-                'link'          => $link,
-                'screenshot'    => $screenshot,
-                'poster'        => $poster
-            ];
         }
 
-        ksort($filenameChunks);
-        return $filenameChunks;
+        ksort($fileSets);
+        return $fileSets;
+    }
+
+    /**
+     * @param string $movieFileExtension
+     *
+     * @return bool
+     */
+    public function isCorrectMovieFormat($movieFileExtension)
+    {
+        return 1 === preg_match($this->allowedExtensionsRegex, $movieFileExtension);
+    }
+
+    /**
+     * @param $filename
+
+     * @return bool
+     */
+    public function isNotMultiPartMovie($filename)
+    {
+        return 1 !== preg_match('/.*CD[2-9]\.\w+$/', $filename);
     }
 }
