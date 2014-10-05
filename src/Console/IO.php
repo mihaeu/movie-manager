@@ -4,6 +4,7 @@ namespace Mihaeu\MovieManager\Console;
 
 use Composer\IO\ConsoleIO;
 use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Question\Question;
 
 class IO extends ConsoleIO
@@ -28,5 +29,20 @@ class IO extends ConsoleIO
     public function getOption($option)
     {
         return $this->input->getOption($option);
+    }
+
+    /**
+     * @param array $headers
+     * @param array $rows
+     */
+    public function table(array $headers, array $rows)
+    {
+        /** @var Table $table */
+        $table = $this->helperSet->get('table');
+        $table
+            ->setHeaders($headers)
+            ->setRows($rows)
+        ;
+        $table->render($this->output);
     }
 }

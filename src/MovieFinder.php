@@ -35,18 +35,15 @@ class MovieFinder
      */
     public function findMoviesInDir($path = '')
     {
-        $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($path),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
+        // only files
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
 
         $fileSets = [];
         foreach ($files as $name => $file) {
             /** @var \SplFileInfo $file */
-            if ($file->isFile() && $this->isCorrectMovieFormat($file->getExtension()) || $this->isNotMultiPartMovie($name)) {
-                $fileSets = $this->fileSetFactory->create($file->getRealPath());
+            if ($file->isReadable() && $this->isCorrectMovieFormat($file->getExtension()) && $this->isNotMultiPartMovie($name)) {
+                $fileSets[] = $this->fileSetFactory->create($file->getRealPath());
             }
-
         }
 
         ksort($fileSets);
