@@ -1,6 +1,7 @@
 {
     "name": "mihaeu/movie-manager",
-    "description": "Organize, search, list and filter your movie collection.",
+    "description": "Organize, list, search and filter your movie collection.",
+    "keywords": ["movie", "organizer", "film", "collection"],
     "require": {
         "twig/twig":                    "1.*",
         "guzzle/guzzle":                "3.*",

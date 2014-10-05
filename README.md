@@ -1,7 +1,7 @@
 # Movie-Manager
-![https://scrutinizer-ci.com/g/mihaeu/movie-manager/badges/quality-score.png?b=master](https://scrutinizer-ci.com/g/mihaeu/movie-manager/?branch=master)
-![https://scrutinizer-ci.com/g/mihaeu/movie-manager/build-status/master](https://scrutinizer-ci.com/g/mihaeu/movie-manager/?branch=master)
-![https://insight.sensiolabs.com/projects/779570d4-8dfa-4ab2-8c37-85f59a56c7b8/mini.png](https://insight.sensiolabs.com/projects/779570d4-8dfa-4ab2-8c37-85f59a56c7b8)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mihaeu/movie-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mihaeu/movie-manager/?branch=master)
+[![Build Status](https://scrutinizer-ci.com/g/mihaeu/movie-manager/badges/build.png?b=master)](https://scrutinizer-ci.com/g/mihaeu/movie-manager/build-status/master)
+[![SensioLabgs Insight](https://insight.sensiolabs.com/projects/779570d4-8dfa-4ab2-8c37-85f59a56c7b8/mini.png)](https://insight.sensiolabs.com/projects/779570d4-8dfa-4ab2-8c37-85f59a56c7b8)
 
 > Organize, list, search and filter your movie collection.
 
@@ -25,7 +25,4 @@ bin/moviemanager build [--limit="..."] [--no-posters] path [save]
 
 ## TO DO
 
- - [ ] better README/docs
- - [ ] phar file
- - [ ] test coverage
- - [ ] same filters for all commands
+See ![Issues](https://github.com/mihaeu/movie-manager/issues)
