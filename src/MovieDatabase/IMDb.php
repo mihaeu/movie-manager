@@ -2,8 +2,7 @@
 
 namespace Mihaeu\MovieManager\MovieDatabase;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Message\ResponseInterface;
+use GuzzleHttp\ClientInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
@@ -18,14 +17,14 @@ class IMDb
     const IMDB_BASE_URL = 'http://www.imdb.com/title/';
 
     /**
-     * @var Client
+     * @var ClientInterface
      */
     private $client;
 
     /**
-     * @param Client $client
+     * @param ClientInterface $client
      */
-    public function __construct(Client $client)
+    public function __construct(ClientInterface $client)
     {
         $this->client = $client;
     }
@@ -40,7 +39,6 @@ class IMDb
     public function getRating($imdbId)
     {
         try {
-            /** @var ResponseInterface $response */
             $response = $this->client->get(self::IMDB_BASE_URL.$imdbId);
             $content = $response->getBody();
         } catch (\Exception $e) {

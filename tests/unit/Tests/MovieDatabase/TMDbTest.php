@@ -22,38 +22,16 @@ class TMDbTest extends \PHPUnit_Framework_TestCase
         $this->tmdb = new TMDb($config->get('tmdb-api-key'));
     }
 
-    public function testVeryPreciseQuery()
+    public function testListsSuggestionsForAPreciseQuery()
     {
-        $suggestions = $this->tmdb->getMovieSuggestionsFromQuery('shawshank redemption');
+        $suggestions = $this->tmdb->getMovieSuggestionsFromQuery('the godfather');
         $resultIds = [];
         foreach ($suggestions as $suggestion) {
             $resultIds[] = $suggestion['id'];
         }
 
-        $shawshankRedemptionTMDbId = 278;
+        $shawshankRedemptionTMDbId = self::THE_GODFATHER_TMDB_ID;
         $this->assertContains($shawshankRedemptionTMDbId, $resultIds);
-    }
-
-    /**
-     * If we search for something like `the godfather` we should get
-     * the classic "The Godfather" from 1972.
-     */
-    public function testListsMostProbableHitFirst()
-    {
-        $suggestions = $this->tmdb->getMovieSuggestionsFromQuery('the godfather');
-
-        $this->assertEquals(self::THE_GODFATHER_TMDB_ID, $suggestions[0]['id']);
-    }
-
-    public function testConvertsImdbToTmdbId()
-    {
-        $this->assertEquals(self::THE_GODFATHER_TMDB_ID, $this->tmdb->getTmdbIdFromImdbId('tt0068646'));
-    }
-
-    public function testThrowsExceptionOnBadId()
-    {
-        $this->setExpectedException('\Exception');
-        $this->tmdb->getTmdbIdFromImdbId('badId');
     }
 
     public function testFindsTmdbInfo()
