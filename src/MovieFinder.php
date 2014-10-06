@@ -41,7 +41,7 @@ class MovieFinder
         $fileSets = [];
         foreach ($files as $name => $file) {
             /** @var \SplFileInfo $file */
-            if ($this->isCorrectMovieFormat($file->getExtension()) && $this->isNotMultiPartMovie($name)) {
+            if ($this->isCorrectMovieFormat($file->getExtension()) && $this->isNotMultiPartMovie($name) && $this->isNotTrailer($name)) {
                 $fileSets[] = $this->fileSetFactory->create($file->getRealPath());
             }
         }
@@ -68,5 +68,15 @@ class MovieFinder
     public function isNotMultiPartMovie($filename)
     {
         return 1 !== preg_match('/.*CD[2-9]\.\w+$/', $filename);
+    }
+
+    /**
+     * @param $name
+     *
+     * @return bool
+     */
+    public function isNotTrailer($name)
+    {
+        return 1 !== preg_match('/ \- Trailer\.\w+$/', $name);
     }
 }

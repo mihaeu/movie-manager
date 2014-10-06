@@ -269,7 +269,7 @@ class TMDb
     /**
      * @param Videos $videos
      *
-     * @return null|string
+     * @return string|null
      */
     public function extractTrailer(Videos $videos)
     {
@@ -279,6 +279,6 @@ class TMDb
                 return 'https://www.youtube.com/watch?v='.$video->getKey();
             }
         }
-        return false;
+        return null;
     }
 }

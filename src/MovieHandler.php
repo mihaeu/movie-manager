@@ -139,10 +139,11 @@ class MovieHandler
         $script = __DIR__.'/../rasterize.js';
         $target = $this->generateFileName($movie, $movieFile, ' - IMDb.png');
         $cmd = "phantomjs $script \"$url\" \"$target\"";
-        $returnVal = false;
-        exec($cmd, $returnVal);
+        $returnVal = 1;
+        $output = [];
+        exec($cmd, $output, $returnVal);
 
-        return false !== $returnVal;
+        return 0 === $returnVal;
     }
 
     /**
@@ -197,10 +198,15 @@ class MovieHandler
     /**
      * @param \SplFileInfo $movieFile
      * @param string       $targetDirectory
+     *
+     * @return string
      */
     public function moveTo(\SplFileInfo $movieFile, $targetDirectory)
     {
-        $this->filesystem->rename($movieFile->getPath(), $targetDirectory.DIRECTORY_SEPARATOR.$movieFile->getPathInfo()->getBasename());
+        $newRootDirectory = $targetDirectory.DIRECTORY_SEPARATOR.$movieFile->getPathInfo()->getBasename();
+        $this->filesystem->rename($movieFile->getPath(), $newRootDirectory);
+
+        return $newRootDirectory;
     }
 
 
@@ -235,5 +241,30 @@ class MovieHandler
         rename($movieFile->getRealPath(), $newPath);
 
         return $newPath;
+    }
+
+    /**
+     * Download the movie trailer using Python's youtube-dl (when installed).
+     *
+     * @param Movie        $movie
+     * @param \SplFileInfo $movieFile
+     *
+     * @return bool
+     */
+    public function downloadTrailer(Movie $movie, \SplFileInfo $movieFile)
+    {
+        // check if youtube-dl exists in the right version
+        if (exec('youtube-dl --version') < 1 || null === $movie->getTrailer()) {
+            return false;
+        }
+
+        $filesBefore = scandir($movieFile->getPath());
+        $cmd = 'youtube-dl "'.$movie->getTrailer().'" --output "'
+            .$this->generateFileName($movie, $movieFile).' - Trailer.%(ext)s"';
+        $returnVal = false;
+        system($cmd, $returnVal);
+        $filesAfter = scandir($movieFile->getPath());
+        $trailerFilename = $movieFile->getPath().'/'.array_pop(array_diff($filesAfter, $filesBefore));
+        return file_exists($trailerFilename);
     }
 }

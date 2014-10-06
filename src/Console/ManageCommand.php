@@ -33,6 +33,7 @@ class ManageCommand extends BaseCommand
     const MSG_CREATE_INFO               = '[%s] Creating movie information file ... ';
     const MSG_CREATE_SCREENY            = '[%s] Downloading IMDb screenshot ... ';
     const MSG_CREATE_POSTER             = '[%s] Downloading poster ... ';
+    const MSG_CREATE_TRAILER            = '[%s] Downloading trailer ... ';
     const MSG_MOVE_FILE                 = '[%s] Renaming movie file ... ';
     const MSG_MOVE_DIRECTORY            = '[%s] Renaming movie directory ... ';
     const MSG_MOVE_SEPARATE_DIRECTORY   = '[%s] Moving to separate movie directory ... ';
@@ -257,20 +258,30 @@ class ManageCommand extends BaseCommand
                 $this->io->overwrite(sprintf(self::MSG_CREATE_POSTER, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
-            $movieWasRenamed = $movieHandler->renameMovie($parsedMovie, $movieFile);
-            if ($movieWasRenamed) {
-                $this->io->write(sprintf(self::MSG_MOVE_FILE, self::CLI_OK));
+            $this->io->write(sprintf(self::MSG_MOVE_FILE, ' '), false);
+            $newFilename = $movieHandler->renameMovie($parsedMovie, $movieFile);
+            if ($newFilename) {
+                $movieFile = new \SplFileObject($newFilename);
+                $this->io->overwrite(sprintf(self::MSG_MOVE_FILE, self::CLI_OK));
             }
 
+            $this->io->write(sprintf(self::MSG_MOVE_DIRECTORY, ' '), false);
             $newDirectory = $movieHandler->renameMovieFolder($parsedMovie, $movieFile);
             if ($newDirectory) {
-                $this->io->write(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_OK));
+                $movieFile = new \SplFileObject($newDirectory.'/'.$movieFile->getBasename());
+                $this->io->overwrite(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_OK));
             }
 
             if ($this->io->getOption('move-to')) {
-                $movieHandler->moveTo($movieFile, $this->io->getOption('move-to'));
+                $this->io->write(sprintf(self::MSG_MOVE_TO_ROOT, ''), false);
+                $newRootDirectory = $movieHandler->moveTo($movieFile, $this->io->getOption('move-to'));
+                $movieFile = new \SplFileObject($newRootDirectory.'/'.$movieFile->getBasename());
                 $this->io->write(sprintf(self::MSG_MOVE_TO_ROOT, self::CLI_OK));
             }
+
+            $this->io->write(PHP_EOL);
+            $result = $movieHandler->downloadTrailer($parsedMovie, $movieFile);
+            $this->io->write(sprintf(self::MSG_CREATE_TRAILER, $result ? self::CLI_OK : self::CLI_NOK));
         }
     }
 }
