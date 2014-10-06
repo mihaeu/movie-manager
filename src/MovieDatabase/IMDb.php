@@ -3,6 +3,7 @@
 namespace Mihaeu\MovieManager\MovieDatabase;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Message\ResponseInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
@@ -39,6 +40,7 @@ class IMDb
     public function getRating($imdbId)
     {
         try {
+            /** @var ResponseInterface $response */
             $response = $this->client->get(self::IMDB_BASE_URL.$imdbId);
             $content = $response->getBody();
         } catch (\Exception $e) {

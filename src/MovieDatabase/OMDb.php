@@ -3,6 +3,7 @@
 namespace Mihaeu\MovieManager\MovieDatabase;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Message\ResponseInterface;
 
 /**
  * Class OMDb
@@ -36,6 +37,7 @@ class OMDb
     public function getIMDbRating($imdbId)
     {
         try {
+            /** @var ResponseInterface $response */
             $response = $this->client->get(self::OMDB_API_BASE_URL.$imdbId);
             $jsonData = $response->json();
         } catch (\Exception $e) {
