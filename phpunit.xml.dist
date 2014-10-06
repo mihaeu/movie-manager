@@ -28,7 +28,35 @@
     </logging>
 
     <listeners>
+
+        <!-- Mockery: Mocks for PHPUnit -->
         <listener class="\Mockery\Adapter\Phpunit\TestListener" />
+
+        <!-- Clever and Smart: runs previously failing tests first -->
+        <listener class="PHPUnit\Runner\CleverAndSmart\TestListener">
+            <arguments>
+                <object class="PHPUnit\Runner\CleverAndSmart\Storage\Sqlite3Storage">
+                    <arguments>
+                        <string>./build/.phpunit-cas.db</string>
+                    </arguments>
+                </object>
+            </arguments>
+        </listener>
+
+        <!-- SpeedTrap: lists slow test -->
+        <listener class="JohnKary\PHPUnit\Listener\SpeedTrapListener">
+            <arguments>
+                <array>
+                    <element key="slowThreshold">
+                        <integer>200</integer>
+                    </element>
+                    <element key="reportLength">
+                        <integer>5</integer>
+                    </element>
+                </array>
+            </arguments>
+        </listener>
+
     </listeners>
 
 </phpunit>
