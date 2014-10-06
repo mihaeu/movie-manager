@@ -35,7 +35,7 @@
         <!-- Clever and Smart: runs previously failing tests first -->
         <listener class="PHPUnit\Runner\CleverAndSmart\TestListener">
             <arguments>
-                <object class="PHPUnit\Runner\CleverAndSmart\Storage\Sqlite3Storage">
+                <object class="Mihaeu\MovieManager\Tests\Sqlite3TestStorage">
                     <arguments>
                         <string>build/.phpunit-cas.db</string>
                     </arguments>
