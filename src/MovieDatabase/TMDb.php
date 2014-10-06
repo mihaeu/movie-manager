@@ -99,10 +99,12 @@ class TMDb
     /**
      * Get all movie information from TMDb.
      *
-     * @param  int   $tmdbId
+     * @param int  $tmdbId
+     * @param bool $withTrailer
+     *
      * @return array
      */
-    public function getMovieFromTmdbId($tmdbId)
+    public function getMovieFromTmdbId($tmdbId, $withTrailer = false)
     {
         $configRepository = new ConfigurationRepository($this->client);
         $config = $configRepository->load();
@@ -139,9 +141,12 @@ class TMDb
             'spokenLanguages'       => $this->extractSpokenLanguages($movieResult->getSpokenLanguages()),
             'cast'                  => $this->extractCast($credit->getCast($credit)),
             'character'             => $this->extractCharacters($credit->getCast($credit)),
-            'directors'             => $this->extractDirectors($credit->getCrew($credit)),
-            'trailer'               => $this->extractTrailer($movieRepository->getVideos($tmdbId))
+            'directors'             => $this->extractDirectors($credit->getCrew($credit))
         ];
+
+        if (true === $withTrailer) {
+            $movie['trailer'] = $this->extractTrailer($movieRepository->getVideos($tmdbId));
+        }
 
         return $movie;
     }
