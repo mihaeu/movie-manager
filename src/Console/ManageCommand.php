@@ -5,6 +5,7 @@ namespace Mihaeu\MovieManager\Console;
 use Mihaeu\MovieManager\Config;
 use Mihaeu\MovieManager\Factory\FileSetFactory;
 use Mihaeu\MovieManager\Factory\MovieFactory;
+use Mihaeu\MovieManager\FileSet;
 use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\MovieDatabase\IMDb;
 use Mihaeu\MovieManager\MovieDatabase\TMDb;
@@ -36,11 +37,6 @@ class ManageCommand extends BaseCommand
     const MSG_MOVE_TO_ROOT              = '[%s] Moving to new destination ... ';
     const MSG_NO_MOVIES                 = '<info>Couldn\'t find any movies.</info>';
     const MSG_NO_MATCHES                = '<error>No matches for your query.</error>';
-
-    /**
-     * @var Config
-     */
-    private $config;
 
     /**
      * @var MovieFactory
@@ -100,20 +96,17 @@ class ManageCommand extends BaseCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->config = new Config();
+        $config = new Config();
         $this->io = new IO($input, $output, $this->getHelperSet());
 
         $this->movieRoot = new \SplFileInfo($input->getArgument('path'));
-        $finder = new MovieFinder();
-        $movieFiles = $finder->findMoviesInDir(
-            $this->movieRoot->getRealPath(),
-            $this->config->get('allowed-movie-formats')
-        );
+        $this->fileSetFactory = new FileSetFactory($this->movieRoot);
+        $finder = new MovieFinder($this->fileSetFactory, $config->get('allowed-movie-formats'));
+        $movieFiles = $finder->findMoviesInDir($this->movieRoot->getRealPath());
 
-        $this->tmdb = new TMDb($this->config->get('tmdb-api-key'));
+        $this->tmdb = new TMDb($config->get('tmdb-api-key'));
         $imdb = new IMDb();
         $this->movieFactory = new MovieFactory($this->tmdb, $imdb);
-        $this->fileSetFactory = new FileSetFactory($this->movieRoot);
 
         if (!$input->getOption('show-all')) {
             $movieFiles = $this->filterBadMovies($movieFiles);
@@ -124,12 +117,10 @@ class ManageCommand extends BaseCommand
             return;
         }
 
-        $table = $this->getHelper('table');
-        $table
-            ->setHeaders(['Name', 'Format ', 'Folder ', 'Info   ', 'Screeny', 'Poster '])
-            ->setRows($this->formatMoviesForTable($movieFiles))
-        ;
-        $table->render($output);
+        $this->io->table(
+            ['Name', 'Format ', 'Folder ', 'Info   ', 'Screeny', 'Poster '],
+            $this->formatMoviesForTable($movieFiles)
+        );
 
         $this->manageMoviesInteractively($movieFiles, $input, $output);
     }
@@ -137,58 +128,61 @@ class ManageCommand extends BaseCommand
     /**
      * Filters the movies so that only movies which are not properly parsed will be left.
      *
-     * @param array $movieFiles
+     * @param array|FileSet[] $fileSets
      *
-     * @return array
+     * @return array|FileSet[]
      */
-    public function filterBadMovies(array $movieFiles)
+    public function filterBadMovies(array $fileSets)
     {
-        return array_filter($movieFiles, function ($movie) {
-            return !$movie['format']
-            || !$movie['folder']
-            || !$movie['link']
-            || !$movie['screenshot']
-            || !$movie['poster'];
+        return array_filter($fileSets, function (FileSet $fileSet) {
+            return !(
+                   $fileSet->hasCorrectName()
+                && $fileSet->hasCorrectParentFolder()
+                && $fileSet->getInfoFile()
+                && $fileSet->getImdbScreenshotFile()
+                && $fileSet->getPosterFile()
+            );
         });
     }
 
     /**
      * Formats a movie for pretty printing in a symfony console table.
      *
-     * @param array $movieFiles
+     * @param array|FileSet[] $fileSets
      *
      * @return array
      */
-    public function formatMoviesForTable(array $movieFiles)
+    public function formatMoviesForTable(array $fileSets)
     {
-        return array_map(function (array $movie) {
+        return array_map(function (FileSet $fileSet) {
             return [
-                substr($movie['name'], 0, 40),
-                $movie['format']        ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
-                $movie['folder']        ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
-                $movie['link']          ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
-                $movie['screenshot']    ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
-                $movie['poster']        ? self::CLI_CELL_OK : self::CLI_CELL_NOK
+                substr($fileSet->getMovieFile()->getBasename(), 0, 40),
+                $fileSet->hasCorrectName()         ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
+                $fileSet->hasCorrectParentFolder() ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
+                $fileSet->getInfoFile()            ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
+                $fileSet->getImdbScreenshotFile()  ? self::CLI_CELL_OK : self::CLI_CELL_NOK,
+                $fileSet->getPosterFile()          ? self::CLI_CELL_OK : self::CLI_CELL_NOK
             ];
-        }, $movieFiles);
+        }, $fileSets);
     }
 
     /**
-     * @param array $movieFiles
+     * @param array|FileSet[] $fileSets
      *
      * @throws \Exception
      */
-    public function manageMoviesInteractively(array $movieFiles)
+    public function manageMoviesInteractively(array $fileSets)
     {
         $movieTitleQuestion =  new Question('Please enter the movie title [or hit ENTER to skip, p to play, q to quit]: ');
         $movieHandler = new MovieHandler(new Filesystem());
 
         $index = 0;
-        foreach ($movieFiles as $movie) {
-            $movieFile = new \SplFileObject($movie['fullname']);
-            $this->io->write(sprintf(self::MSG_TITLE, ++$index, count($movieFiles), $movie['name']));
+        foreach ($fileSets as $fileSet) {
+            /** @var FileSet $fileSet */
+            $movieFile = $fileSet->getMovieFile();
+            $this->io->write(sprintf(self::MSG_TITLE, ++$index, count($fileSets), $movieFile->getBasename()));
 
-            if (!$movie['link']) {
+            if (null === $fileSet->getInfoFile()) {
                 $query = $this->io->askQuestion($movieTitleQuestion);
                 if (empty($query)) {
                     continue;
@@ -199,7 +193,7 @@ class ManageCommand extends BaseCommand
                 }
 
                 if ('p' === $query) {
-                    system('vlc "'.$movie['fullname'].'"');
+                    system('vlc "'.$movieFile->getRealPath().'"');
                     $query = $this->io->askQuestion($movieTitleQuestion);
 
                     if (empty($query)) {
@@ -238,9 +232,6 @@ class ManageCommand extends BaseCommand
                 if ($movieHandler->movieIsNotInSeparateFolder($this->movieRoot, $movieFile)) {
                     $newFilename = $movieHandler->moveMovieToSeparateFolder($this->movieRoot, $movieFile);
                     $movieFile = new \SplFileObject($newFilename);
-                    $movie['link'] = false;
-                    $movie['poster'] = false;
-                    $movie['screenshot'] = false;
                     $this->io->write(sprintf(self::MSG_MOVE_SEPARATE_DIRECTORY, self::CLI_OK));
                 }
 
@@ -258,13 +249,13 @@ class ManageCommand extends BaseCommand
                 $parsedMovie = $this->movieFactory->create($movieInfo['info']['id']);
             }
 
-            if (!$movie['screenshot']) {
+            if (null === $fileSet->getImdbScreenshotFile()) {
                 $this->io->write(sprintf(self::MSG_CREATE_SCREENY, ' '), false);
                 $result = $movieHandler->downloadIMDbScreenshot($parsedMovie, $movieFile);
                 $this->io->overwrite(sprintf(self::MSG_CREATE_SCREENY, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
-            if (!$movie['poster']) {
+            if (null === $fileSet->getPosterFile()) {
                 $this->io->write(sprintf(self::MSG_CREATE_POSTER, ' '), false);
                 $result = $movieHandler->downloadMoviePoster($parsedMovie, $movieFile);
                 $this->io->overwrite(sprintf(self::MSG_CREATE_POSTER, $result ? self::CLI_OK : self::CLI_NOK));
