@@ -104,7 +104,7 @@ class TMDb
      *
      * @return array
      */
-    public function getMovieFromTmdbId($tmdbId, $withTrailer = false)
+    public function getMovieFromTMDbId($tmdbId, $withTrailer = false)
     {
         $configRepository = new ConfigurationRepository($this->client);
         $config = $configRepository->load();

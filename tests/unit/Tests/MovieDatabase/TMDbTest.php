@@ -14,9 +14,8 @@ class TMDbTest extends \PHPUnit_Framework_TestCase
 
     public function testListsSuggestionsForAPreciseQuery()
     {
-        $config = new Config();
         $tmdbTheGodfatherSearch = __DIR__.'/../../../demo/api.themoviedb.org/3/search/movie?query=the%2Bgodfather';
-        $tmdb = new TMDb($config->get('tmdb-api-key'), $this->getMockedGuzzleV3ClientForJson($tmdbTheGodfatherSearch));
+        $tmdb = new TMDb('tmdb-api-key', $this->getMockedGuzzleV3ClientForJson($tmdbTheGodfatherSearch));
         $suggestions = $tmdb->getMovieSuggestionsFromQuery('the godfather');
         $resultIds = [];
         foreach ($suggestions as $suggestion) {
@@ -27,10 +26,9 @@ class TMDbTest extends \PHPUnit_Framework_TestCase
 
     public function testFindsTmdbInfo()
     {
-        $config = new Config();
         $tmdbTheGodfatherMovie = __DIR__.'/../../../demo/api.themoviedb.org/3/movie/238';
-        $tmdb = new TMDb($config->get('tmdb-api-key'), $this->getMockedGuzzleV3ClientForJson($tmdbTheGodfatherMovie));
-        $movie = $tmdb->getMovieFromTmdbId(self::THE_GODFATHER_TMDB_ID);
+        $tmdb = new TMDb('tmdb-api-key', $this->getMockedGuzzleV3ClientForJson($tmdbTheGodfatherMovie));
+        $movie = $tmdb->getMovieFromTMDbId(self::THE_GODFATHER_TMDB_ID);
         $this->assertEquals(1972, $movie['year']);
     }
 
