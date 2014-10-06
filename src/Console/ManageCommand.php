@@ -9,6 +9,7 @@ use Mihaeu\MovieManager\Factory\MovieFactory;
 use Mihaeu\MovieManager\FileSet;
 use Mihaeu\MovieManager\Ini\Reader;
 use Mihaeu\MovieManager\MovieDatabase\IMDb;
+use Mihaeu\MovieManager\MovieDatabase\OMDb;
 use Mihaeu\MovieManager\MovieDatabase\TMDb;
 use Mihaeu\MovieManager\MovieFinder;
 use Mihaeu\MovieManager\MovieHandler;
@@ -100,8 +101,8 @@ class ManageCommand extends BaseCommand
         $movieFiles = $finder->findMoviesInDir($this->movieRoot->getRealPath());
 
         $this->tmdb = new TMDb($config->get('tmdb-api-key'));
-        $imdb = new IMDb(new Client());
-        $this->movieFactory = new MovieFactory($this->tmdb, $imdb);
+        $client = new Client();
+        $this->movieFactory = new MovieFactory($this->tmdb, new IMDb($client), new OMDb($client));
 
         if (!$input->getOption('show-all')) {
             $movieFiles = $this->filterBadMovies($movieFiles);

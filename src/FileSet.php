@@ -63,7 +63,7 @@ class FileSet
     public function getFilesize()
     {
         if (null === $this->filesize) {
-            $this->$filesize = $this->movieFile->getSize() / self::B_TO_KB / self::KB_TO_MB;
+            $this->filesize = $this->movieFile->getSize() / self::B_TO_KB / self::KB_TO_MB;
         }
         return $this->filesize;
     }

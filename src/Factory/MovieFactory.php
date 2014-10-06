@@ -3,6 +3,7 @@
 namespace Mihaeu\MovieManager\Factory;
 
 use \Mihaeu\MovieManager\Movie;
+use Mihaeu\MovieManager\MovieDatabase\OMDb;
 use Mihaeu\MovieManager\MovieDatabase\TMDb;
 use Mihaeu\MovieManager\MovieDatabase\IMDb;
 
@@ -14,13 +15,30 @@ use Mihaeu\MovieManager\MovieDatabase\IMDb;
 class MovieFactory
 {
     /**
+     * @var TMDb
+     */
+    private $tmdb;
+
+    /**
+     * @var IMDb
+     */
+    private $imdb;
+
+    /**
+     * @var OMDb
+     */
+    private $omdb;
+
+    /**
      * @param TMDb $tmdb
      * @param IMDb $imdb
+     * @param OMDb $omdb
      */
-    public function __construct(TMDb $tmdb, IMDb $imdb)
+    public function __construct(TMDb $tmdb, IMDb $imdb, OMDb $omdb)
     {
         $this->tmdb = $tmdb;
         $this->imdb = $imdb;
+        $this->omdb = $omdb;
     }
 
     /**
@@ -42,10 +60,33 @@ class MovieFactory
         }
 
         // set IMDb data
-        $imdbRating = $this->imdb->getRating($movie->getImdbId());
-        $movie->setImdbRating($imdbRating);
+        $movie->setImdbRating($this->getIMDbRating($movie->getImdbId()));
 
         return $movie;
+    }
+
+    /**
+     * Fetches the IMDb rating from OMDb using IMDb as a fallback option.
+     *
+     * @param string $imdbId
+     *
+     * @return float
+     */
+    private function getIMDbRating($imdbId)
+    {
+        $imdbRating = $this->omdb->getIMDbRating($imdbId);
+
+        // fall back on IMDb
+        if (false === $imdbRating) {
+            $imdbRating = $this->imdb->getRating($imdbId);
+        }
+
+        // default rating 0.0
+        if (false === $imdbRating) {
+            $imdbRating = 0.0;
+        }
+
+        return $imdbRating;
     }
 }
 

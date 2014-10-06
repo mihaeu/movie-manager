@@ -14,6 +14,7 @@ class TMDbTest extends \PHPUnit_Framework_TestCase
     private $tmdb;
 
     const THE_GODFATHER_TMDB_ID = 238;
+    const THE_GODFATHER_TMDB_TITLE = 'The Godfather';
 
     public function setUp()
     {
@@ -46,7 +47,7 @@ class TMDbTest extends \PHPUnit_Framework_TestCase
 
     public function testConvertsImdbToTmdbId()
     {
-        $this->assertEquals($this->tmdb->getTmdbIdFromImdbId('tt0068646'), self::THE_GODFATHER_TMDB_ID);
+        $this->assertEquals(self::THE_GODFATHER_TMDB_ID, $this->tmdb->getTmdbIdFromImdbId('tt0068646'));
     }
 
     public function testThrowsExceptionOnBadId()
