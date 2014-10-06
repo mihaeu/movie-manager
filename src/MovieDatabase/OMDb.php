@@ -3,7 +3,6 @@
 namespace Mihaeu\MovieManager\MovieDatabase;
 
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Message\ResponseInterface;
 
 /**
  * Class OMDb

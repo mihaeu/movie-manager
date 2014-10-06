@@ -1,6 +1,7 @@
 # Movie-Manager
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mihaeu/movie-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mihaeu/movie-manager/?branch=master)
 [![Build Status](https://scrutinizer-ci.com/g/mihaeu/movie-manager/badges/build.png?b=master)](https://scrutinizer-ci.com/g/mihaeu/movie-manager/build-status/master)
+[![Code Coverage](https://scrutinizer-ci.com/g/mihaeu/movie-manager/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/mihaeu/movie-manager/?branch=master)
 [![SensioLabgs Insight](https://insight.sensiolabs.com/projects/779570d4-8dfa-4ab2-8c37-85f59a56c7b8/mini.png)](https://insight.sensiolabs.com/projects/779570d4-8dfa-4ab2-8c37-85f59a56c7b8)
 
 > Organize, list, search and filter your movie collection.
