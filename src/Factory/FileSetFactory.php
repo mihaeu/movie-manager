@@ -24,9 +24,6 @@ class FileSetFactory
     const INFO_FILE_FORMAT          = '%s - IMDb.url';
     const IMDB_SCREENSHOT_FORMAT    = '%s - IMDb.png';
 
-    const B_TO_KB  = 1024;
-    const KB_TO_MB = 1024;
-
     /**
      * @param string $rootFolder
      */
@@ -77,12 +74,6 @@ class FileSetFactory
         if (file_exists($imdbScreenshotFilename)) {
             $fileSet->setImdbScreenshotFile(new \SplFileObject($imdbScreenshotFilename));
         }
-
-        $filesize = 0;
-        foreach ($allFiles as $filename => $file) {
-            $filesize += (int)(filesize($filename) / self::B_TO_KB / self::KB_TO_MB);
-        }
-        $fileSet->setFilesize($filesize);
 
         $fileSet->setMoviePartFiles(array_filter($allFiles, function (\SplFileInfo $file) use ($movieFile) {
             return $file->getExtension() === $movieFile->getExtension();

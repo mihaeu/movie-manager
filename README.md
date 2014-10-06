@@ -25,4 +25,4 @@ bin/moviemanager build [--limit="..."] [--no-posters] path [save]
 
 ## TO DO
 
-See ![Issues](https://github.com/mihaeu/movie-manager/issues)
+See [Issues](https://github.com/mihaeu/movie-manager/issues)

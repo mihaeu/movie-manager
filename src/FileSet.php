@@ -9,6 +9,9 @@ namespace Mihaeu\MovieManager;
  */
 class FileSet
 {
+    const B_TO_KB  = 1024;
+    const KB_TO_MB = 1024;
+
     /**
      * @var \SplFileObject
      */
@@ -55,10 +58,13 @@ class FileSet
     private $filesize;
 
     /**
-     * @return int
+     * @return int filesize in MB
      */
     public function getFilesize()
     {
+        if (null === $this->filesize) {
+            $this->$filesize = $this->movieFile->getSize() / self::B_TO_KB / self::KB_TO_MB;
+        }
         return $this->filesize;
     }
 

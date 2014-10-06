@@ -6,6 +6,7 @@ php:
 
 before_script:
  - composer install
+ - cp config.sample.json config.json
 
 script: phpunit --coverage-text  --coverage-clover=coverage.clover
 

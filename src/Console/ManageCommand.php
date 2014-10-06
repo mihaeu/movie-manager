@@ -2,7 +2,9 @@
 
 namespace Mihaeu\MovieManager\Console;
 
+use GuzzleHttp\Client;
 use Mihaeu\MovieManager\Config;
+use Mihaeu\MovieManager\Factory\FileSetFactory;
 use Mihaeu\MovieManager\Factory\MovieFactory;
 use Mihaeu\MovieManager\FileSet;
 use Mihaeu\MovieManager\Ini\Reader;
@@ -94,12 +96,11 @@ class ManageCommand extends BaseCommand
         $this->io = new IO($input, $output, $this->getHelperSet());
 
         $this->movieRoot = new \SplFileInfo($input->getArgument('path'));
-        $this->fileSetFactory = new FileSetFactory($this->movieRoot);
-        $finder = new MovieFinder($this->fileSetFactory, $config->get('allowed-movie-formats'));
+        $finder = new MovieFinder(new FileSetFactory($this->movieRoot), $config->get('allowed-movie-formats'));
         $movieFiles = $finder->findMoviesInDir($this->movieRoot->getRealPath());
 
         $this->tmdb = new TMDb($config->get('tmdb-api-key'));
-        $imdb = new IMDb();
+        $imdb = new IMDb(new Client());
         $this->movieFactory = new MovieFactory($this->tmdb, $imdb);
 
         if (!$input->getOption('show-all')) {
