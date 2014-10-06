@@ -3,6 +3,7 @@
     "description": "Organize, list, search and filter your movie collection.",
     "keywords": ["movie", "organizer", "film", "collection"],
     "require": {
+        "php":                          ">=5.4",
         "twig/twig":                    "1.*",
         "guzzle/guzzle":                "3.*",
         "wtfzdotnet/php-tmdb-api":      "1.*",

@@ -15,11 +15,15 @@ class Config
     private $config;
 
     /**
+     * @param  string|null $configFile
+     *
      * @throws \Exception
      */
-    public function __construct()
+    public function __construct($configFile = null)
     {
-        $configFile = __DIR__ . '/../config.json';
+        if (null === $configFile) {
+            $configFile = __DIR__ . '/../config.json';
+        }
         if (!file_exists($configFile)) {
             throw new \Exception($configFile . ' does not exist, please create it or rename config.sample.json.'.PHP_EOL);
         }
