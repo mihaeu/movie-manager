@@ -37,7 +37,7 @@
             <arguments>
                 <object class="PHPUnit\Runner\CleverAndSmart\Storage\Sqlite3Storage">
                     <arguments>
-                        <string>./build/.phpunit-cas.db</string>
+                        <string>build/.phpunit-cas.db</string>
                     </arguments>
                 </object>
             </arguments>
