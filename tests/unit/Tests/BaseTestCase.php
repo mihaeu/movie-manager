@@ -9,7 +9,7 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
     /**
      * @var string
      */
-    protected $testFolder;
+    protected $testDirectory;
 
     /**
      * @var Filesystem
@@ -18,7 +18,7 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
 
     public function __construct()
     {
-        $this->testFolder = sys_get_temp_dir().DIRECTORY_SEPARATOR.microtime(true);
+        $this->testDirectory = sys_get_temp_dir().DIRECTORY_SEPARATOR.microtime(true);
     }
 
     /**
@@ -30,7 +30,7 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
     protected function createTestStructure($files, $parent = null)
     {
         if (null === $parent) {
-            $parent = $this->testFolder;
+            $parent = $this->testDirectory;
         }
 
         foreach ($files as $key => $file) {
@@ -50,7 +50,7 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
     protected function destroyTestStructure($path = null)
     {
         if (null === $path) {
-            $path = $this->testFolder;
+            $path = $this->testDirectory;
         }
         $this->getFilesystem()->remove($path);
     }

@@ -96,11 +96,7 @@ class MovieHandler
      */
     public function getIMDbLink($imdbId)
     {
-        if (strpos($imdbId, 'tt') === false) {
-            return 'http://www.imdb.com/title/tt' . $imdbId;
-        } else {
-            return 'http://www.imdb.com/title/' . $imdbId;
-        }
+        return 'http://www.imdb.com/title/'.$imdbId;
     }
 
     /**
@@ -108,8 +104,6 @@ class MovieHandler
      * @param \SplFileInfo   $movieFile
      *
      * @return bool
-     *
-     * @throws \TMDbException
      */
     public function downloadMoviePoster(Movie $movie, \SplFileInfo $movieFile)
     {

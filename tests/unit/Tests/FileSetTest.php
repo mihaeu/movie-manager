@@ -28,9 +28,9 @@ class FileSetTest extends BaseTestCase
     public function testComputesFileSize()
     {
         $this->createTestStructure(['folder' => ['movie.mp4']]);
-        $movieFilename = $this->testFolder.DIRECTORY_SEPARATOR.'folder'.DIRECTORY_SEPARATOR.'movie.mp4';
+        $movieFilename = $this->testDirectory.DIRECTORY_SEPARATOR.'folder'.DIRECTORY_SEPARATOR.'movie.mp4';
         file_put_contents($movieFilename, str_repeat('1', 1024*1024));
-        $factory = new FileSetFactory($this->testFolder);
+        $factory = new FileSetFactory($this->testDirectory);
         $fileSet = $factory->create($movieFilename);
         $this->assertEquals(1, $fileSet->getFilesize());
         $this->destroyTestStructure();

@@ -39,7 +39,7 @@ class MovieFinderTest extends BaseTestCase
         ];
 
         $this->createTestStructure($files);
-        $this->finder = $finder = new MovieFinder(new FileSetFactory($this->testFolder), ['mkv', 'avi', 'mp4']);
+        $this->finder = $finder = new MovieFinder(new FileSetFactory($this->testDirectory), ['mkv', 'avi', 'mp4']);
     }
 
     public function tearDown()
@@ -49,7 +49,7 @@ class MovieFinderTest extends BaseTestCase
 
     public function testFindsAllMovieFiles()
     {
-        $fileSets = $this->finder->findMoviesInDir($this->testFolder);
+        $fileSets = $this->finder->findMoviesInDir($this->testDirectory);
         $this->assertCount(5, $fileSets);
     }
 }
