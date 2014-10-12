@@ -272,16 +272,15 @@ class ManageCommand extends BaseCommand
                 $this->io->overwrite(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_OK));
             }
 
-            if ($this->io->getOption('move-to')) {
-                $this->io->write(sprintf(self::MSG_MOVE_TO_ROOT, ''), false);
-                $newRootDirectory = $movieHandler->moveTo($movieFile, $this->io->getOption('move-to'));
-                $movieFile = new \SplFileObject($newRootDirectory.'/'.$movieFile->getBasename());
-                $this->io->write(sprintf(self::MSG_MOVE_TO_ROOT, self::CLI_OK));
-            }
-
             $this->io->write(PHP_EOL);
             $result = $movieHandler->downloadTrailer($parsedMovie, $movieFile);
             $this->io->write(sprintf(self::MSG_CREATE_TRAILER, $result ? self::CLI_OK : self::CLI_NOK));
+
+            if ($this->io->getOption('move-to')) {
+                $this->io->write(sprintf(self::MSG_MOVE_TO_ROOT, ''), false);
+                $movieHandler->moveTo($movieFile, $this->io->getOption('move-to'));
+                $this->io->overwrite(sprintf(self::MSG_MOVE_TO_ROOT, self::CLI_OK));
+            }
         }
     }
 }
