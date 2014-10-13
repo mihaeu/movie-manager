@@ -36,8 +36,8 @@ class IniTest extends BaseTestCase
 
     public function testWritesDeepArray()
     {
-        $this->markTestSkipped();
-        
+        $this->markTestSkipped('Nested array handling is not yet implemented, but should probably be there? YAGNI?');
+
         $ini = new Ini(new Filesystem());
         $ini->write($this->testDirectory.'/test.ini',
             [

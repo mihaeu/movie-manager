@@ -105,7 +105,8 @@ class ManageCommand extends BaseCommand
 
         $this->tmdb = new TMDb($config->get('tmdb-api-key'));
         $client = new Client();
-        $this->movieFactory = new MovieFactory($this->tmdb, new IMDb($client), new OMDb($client));
+        $ini = new Ini(new Filesystem());
+        $this->movieFactory = new MovieFactory($this->tmdb, new IMDb($client), new OMDb($client), $ini);
 
         if (!$input->getOption('show-all')) {
             $movieFiles = $this->filterBadMovies($movieFiles);
@@ -240,13 +241,7 @@ class ManageCommand extends BaseCommand
                 $this->io->overwrite(sprintf(self::MSG_CREATE_INFO, $result ? self::CLI_OK : self::CLI_NOK));
             } else {
                 $infoFile = $movieFile->getPath().'/'.$movieFile->getBasename('.'.$movieFile->getExtension()).' - IMDb.url';
-                if (!file_exists($infoFile)) {
-                    throw new \Exception('Movie info file does not exist, movie cannot be processed.'.PHP_EOL.$infoFile);
-                }
-                $ini = new Ini(new Filesystem());
-                $movieInfo = $ini->read($infoFile);
-
-                $parsedMovie = $this->movieFactory->create($movieInfo['info']['id']);
+                $parsedMovie = $this->movieFactory->createFromIni($infoFile);
             }
 
             if (null === $fileSet->getImdbScreenshotFile()) {
