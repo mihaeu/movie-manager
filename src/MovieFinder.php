@@ -36,7 +36,11 @@ class MovieFinder
     public function findMoviesInDir($path = '')
     {
         // only files
-        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path),
+            \RecursiveIteratorIterator::SELF_FIRST,
+            \RecursiveIteratorIterator::CATCH_GET_CHILD
+        );
 
         $fileSets = [];
         foreach ($files as $name => $file) {

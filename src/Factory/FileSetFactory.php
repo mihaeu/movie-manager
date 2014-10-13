@@ -47,7 +47,8 @@ class FileSetFactory
 
         $allFiles = iterator_to_array(new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($fileSet->getParentFolder()->getPathname()),
-            \RecursiveIteratorIterator::SELF_FIRST
+            \RecursiveIteratorIterator::SELF_FIRST,
+            \RecursiveIteratorIterator::CATCH_GET_CHILD
         ));
 
         $fileSet->setSubtitleFiles(array_filter($allFiles, function (\SplFileInfo $file) {
