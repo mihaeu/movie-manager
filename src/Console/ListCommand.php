@@ -4,6 +4,8 @@ namespace Mihaeu\MovieManager\Console;
 
 use Mihaeu\MovieManager\Ini\Reader;
 
+use Mihaeu\MovieManager\IO\Filesystem;
+use Mihaeu\MovieManager\IO\Ini;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -66,9 +68,9 @@ class ListCommand extends Command
         }
 
         if ($this->options['print0']) {
-            echo implode("\0", $matchedMovies);
+            $output->write(implode("\0", $matchedMovies));
         } else {
-            echo implode("\n", $matchedMovies).PHP_EOL;
+            $output->writeln(implode("\n", $matchedMovies));
         }
     }
 
@@ -128,15 +130,15 @@ class ListCommand extends Command
         uasort($this->movies, function ($arrayA, $arrayB) use ($sortBy) {
             if (!isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
                 return 0;
-            } else if (isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
+            } elseif (isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
                 return 1;
-            }  else if (!isset($arrayA['info'][$sortBy]) && isset($arrayB['info'][$sortBy])) {
+            } elseif (!isset($arrayA['info'][$sortBy]) && isset($arrayB['info'][$sortBy])) {
                 return -1;
             }
 
             if ($arrayA['info'][$sortBy] === $arrayB['info'][$sortBy]) {
                 return 0;
-            } else if ($arrayA['info'][$sortBy] > $arrayB['info'][$sortBy]) {
+            } elseif ($arrayA['info'][$sortBy] > $arrayB['info'][$sortBy]) {
                 return 1;
             } else {
                 return -1;
@@ -156,7 +158,8 @@ class ListCommand extends Command
         $movieFolders = array_diff(scandir($this->options['path']), ['.', '..']);
         foreach ($movieFolders as $movieFolder) {
             $linkFile = $this->options['path']."/$movieFolder/$movieFolder - IMDb.url";
-            $movieInfo = Reader::read($linkFile);
+            $ini = new Ini(new Filesystem());
+            $movieInfo = $ini->read($linkFile);
 
             // don't process files which have not been parsed
             if (!isset($movieInfo['info'])) {

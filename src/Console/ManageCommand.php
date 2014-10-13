@@ -7,7 +7,8 @@ use Mihaeu\MovieManager\Config;
 use Mihaeu\MovieManager\Factory\FileSetFactory;
 use Mihaeu\MovieManager\Factory\MovieFactory;
 use Mihaeu\MovieManager\FileSet;
-use Mihaeu\MovieManager\Ini\Reader;
+use Mihaeu\MovieManager\IO\Filesystem;
+use Mihaeu\MovieManager\IO\Ini;
 use Mihaeu\MovieManager\MovieDatabase\IMDb;
 use Mihaeu\MovieManager\MovieDatabase\OMDb;
 use Mihaeu\MovieManager\MovieDatabase\TMDb;
@@ -20,7 +21,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
-use Symfony\Component\Filesystem\Filesystem;
 
 class ManageCommand extends BaseCommand
 {
@@ -40,6 +40,8 @@ class ManageCommand extends BaseCommand
     const MSG_MOVE_TO_ROOT              = '[%s] Moving to new destination ... ';
     const MSG_NO_MOVIES                 = '<info>Couldn\'t find any movies.</info>';
     const MSG_NO_MATCHES                = '<error>No matches for your query.</error>';
+
+    const QUESTION_TITLE = 'Please enter the movie title [or hit ENTER to skip, p to play, q to quit]: ';
 
     /**
      * @var MovieFactory
@@ -170,7 +172,7 @@ class ManageCommand extends BaseCommand
      */
     public function manageMoviesInteractively(array $fileSets)
     {
-        $movieTitleQuestion =  new Question('Please enter the movie title [or hit ENTER to skip, p to play, q to quit]: ');
+        $movieTitleQuestion =  new Question(self::QUESTION_TITLE);
         $movieHandler = new MovieHandler(new Filesystem());
 
         $index = 0;
@@ -237,11 +239,12 @@ class ManageCommand extends BaseCommand
                 $result = $movieHandler->createMovieInfo($parsedMovie, $movieFile);
                 $this->io->overwrite(sprintf(self::MSG_CREATE_INFO, $result ? self::CLI_OK : self::CLI_NOK));
             } else {
-                $infoFile = $movieFile->getPath().DIRECTORY_SEPARATOR.$movieFile->getBasename('.'.$movieFile->getExtension()).' - IMDb.url';
+                $infoFile = $movieFile->getPath().'/'.$movieFile->getBasename('.'.$movieFile->getExtension()).' - IMDb.url';
                 if (!file_exists($infoFile)) {
                     throw new \Exception('Movie info file does not exist, movie cannot be processed.'.PHP_EOL.$infoFile);
                 }
-                $movieInfo = Reader::read($infoFile);
+                $ini = new Ini(new Filesystem());
+                $movieInfo = $ini->read($infoFile);
 
                 $parsedMovie = $this->movieFactory->create($movieInfo['info']['id']);
             }
@@ -258,23 +261,28 @@ class ManageCommand extends BaseCommand
                 $this->io->overwrite(sprintf(self::MSG_CREATE_POSTER, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
-            $this->io->write(sprintf(self::MSG_MOVE_FILE, ' '), false);
-            $newFilename = $movieHandler->renameMovie($parsedMovie, $movieFile);
-            if ($newFilename) {
-                $movieFile = new \SplFileObject($newFilename);
-                $this->io->overwrite(sprintf(self::MSG_MOVE_FILE, self::CLI_OK));
+            if (!$fileSet->hasCorrectName()) {
+                $this->io->write(sprintf(self::MSG_MOVE_FILE, ' '), false);
+                $newFilename = $movieHandler->renameMovie($parsedMovie, $movieFile);
+                if ($newFilename) {
+                    $movieFile = new \SplFileObject($newFilename);
+                    $this->io->overwrite(sprintf(self::MSG_MOVE_FILE, self::CLI_OK));
+                }
             }
 
-            $this->io->write(sprintf(self::MSG_MOVE_DIRECTORY, ' '), false);
-            $newDirectory = $movieHandler->renameMovieFolder($parsedMovie, $movieFile);
-            if ($newDirectory) {
-                $movieFile = new \SplFileObject($newDirectory.'/'.$movieFile->getBasename());
-                $this->io->overwrite(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_OK));
+            if (!$fileSet->hasCorrectParentFolder()) {
+                $this->io->write(sprintf(self::MSG_MOVE_DIRECTORY, ' '), false);
+                $newDirectory = $movieHandler->renameMovieFolder($parsedMovie, $movieFile);
+                if ($newDirectory) {
+                    $movieFile = new \SplFileObject($newDirectory.'/'.$movieFile->getBasename());
+                    $this->io->overwrite(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_OK));
+                }
             }
 
-            $this->io->write(PHP_EOL);
-            $result = $movieHandler->downloadTrailer($parsedMovie, $movieFile);
-            $this->io->write(sprintf(self::MSG_CREATE_TRAILER, $result ? self::CLI_OK : self::CLI_NOK));
+            if (!file_exists($movieHandler->generateFileName($parsedMovie, $movieFile, ' - Trailer.mp4'))) {
+                $result = $movieHandler->downloadTrailer($parsedMovie, $movieFile);
+                $this->io->write(sprintf(PHP_EOL.self::MSG_CREATE_TRAILER, $result ? self::CLI_OK : self::CLI_NOK));
+            }
 
             if ($this->io->getOption('move-to')) {
                 $this->io->write(sprintf(self::MSG_MOVE_TO_ROOT, ''), false);

@@ -38,11 +38,21 @@ class FileSetTest extends BaseTestCase
 
     public function testChecksParentFolder()
     {
-        $factory = new FileSetFactory(vfsStream::url('root'));
-        $fileSet = $factory->create(vfsStream::url('root').'/Amour (2012)/Amour (2012).avi');
+        $testStructure = [
+            'Amour' => [
+                'Amour (2012).avi'
+            ],
+            'Amour (2012)' => [
+                'Amour (2012).avi'
+            ]
+        ];
+        $this->createTestStructure($testStructure);
+
+        $factory = new FileSetFactory($this->testDirectory);
+        $fileSet = $factory->create($this->testDirectory.'/Amour (2012)/Amour (2012).avi');
         $this->assertTrue($fileSet->hasCorrectParentFolder());
 
-        $fileSet = $factory->create(vfsStream::url('root').'/Amour/Amour (2012).avi');
+        $fileSet = $factory->create($this->testDirectory.'/Amour/Amour (2012).avi');
         $this->assertFalse($fileSet->hasCorrectParentFolder());
 
         $emptyFileSet = new FileSet();

@@ -56,7 +56,7 @@ class Filesystem implements FilesystemInterface
     /**
      * {@inheritdoc}
      */
-    public function rename($filenameOld, $filenameNew, $overwrite)
+    public function rename($filenameOld, $filenameNew, $overwrite = false)
     {
         $this->filesystem->rename($filenameOld, $filenameNew, $overwrite);
     }

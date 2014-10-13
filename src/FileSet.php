@@ -239,8 +239,10 @@ class FileSet
         }
 
         $movieBasename = $this->getMovieFile()->getBasename('.'.$this->getMovieFile()->getExtension());
+        $rootSameAsParentOfMovie = $this->getRootFolder()->getRealPath() === $this->getParentFolder()->getPath();
+        $movieNameSameAsFolder = $this->getParentFolder()->getBasename() === $movieBasename;
         return $this->hasCorrectName()
-            && $this->getRootFolder()->getPathname() === $this->getParentFolder()->getPath()
-            && $this->getParentFolder()->getBasename() === $movieBasename;
+            && $rootSameAsParentOfMovie
+            && $movieNameSameAsFolder;
     }
 }

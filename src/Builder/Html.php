@@ -2,7 +2,8 @@
 
 namespace Mihaeu\MovieManager\Builder;
 
-use Mihaeu\MovieManager\Ini\Reader;
+use Mihaeu\MovieManager\IO\Filesystem;
+use Mihaeu\MovieManager\IO\Ini;
 
 /**
  * Class Html
@@ -66,7 +67,8 @@ class Html
             }
 
             $linkFile = "$pathToMovies/$movieFolder/$movieFolder - IMDb.url";
-            $movieInfo = Reader::read($linkFile);
+            $iniHandler = new Ini(new Filesystem());
+            $movieInfo = $iniHandler->read($linkFile);
             if (false === $movieInfo) {
                 continue;
             }
@@ -145,28 +147,11 @@ class Html
                 'genres'     => $movieGenres,
                 'languages'  => $movieLanguages,
                 'countries'  => $movieCountries,
-                'movies'     => $this->getMovies(),
-                'moviesJson' => $this->getMoviesJson()
+                'movies'     => $this->movies,
+                'moviesJson' => $this->moviesJson
             ]
         );
     }
-
-    /**
-     * @return array
-     */
-    public function getMovies()
-    {
-        return $this->movies;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMoviesJson()
-    {
-        return $this->moviesJson;
-    }
-
 
     /**
      * Scales a .jpeg image and returns the base64 encoded data.
@@ -207,22 +192,21 @@ class Html
     /**
      * Sets up Twig environment, extensions and functions.
      */
-    public function setUpTemplating()
+    private function setUpTemplating()
     {
-        $loader = new \Twig_Loader_Filesystem(
-            [
-                $this->templateDir.'/movie-collection',
-                $this->templateDir.'/movie-collection/assets/css',
-                $this->templateDir.'/movie-collection/assets/js'
-            ]
-        );
+        $loader = new \Twig_Loader_Filesystem([
+            $this->templateDir.'/movie-collection',
+            $this->templateDir.'/movie-collection/assets/css',
+            $this->templateDir.'/movie-collection/assets/js'
+        ]);
         $this->templating = new \Twig_Environment($loader, ['debug' => true]);
         $this->templating->addExtension(new \Twig_Extension_Debug());
 
         // add custom functions
         $this->templating->addFunction(
             new \Twig_SimpleFunction(
-                'filedump', function ($file) {
+                'filedump',
+                function ($file) {
                     $data = file_get_contents($this->templateDir.'/movie-collection/'.$file);
                     echo $data;
                 }
@@ -230,7 +214,8 @@ class Html
         );
         $this->templating->addFunction(
             new \Twig_SimpleFunction(
-                'base64filedump', function ($file) {
+                'base64filedump',
+                function ($file) {
                     $data = file_get_contents($this->templateDir.'/movie-collection/'.$file);
                     echo base64_encode($data);
                 }

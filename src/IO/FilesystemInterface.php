@@ -31,7 +31,7 @@ interface FilesystemInterface
      * @param string $filenameNew
      * @param bool   $overwrite
      */
-    public function rename($filenameOld, $filenameNew, $overwrite);
+    public function rename($filenameOld, $filenameNew, $overwrite = false);
 
     /**
      * @param string $filename

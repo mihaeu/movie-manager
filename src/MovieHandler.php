@@ -2,9 +2,9 @@
 
 namespace Mihaeu\MovieManager;
 
-use Mihaeu\MovieManager\Ini\Reader;
-use Mihaeu\MovieManager\Ini\Writer;
-use Symfony\Component\Filesystem\Filesystem;
+use Mihaeu\MovieManager\IO\Filesystem;
+use Mihaeu\MovieManager\IO\FilesystemInterface;
+use Mihaeu\MovieManager\IO\Ini;
 
 /**
  * Handles all tasks to get the movie into a proper format.
@@ -16,11 +16,11 @@ use Symfony\Component\Filesystem\Filesystem;
 class MovieHandler
 {
     /**
-     * @var Filesystem
+     * @var FilesystemInterface
      */
     private $filesystem;
 
-    public function __construct(Filesystem $filesystem)
+    public function __construct(FilesystemInterface $filesystem)
     {
         $this->filesystem = $filesystem;
     }
@@ -169,10 +169,11 @@ class MovieHandler
             ] + $movieIni;
 
         $iniFile = $this->generateFileName($movie, $movieFile, ' - IMDb.url');
-        Writer::write($iniFile, $iniArray);
+        $iniHandler = new Ini(new Filesystem());
+        $iniHandler->write($iniFile, $iniArray);
 
         // this is not fast, but it doesn't really matter for this app
-        return Reader::read($iniFile) !== false;
+        return $iniHandler->read($iniFile) !== false;
     }
 
     /**

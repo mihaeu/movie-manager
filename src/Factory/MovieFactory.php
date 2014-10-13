@@ -89,4 +89,3 @@ class MovieFactory
         return $imdbRating;
     }
 }
-
