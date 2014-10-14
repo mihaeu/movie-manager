@@ -38,32 +38,38 @@
 
 	<br><br>
 
-	<label for="languages">Languages:
-		<select id="languages" name="languages" class="languages form-control input-sm">
-			<option value="all">(all)</option>
-			{% for language in languages|sort %}
-				<option value="{{ language }}">{{ language }}</option>
-			{% endfor %}
-		</select>
-	</label>
+	{% if languages is iterable %}
+		<label for="languages">Languages:
+			<select id="languages" name="languages" class="languages form-control input-sm">
+				<option value="all">(all)</option>
+				{% for language in languages|sort %}
+					<option value="{{ language }}">{{ language }}</option>
+				{% endfor %}
+			</select>
+		</label>
+	{% endif %}
 
-	<label for="genre">Genre:
-		<select id="genre" name="genre" class="form-control input-sm">
-			<option value="all">(all)</option>
-			{% for genre in genres|sort %}
-				<option value="{{ genre }}">{{ genre }}</option>
-			{% endfor %}
-		</select>
-	</label>
+	{% if languages is iterable %}
+		<label for="genre">Genre:
+			<select id="genre" name="genre" class="form-control input-sm">
+				<option value="all">(all)</option>
+				{% for genre in genres|sort %}
+					<option value="{{ genre }}">{{ genre }}</option>
+				{% endfor %}
+			</select>
+		</label>
+	{% endif %}
 
-	<label for="country">Country:
-		<select id="country" name="country" class="form-control input-sm">
-			<option value="all">(all)</option>
-			{% for country in countries|sort %}
-				<option value="{{ country }}">{{ country }}</option>
-			{% endfor %}
-		</select>
-	</label>
+	{% if languages is iterable %}
+		<label for="country">Country:
+			<select id="country" name="country" class="form-control input-sm">
+				<option value="all">(all)</option>
+				{% for country in countries|sort %}
+					<option value="{{ country }}">{{ country }}</option>
+				{% endfor %}
+			</select>
+		</label>
+	{% endif %}
 
 	<label for="rating">Rating:
 		<select id="rating" name="rating" class="form-control input-sm">
