@@ -12,7 +12,7 @@ use Mihaeu\MovieManager\FileSet;
 class FileSetFactory
 {
     /**
-     * @var \SplFileObject
+     * @var \SplFileInfo
      */
     private $root;
 
@@ -30,6 +30,14 @@ class FileSetFactory
     public function __construct($rootFolder)
     {
         $this->root = new \SplFileInfo($rootFolder);
+    }
+
+    /**
+     * @return \SplFileInfo
+     */
+    public function getRoot()
+    {
+        return $this->root;
     }
 
     /**

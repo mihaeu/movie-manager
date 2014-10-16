@@ -21,7 +21,7 @@ class HtmlTest extends BaseTestCase
 
         $builder = new Html($movieFactory);
         $movieFinder = new MovieFinder(new FileSetFactory(__DIR__.'/../../../demo/movies'), ['mkv', 'avi']);
-        $fileSets = $movieFinder->findMoviesInDir(__DIR__.'/../../../demo/movies');
+        $fileSets = $movieFinder->findMoviesInDir();
         $this->assertRegExp('/2 Movies from 2 countries in 4 languages/', $builder->build($fileSets));
     }
 }

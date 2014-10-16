@@ -49,14 +49,14 @@ class MovieFinderTest extends BaseTestCase
 
     public function testFindsAllMovieFiles()
     {
-        $fileSets = $this->finder->findMoviesInDir($this->testDirectory);
+        $fileSets = $this->finder->findMoviesInDir();
         $this->assertCount(5, $fileSets);
     }
 
     public function testIgnoresUnreadableDirectories()
     {
         chmod($this->testDirectory.'/a', 0222);
-        $fileSets = $this->finder->findMoviesInDir($this->testDirectory);
+        $fileSets = $this->finder->findMoviesInDir();
 
         // usually it should be 5, but one is not readable = 4
         $this->assertCount(4, $fileSets);

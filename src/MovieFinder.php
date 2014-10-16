@@ -29,12 +29,12 @@ class MovieFinder
     /**
      * Looks recursively for movie files in a directory.
      *
-     * @param  string $path Path which contains the movies.
-     *
      * @return array matched movies
      */
-    public function findMoviesInDir($path = '')
+    public function findMoviesInDir()
     {
+        $path = $this->fileSetFactory->getRoot()->getRealPath();
+
         // only files
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($path),

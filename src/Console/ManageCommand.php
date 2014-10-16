@@ -101,7 +101,7 @@ class ManageCommand extends BaseCommand
 
         $this->movieRoot = new \SplFileInfo($input->getArgument('path'));
         $finder = new MovieFinder(new FileSetFactory($this->movieRoot), $config->get('allowed-movie-formats'));
-        $movieFiles = $finder->findMoviesInDir($this->movieRoot->getRealPath());
+        $movieFiles = $finder->findMoviesInDir();
 
         $this->tmdb = new TMDb($config->get('tmdb-api-key'));
         $client = new Client();
