@@ -1,0 +1,105 @@
+[internet_shortcut]
+url="http://www.imdb.com/title/tt0068646"
+
+[info]
+id=238
+imdb_id="tt0068646"
+adult=""
+poster_url="http://image.tmdb.org/t/p/original/d4KNaTrltq6bpkFS01pYtyXa09m.jpg"
+backdrop_url="http://image.tmdb.org/t/p/original/6xKCYgH16UuwEGAyroLU6p8HLIn.jpg"
+budget=6000000
+homepage="http://www.thegodfather.com/"
+original_title="The Godfather"
+overview="The story spans the years from 1945 to 1955 and chronicles the fictional Italian-American Corleone crime family. When organized crime family patriarch Vito Corleone barely survives an attempt on his life, his youngest son, Michael, steps in to take care of the would-be killers, launching a campaign of bloody revenge."
+popularity=2.3138502341039
+release_date="1972-03-15"
+year=1972
+revenue=245066411
+runtime=175
+status="Released"
+tagline="An offer you can't refuse."
+title="The Godfather"
+vote_average=8
+vote_count=2129
+imdb_rating=9.2
+trailer="https://www.youtube.com/watch?v=sY1S34973zA"
+
+[genres]
+80="Crime"
+18="Drama"
+
+[production_companies]
+4="Paramount Pictures"
+10211="Alfran Productions"
+
+[production_countries]
+0="United States of America"
+
+[spoken_languages]
+0="English"
+1="Italiano"
+2="Latin"
+
+[cast]
+3084="Marlon Brando"
+1158="Al Pacino"
+3085="James Caan"
+3086="Richard S. Castellano"
+3087="Robert Duvall"
+3088="Sterling Hayden"
+3142="John Marley"
+3090="Richard Conte"
+3091="Al Lettieri"
+3092="Diane Keaton"
+3093="Abe Vigoda"
+3094="Talia Shire"
+3095="Gianni Russo"
+3096="John Cazale"
+3143="Rudy Bond"
+3144="Al Martino"
+933716="Morgana King"
+106811="Lenny Montana"
+99724="John Martino"
+1195877="Salvatore Corsitto"
+20752="Alex Rocco"
+3414="Tony Giorgio"
+3413="Victor Rendina"
+3145="Simonetta Stefanelli"
+119431="Saro Urzì"
+1769="Sofia Coppola"
+20973="Louis Guss"
+138211="Gabriele Torrei"
+
+[character]
+3084="Don Vito Corleone"
+1158="Michael Corleone"
+3085="Santino 'Sonny' Corleone"
+3086="Pete Clemenza"
+3087="Tom Hagen"
+3088="Capt. Mark McCluskey"
+3142="Jack Woltz"
+3090="Emilio Barzini"
+3091="Virgil 'Der Türke' Sollozzo"
+3092="Kay Adams"
+3093="Salvatore 'Sally' Tessio"
+3094="Connie Corleone Rizzi"
+3095="Carlo Rizzi"
+3096="Fredo Corleone"
+3143="Carmine Cuneo"
+3144="Johnny Fontane"
+933716="Mama Corleone"
+106811="Luca Brasi"
+99724="Paulie"
+1195877="Bonasera"
+20752="Moe Greene"
+3414="Bruno Tattaglia"
+3413="Philip Tattaglia"
+3145="Apollonia Vitelli-Corleone"
+119431="Vitelli"
+1769="Baby in baptism scene"
+20973="Don Zaluchi"
+138211="Enzo, the baker"
+
+[directors]
+1776="Francis Ford Coppola"
+
