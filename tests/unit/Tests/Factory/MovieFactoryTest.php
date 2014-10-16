@@ -31,7 +31,6 @@ class MovieFactoryTest extends \PHPUnit_Framework_TestCase
         $tmdb = \Mockery::mock('Mihaeu\MovieManager\MovieDatabase\TMDb');
         $imdb = \Mockery::mock('Mihaeu\MovieManager\MovieDatabase\IMDb');
         $omdb = \Mockery::mock('Mihaeu\MovieManager\MovieDatabase\OMDb');
-        $omdb->shouldReceive('getIMDbRating')->andReturn(IMDbTest::IMDB_RATING_THE_GODFATHER);
 
         $ini = new Ini(new Filesystem());
         $factory = new MovieFactory($tmdb, $imdb, $omdb, $ini);

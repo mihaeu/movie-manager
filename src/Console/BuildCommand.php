@@ -4,6 +4,15 @@ namespace Mihaeu\MovieManager\Console;
 
 use Mihaeu\MovieManager\Builder\Html;
 
+use Mihaeu\MovieManager\Config;
+use Mihaeu\MovieManager\Factory\FileSetFactory;
+use Mihaeu\MovieManager\Factory\MovieFactory;
+use Mihaeu\MovieManager\IO\Filesystem;
+use Mihaeu\MovieManager\IO\Ini;
+use Mihaeu\MovieManager\MovieDatabase\IMDb;
+use Mihaeu\MovieManager\MovieDatabase\OMDb;
+use Mihaeu\MovieManager\MovieDatabase\TMDb;
+use Mihaeu\MovieManager\MovieFinder;
 use Symfony\Component\Console\Command\Command as BaseCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -52,13 +61,17 @@ class BuildCommand extends BaseCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $builder = new Html();
+        $movieFactory = new MovieFactory(null, null, null, new Ini(new Filesystem()));
+        $buildWithPosters = !$input->getOption('no-posters');
+        $builder = new Html($movieFactory, $buildWithPosters);
 
         $path = realpath($input->getArgument('path'));
-        $buildWithPosters = !$input->getOption('no-posters');
+        $config = new Config();
+        $movieFinder = new MovieFinder(new FileSetFactory($path), $config->get('allowed-movie-formats'));
+        $movies = $movieFinder->findMoviesInDir($path);
         file_put_contents(
             $input->getArgument('save'),
-            $builder->build($path, $input->getOption('limit'), $buildWithPosters)
+            $builder->build($movies)
         );
     }
 }

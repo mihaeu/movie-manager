@@ -2,15 +2,15 @@
 	<div class="row movie" id="{{ movie.id }}">
 		<div class="col-md-3">
 			<div class="poster">
-				<a class="fancybox fancybox.iframe" href="http://imdb.com/title/{{ movie.id }}">
-					<img class="img-rounded" src="data:image/jpg;base64,{{ movie.poster }}" />
+				<a class="fancybox" href="http://imdb.com/title/{{ movie.id }}">
+					<img class="img-rounded" src="data:image/jpg;base64,{{ posters[movie.id] }}" />
 				</a>
 			</div>
 		</div>
 		<div class="col-md-9">
 			<div class="full-title">
 				<span class="title pull-left">
-					<a href="http://imdb.com/title/{{ movie.id }}">
+					<a class="fancybox" href="http://imdb.com/title/{{ movie.id }}">
 						{{ movie.title }}
 					</a>
 				</span>
@@ -28,19 +28,20 @@
 						<tr>
 							<td>Rating:</td>
 							<td class="rating">
-								{{ movie.rating }}
+								{{ movie.imdbRating }}
+								{#<small>(TMDb: {{ movie.voteAverage }})</small>#}
 							</td>
 						</tr>
 						<tr>
 							<td>Genre:</td>
 							<td class="genre">
-								{{ movie.genre|join(', ') }}
+								{{ movie.genres|join(', ') }}
 							</td>
 						</tr>
 						<tr>
 							<td>Length:</td>
 							<td class="length">
-								{{ movie.length }} min
+								{{ movie.runtime }} min
 							</td>
 						</tr>
 						<tr>
@@ -56,8 +57,8 @@
 						<tr>
 							<td>Countries:</td>
 							<td class="countries">
-								{% if movie.countries is not empty %}
-									{{ movie.countries|join(', ') }}
+								{% if movie.productionCountries is not empty %}
+									{{ movie.productionCountries|join(', ') }}
 								{% else %}
 								    -
 								{% endif %}
@@ -66,8 +67,8 @@
 						<tr>
 							<td>Languages:</td>
 							<td class="countries">
-								{% if movie.languages is not empty %}
-									{{ movie.languages|join(', ') }}
+								{% if movie.spokenLanguages is not empty %}
+									{{ movie.spokenLanguages|join(', ') }}
 								{% else %}
 								    -
 								{% endif %}
@@ -79,19 +80,17 @@
 			<div class="col-md-6">
 				<h4>Plot</h4>
 				<div class="plot">
-					{{ movie.plot }}
+					{{ movie.overview }}
 				</div>
 					<br>
 				<h4>Cast</h4>
 				<div class="cast">
-					{% for member in movie.cast[0:10] %}
-					    {{ member.name }}
-					    {% if member.character is not empty %}
-							<small>
-								({{ member.character }})
-							</small>
-					    {% endif %}
-					    ,
+					{% for id, castMember in movie.cast %}
+					    {{ castMember }}
+						<small>
+							({{ movie.character[id] }})
+						</small>
+					    {% if not loop.last %},{% endif %}
 					{% endfor %}
 					...
 				</div>

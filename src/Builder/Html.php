@@ -2,8 +2,9 @@
 
 namespace Mihaeu\MovieManager\Builder;
 
-use Mihaeu\MovieManager\IO\Filesystem;
-use Mihaeu\MovieManager\IO\Ini;
+use Mihaeu\MovieManager\Factory\MovieFactory;
+use Mihaeu\MovieManager\FileSet;
+use Mihaeu\MovieManager\Movie;
 
 /**
  * Class Html
@@ -25,149 +26,172 @@ class Html
     private $templateDir;
 
     /**
-     * @var array
+     * @var MovieFactory
      */
-    private $movies = [];
+    private $movieFactory;
 
     /**
-     * @var string
+     * @var bool
      */
-    private $moviesJson;
+    private $buildWithPosters;
 
     /**
-     * Constructor.
+     * @param MovieFactory  $movieFactory
+     * @param bool          $buildWithPosters
      */
-    public function __construct()
+    public function __construct(MovieFactory $movieFactory, $buildWithPosters = true)
     {
-        $this->templateDir = realpath(__DIR__ . '/../../templates');
+        $this->templateDir = realpath(__DIR__.'/../../templates');
         $this->setUpTemplating();
+
+        $this->movieFactory = $movieFactory;
+        $this->buildWithPosters = $buildWithPosters;
     }
 
     /**
-     * Builds the HTML.
-     *
-     * @param  string $pathToMovies
-     * @param  int    $limit
-     * @param  bool   $buildWithPosters
+     * @param array|FileSet[] $fileSets
      *
      * @return string
      */
-    public function build($pathToMovies, $limit = -1, $buildWithPosters = true)
+    public function build(array $fileSets)
     {
-        $moviesJson     = [];
-        $movieYears     = [];
-        $movieGenres    = [];
-        $movieLanguages = [];
-        $movieCountries = [];
-
-        $movieFolders = array_diff(scandir($pathToMovies), ['.', '..']);
-        foreach ($movieFolders as $movieFolder) {
-            if (--$limit === 0) {
-                break;
-            }
-
-            $linkFile = "$pathToMovies/$movieFolder/$movieFolder - IMDb.url";
-            $iniHandler = new Ini(new Filesystem());
-            $movieInfo = $iniHandler->read($linkFile);
-            if (false === $movieInfo) {
+        $movies = [];
+        $posters = [];
+        foreach ($fileSets as $fileSet) {
+            /** @var FileSet $fileset */
+            $infoFile = $fileSet->getInfoFile()->getRealPath();
+            if (null === $infoFile) {
                 continue;
             }
 
-            if (isset($movieInfo['info'])) {
-                $posterFile = str_replace('- IMDb.url', '- Poster.jpg', $linkFile);
-                $cast = [];
-                if (isset($movieInfo['cast'])) {
-                    foreach ($movieInfo['cast'] as $id => $name) {
-                        $character = '';
-                        if (isset($movieInfo['character'][$id])) {
-                            $character = $movieInfo['character'][$id];
-                        }
-                        $cast[] = [
-                            'id'        => $id,
-                            'name'      => $name,
-                            'character' => $character
-                        ];
-                    }
-                }
-
-                $movie = [
-                    'id'         => $movieInfo['info']['imdb_id'],
-                    'title'      => $movieInfo['info']['title'],
-                    'year'       => preg_replace('/(\d{4}).*/', '$1', $movieInfo['info']['release_date']),
-                    'directors'  => isset($movieInfo['directors']) ? $movieInfo['directors'] : '',
-                    'cast'       => isset($cast) ? $cast : '',
-                    'rating'     => isset($movieInfo['info']['imdb_rating'])
-                                        ? $movieInfo['info']['imdb_rating']
-                                        : $movieInfo['info']['vote_average'],
-                    'length'     => $movieInfo['info']['runtime'],
-                    'genre'      => isset($movieInfo['genres']) ? array_values($movieInfo['genres']) : [],
-                    'languages'  => isset($movieInfo['spoken_languages'])
-                                        ? array_values($movieInfo['spoken_languages'])
-                                        : [],
-                    'countries'  => isset($movieInfo['production_countries'])
-                                        ? array_values($movieInfo['production_countries'])
-                                        : [],
-                    'plot'       => $movieInfo['info']['overview'],
-                    'tagline'    => $movieInfo['info']['tagline']
-                ];
-
-                // the poster should not be part of the json file, so let's add that later
-                $moviesJson[$movie['id']] = $movie;
-
-                if ($buildWithPosters) {
-                    $movie['poster'] = $this->getScaledPosterAsBase64($posterFile, 400, 266);
-                } else {
-                    $movie['poster'] = '';
-                }
-
-                $movieYears[$movie['year']] = $movie['year'];
-                foreach ($movie['genre'] as $genre) {
-                    $movieGenres[$genre] = $genre;
-                }
-                if (isset($movieInfo['spoken_languages'])) {
-                    foreach ($movieInfo['spoken_languages'] as $language) {
-                        if (!empty($language)) {
-                            $movieLanguages[$language] = $language;
-                        }
-                    }
-                }
-                foreach ($movie['countries'] as $country) {
-                    $movieCountries[$country] = $country;
-                }
-                $this->movies[$movie['id']] = $movie;
-            }
+            $movie = $this->movieFactory->createFromIni($infoFile);
+            $movies[] = $movie;
+            $posters[$movie->getId()] = $this->getBase64Poster($fileSet);
         }
-
-        $this->moviesJson = str_replace("[\n\r]", ' ', json_encode($moviesJson, JSON_HEX_APOS | JSON_HEX_QUOT));
-        asort($movieYears);
-        return $this->templating->render(
-            'collection.html.twig',
-            [
-                'years'      => $movieYears,
-                'genres'     => $movieGenres,
-                'languages'  => $movieLanguages,
-                'countries'  => $movieCountries,
-                'movies'     => $this->movies,
-                'moviesJson' => $this->moviesJson
-            ]
-        );
+        return $this->templating->render('collection.html.twig', [
+            'movies'    => $movies,
+            'posters'   => $posters,
+            'languages' => $this->extractLanguages($movies),
+            'genres'    => $this->extractGenres($movies),
+            'countries' => $this->extractCountries($movies),
+            'years'     => $this->extractYears($movies),
+            'json'      => $this->generateJson($movies)
+        ]);
     }
 
     /**
-     * Scales a .jpeg image and returns the base64 encoded data.
+     * @param array $movies
      *
+     * @return array|Movie[]
+     */
+    public function extractLanguages(array $movies)
+    {
+        $languages = [];
+        foreach ($movies as $movie) {
+            /** @var Movie $movie */
+            if (null === $movie->getSpokenLanguages()) {
+                continue;
+            }
+            foreach ($movie->getSpokenLanguages() as $language) {
+                $languages[$language] = 0;
+            }
+        }
+        return array_keys($languages);
+    }
+
+    /**
+     * @param array $movies
+     *
+     * @return array|Movie[]
+     */
+    public function extractGenres(array $movies)
+    {
+        $genres = [];
+        foreach ($movies as $movie) {
+            /** @var Movie $movie */
+            if (null === $movie->getGenres()) {
+                continue;
+            }
+            foreach ($movie->getGenres() as $genre) {
+                $genres[$genre] = 0;
+            }
+        }
+        return array_keys($genres);
+    }
+
+    /**
+     * @param array $movies
+     *
+     * @return array|Movie[]
+     */
+    public function extractCountries(array $movies)
+    {
+        $countries = [];
+        foreach ($movies as $movie) {
+            /** @var Movie $movie */
+            if (null === $movie->getProductionCountries()) {
+                continue;
+            }
+            foreach ($movie->getProductionCountries() as $country) {
+                $countries[$country] = 0;
+            }
+        }
+        return array_keys($countries);
+    }
+
+    /**
+     * @param array $movies
+     *
+     * @return array|Movie[]
+     */
+    public function extractYears(array $movies)
+    {
+        $years = [];
+        foreach ($movies as $movie) {
+            /** @var Movie $movie */
+            if (null === $movie->getYear()) {
+                continue;
+            }
+            $years[$movie->getYear()] = 0;
+        }
+        return array_keys($years);
+    }
+
+    /**
+     * @param array|Movie[] $movies
+     *
+     * @return string
+     */
+    public function generateJson(array $movies)
+    {
+        $jsonData = [];
+        foreach ($movies as $movie) {
+            /** @var Movie $movie */
+            $jsonData[$movie->getId()] = [
+                'id'            => $movie->getId(),
+                'title'         => $movie->getTitle(),
+                'year'          => $movie->getYear(),
+                'rating'        => $movie->getImdbRating(),
+                'length'        => $movie->getRuntime(),
+                'genre'         => null !== $movie->getGenres()              ? array_values($movie->getGenres()) : [],
+                'languages'     => null !== $movie->getSpokenLanguages()     ? array_values($movie->getSpokenLanguages()) : [],
+                'countries'     => null !== $movie->getProductionCountries() ? array_values($movie->getProductionCountries()) : [],
+                'cast'          => null !== $movie->getCast()                ? array_values($movie->getCast()) : [],
+                'directors'     => null !== $movie->getDirectors()           ? array_values($movie->getDirectors()) : []
+            ];
+        }
+        return str_replace("[\n\r]", ' ', json_encode($jsonData, JSON_HEX_APOS | JSON_HEX_QUOT));
+    }
+
+    /**
      * @param string $file
      * @param int    $newHeight
      * @param int    $newWidth
      *
      * @return string
      */
-    public function getScaledPosterAsBase64($file, $newHeight = 400, $newWidth = 0)
+    public function getScaledPoster($file, $newHeight = 400, $newWidth = 0)
     {
-        if (!file_exists($file)) {
-            return '';
-        }
-
         list($width, $height) = getimagesize($file);
         if ($newWidth === 0) {
             $newWidth = $width / ($height / $newHeight);
@@ -186,7 +210,21 @@ class Html
         imagejpeg($thumb);
         $img = ob_get_clean();
 
-        return base64_encode($img);
+        return $img;
+    }
+
+    /**
+     * @param FileSet $fileSet
+     *
+     * @return string|null
+     */
+    public function getBase64Poster(FileSet $fileSet)
+    {
+        if (!$this->buildWithPosters) {
+            return null;
+        }
+
+        return base64_encode($this->getScaledPoster($fileSet->getPosterFile()->getRealPath(), 400, 266));
     }
 
     /**

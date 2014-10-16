@@ -25,8 +25,7 @@ $(function() {
 
 			var matchFound = false;
 			$.map(movieData, function(movie, id) {
-				if ($.inArray(selectedLanguage, movieLanguages) !== -1)
-				{
+				if ($.inArray(selectedLanguage, movieLanguages) !== -1) {
 					matchFound = true;
 				}
 			});
@@ -40,8 +39,7 @@ $(function() {
 
 			var matchFound = false;
 			$.map(movieData, function(movie, id) {
-				if ($.inArray(selectedCountry, movieCountries) !== -1)
-				{
+				if ($.inArray(selectedCountry, movieCountries) !== -1) {
 					matchFound = true;
 				}
 			});
@@ -55,8 +53,7 @@ $(function() {
 
 			var matchFound = false;
 			$.map(movieData, function(movie, id) {
-				if ($.inArray(selectedGenre, movieGenres) !== -1)
-				{
+				if ($.inArray(selectedGenre, movieGenres) !== -1) {
 					matchFound = true;
 				}
 			});
@@ -113,7 +110,7 @@ $(function() {
 
 	};
 
-	var json = '{{ moviesJson|raw }}';
+	var json = '{{ json|raw }}';
 	var movieData = $.parseJSON(json);
 
 	// filter function

@@ -39,8 +39,9 @@ class MovieFactory
      * @param TMDb $tmdb
      * @param IMDb $imdb
      * @param OMDb $omdb
+     * @param Ini  $ini
      */
-    public function __construct(TMDb $tmdb, IMDb $imdb, OMDb $omdb, Ini $ini)
+    public function __construct(TMDb $tmdb = null, IMDb $imdb = null, OMDb $omdb = null, Ini $ini = null)
     {
         $this->tmdb = $tmdb;
         $this->imdb = $imdb;
