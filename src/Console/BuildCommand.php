@@ -68,7 +68,12 @@ class BuildCommand extends BaseCommand
         $path = realpath($input->getArgument('path'));
         $config = new Config();
         $movieFinder = new MovieFinder(new FileSetFactory($path), $config->get('allowed-movie-formats'));
+
         $movies = $movieFinder->findMoviesInDir();
+        if ($input->getOption('limit')) {
+            $movies = array_slice($movies, 0, $input->getOption('limit'));
+        }
+
         file_put_contents(
             $input->getArgument('save'),
             $builder->build($movies)
