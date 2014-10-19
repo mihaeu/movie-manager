@@ -57,6 +57,8 @@ class FileSetTest extends BaseTestCase
 
         $emptyFileSet = new FileSet();
         $this->assertFalse($emptyFileSet->hasCorrectParentFolder());
+
+        $this->destroyTestStructure();
     }
 
     public function testDetectsIfTheFileHasTheRightName()

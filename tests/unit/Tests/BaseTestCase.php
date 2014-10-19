@@ -52,7 +52,10 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
         if (null === $path) {
             $path = $this->testDirectory;
         }
-        $this->getFilesystem()->remove($path);
+
+        if (is_dir($path)) {
+            $this->getFilesystem()->remove($path);
+        }
     }
 
     /**
