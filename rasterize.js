@@ -9,6 +9,11 @@ if (system.args.length < 3 || system.args.length > 5) {
 } else {
     address = system.args[1];
     output = system.args[2];
+    page.settings.resourceTimeout = 5000;
+    page.onResourceTimeout = function(e) {
+        phantom.exit(1);
+    };
+
     page.viewportSize = { width: 600, height: 600 };
     if (system.args.length > 3 && system.args[2].substr(-4) === ".pdf") {
         size = system.args[3].split('*');
