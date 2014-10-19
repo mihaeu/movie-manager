@@ -198,6 +198,10 @@ class MovieHandler
      */
     public function moveTo(\SplFileInfo $movieFile, $targetDirectory)
     {
+        if (!is_dir($targetDirectory)) {
+            $this->filesystem->createDirectory($targetDirectory);
+        }
+
         $newRootDirectory = $targetDirectory.DIRECTORY_SEPARATOR.$movieFile->getPathInfo()->getBasename();
         $this->filesystem->rename($movieFile->getPath(), $newRootDirectory);
 
