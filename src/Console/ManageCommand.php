@@ -224,7 +224,8 @@ class ManageCommand extends BaseCommand
                 $suggestion['q'] = 'quit';
                 $suggestionQuestion = new ChoiceQuestion(
                     'What is the correct title?',
-                    $suggestionChoices
+                    $suggestionChoices,
+                    0
                 );
                 $titleChoice = $this->io->askQuestion($suggestionQuestion);
                 $tmdbId = preg_replace('/^.*\/movie\/(\d+)$/', '$1', $titleChoice);
