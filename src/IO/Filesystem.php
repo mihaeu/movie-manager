@@ -42,6 +42,9 @@ class Filesystem implements FilesystemInterface
     {
         $adapter = new Local(dirname($filename));
         $differentFilesystem = new \League\Flysystem\Filesystem($adapter);
+        if (file_exists($filename)) {
+            return $differentFilesystem->update(basename($filename), $data);
+        }
         return $differentFilesystem->write(basename($filename), $data);
     }
 
