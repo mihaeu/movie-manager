@@ -55,11 +55,28 @@ class ListCommand extends Command
     {
         $this->options = $input->getOptions();
         $this->options['path'] = realpath($input->getArgument('path'));
+        if (!$this->options['path']) {
+            $output->writeln('<error>Directory doesn\'t exist or is not readable.</error>');
+            exit();
+        }
 
         $this->movies = $this->parseMovies();
 
         if ($this->options['sort-by']) {
             $this->sortMovies();
+        }
+
+        if ($this->options['max-size']) {
+            $movies = [];
+            $totalSize = 0;
+            foreach ($this->movies as $movieDir => $movieInfo) {
+                $movieSize = $this->getMovieSizeInMb($this->options['path'].'/'.$movieDir);
+                if ($totalSize + $movieSize <= $this->options['max-size']) {
+                    $totalSize += $movieSize;
+                    $movies[$movieDir] = $movieInfo;
+                }
+            }
+            $this->movies = $movies;
         }
 
         $matchedMovies = array_keys($this->movies);
@@ -113,6 +130,10 @@ class ListCommand extends Command
      */
     public function getMovieSizeInMb($dir)
     {
+        if (!is_dir($dir)) {
+           return 0; 
+        }
+
         $files = array_diff(scandir($dir), ['.', '..']);
         $totalSize = 0;
         foreach ($files as $file) {
@@ -154,31 +175,18 @@ class ListCommand extends Command
     public function parseMovies()
     {
         $movies = [];
-        $totalSize = 0;
         $movieFolders = array_diff(scandir($this->options['path']), ['.', '..']);
         $ini = new Ini(new Filesystem());
         foreach ($movieFolders as $movieFolder) {
             $linkFile = $this->options['path']."/$movieFolder/$movieFolder - IMDb.url";
             $movieInfo = $ini->read($linkFile);
 
-            // don't process files which have not been parsed
-            if (!isset($movieInfo['info'])) {
+            // don't process files which have not been parsed or which don't pass the filters
+            if (!isset($movieInfo['info']) || !$this->passesFilters($movieInfo['info'])) {
                 continue;
             }
 
-            if ($this->passesFilters($movieInfo['info'])) {
-                // if we check for max size then try to fit in as many movies as possible
-                if ($this->options['max-size']) {
-                    $movieSize = $this->getMovieSizeInMb($this->options['path'].$movieFolder);
-                    if ($totalSize + $movieSize <= $this->options['max-size']) {
-                        $totalSize += $movieSize;
-                        $movies[$this->options['path'].DIRECTORY_SEPARATOR.$movieFolder] = $movieInfo;
-                    }
-                } else {
-                    $movies[$this->options['path'].DIRECTORY_SEPARATOR.$movieFolder] = $movieInfo;
-                }
-
-            }
+            $movies[$this->options['path'].DIRECTORY_SEPARATOR.$movieFolder] = $movieInfo;
         }
         return $movies;
     }

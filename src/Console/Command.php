@@ -49,7 +49,7 @@ class Command extends BaseCommand
                 'max-size',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Stop listing movie after a certain total filesize has been reached.'
+                'Stop listing movie after a certain total filesize in MB has been reached.'
             )
             ->addOption(
                 'sort-by',

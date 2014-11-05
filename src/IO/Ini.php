@@ -53,8 +53,7 @@ class Ini
             'none='     => 'none_=',
             'false='    => 'false_='
         ];
-        $saveIniContent = str_replace(array_keys($replacements), array_values($replacements), $iniContent);
-
+        $saveIniContent = str_ireplace(array_keys($replacements), array_values($replacements), $iniContent);
         return parse_ini_string($saveIniContent, $sections);
     }
 
