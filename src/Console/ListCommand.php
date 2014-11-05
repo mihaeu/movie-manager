@@ -156,9 +156,9 @@ class ListCommand extends Command
         $movies = [];
         $totalSize = 0;
         $movieFolders = array_diff(scandir($this->options['path']), ['.', '..']);
+        $ini = new Ini(new Filesystem());
         foreach ($movieFolders as $movieFolder) {
             $linkFile = $this->options['path']."/$movieFolder/$movieFolder - IMDb.url";
-            $ini = new Ini(new Filesystem());
             $movieInfo = $ini->read($linkFile);
 
             // don't process files which have not been parsed

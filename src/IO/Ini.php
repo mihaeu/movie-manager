@@ -32,6 +32,10 @@ class Ini
      */
     public function read($file, $sections = true)
     {
+        if (!file_exists($file)) {
+            return false;
+        }
+
         $iniContent = $this->filesystem->read($file);
         if (false === $iniContent) {
             return false;
