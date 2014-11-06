@@ -20,4 +20,16 @@ class ListCommandTest extends BaseTestCase
 
         $this->assertRegExp('/.*Avatar.*/', $commandTester->getDisplay());
     }
+
+    public function testFailsGracefullyOnBadInput()
+    {
+        $app = new Application();
+        $app->add(new ListCommand());
+
+        $command = $app->find('list');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(['path' => 'does-not-exist']);
+
+        $this->assertRegExp('/.*is not readable\./', $commandTester->getDisplay());
+    }
 }

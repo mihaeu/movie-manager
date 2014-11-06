@@ -2,8 +2,6 @@
 
 namespace Mihaeu\MovieManager\Console;
 
-use Mihaeu\MovieManager\Ini\Reader;
-
 use Mihaeu\MovieManager\IO\Filesystem;
 use Mihaeu\MovieManager\IO\Ini;
 use Symfony\Component\Console\Input\InputInterface;
@@ -49,7 +47,14 @@ class ListCommand extends Command
     }
 
     /**
-     * {@inheritdoc}
+     * Lists movies from a directory which have been previously parsed by
+     * movie manager. The filters and sorts etc. have to be applied in the
+     * right order to achieve the right results.
+     *
+     * @param InputInterface   $input
+     * @param OutputInterface $output
+     *
+     * @return int|null|void
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -57,7 +62,7 @@ class ListCommand extends Command
         $this->options['path'] = realpath($input->getArgument('path'));
         if (!$this->options['path']) {
             $output->writeln('<error>Directory doesn\'t exist or is not readable.</error>');
-            exit();
+            return 1;
         }
 
         $this->movies = $this->parseMovies();
@@ -66,22 +71,22 @@ class ListCommand extends Command
             $this->sortMovies();
         }
 
-        if ($this->options['max-size']) {
-            $movies = [];
-            $totalSize = 0;
-            foreach ($this->movies as $movieDir => $movieInfo) {
-                $movieSize = $this->getMovieSizeInMb($this->options['path'].'/'.$movieDir);
-                if ($totalSize + $movieSize <= $this->options['max-size']) {
-                    $totalSize += $movieSize;
-                    $movies[$movieDir] = $movieInfo;
-                }
-            }
-            $this->movies = $movies;
-        }
-
         $matchedMovies = array_keys($this->movies);
         if ($this->options['desc']) {
             $matchedMovies = array_reverse($matchedMovies);
+        }
+
+        if ($this->options['max-size']) {
+            $movies = [];
+            $totalSize = 0;
+            foreach ($matchedMovies as $movieDir) {
+                $movieSize = $this->getMovieSizeInMb($movieDir);
+                if ($totalSize + $movieSize <= $this->options['max-size']) {
+                    $totalSize += $movieSize;
+                    $movies[] = $movieDir;
+                }
+            }
+            $matchedMovies = $movies;
         }
 
         if ($this->options['print0']) {
@@ -94,7 +99,7 @@ class ListCommand extends Command
     /**
      * Tests all filters for a movie and returns true only when all filters pass.
      *
-     * @param array          $movieInfo
+     * @param array $movieInfo
      *
      * @return bool
      */
@@ -131,7 +136,7 @@ class ListCommand extends Command
     public function getMovieSizeInMb($dir)
     {
         if (!is_dir($dir)) {
-           return 0; 
+           return 0;
         }
 
         $files = array_diff(scandir($dir), ['.', '..']);

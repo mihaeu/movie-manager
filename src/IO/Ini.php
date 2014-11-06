@@ -15,6 +15,20 @@ class Ini
     private $filesystem;
 
     /**
+     * @var array
+     */
+    private $illegalKeyReplacements = [
+        'no='       => 'no_=',
+        'on='       => 'on_=',
+        'yes='      => 'yes_=',
+        'off='      => 'off_=',
+        'true='     => 'true_=',
+        'null='     => 'null_=',
+        'none='     => 'none_=',
+        'false='    => 'false_='
+    ];
+
+    /**
      * @param FilesystemInterface $filesystem
      */
     public function __construct(FilesystemInterface $filesystem)
@@ -41,20 +55,26 @@ class Ini
             return false;
         }
 
-        // problem: certain keys are not allowed in .ini files
-        // find and fix them
-        $replacements = [
-            'no='       => 'no_=',
-            'on='       => 'on_=',
-            'yes='      => 'yes_=',
-            'off='      => 'off_=',
-            'true='     => 'true_=',
-            'null='     => 'null_=',
-            'none='     => 'none_=',
-            'false='    => 'false_='
-        ];
-        $saveIniContent = str_ireplace(array_keys($replacements), array_values($replacements), $iniContent);
-        return parse_ini_string($saveIniContent, $sections);
+        $sanitizedIniContent = $this->sanitizeIniContent($iniContent);
+        return parse_ini_string($sanitizedIniContent, $sections);
+    }
+
+    /**
+     * Sanitizes keys in an .ini formated string.
+     *
+     * There are many varying implementations of the .ini format, in php it is
+     * not possible to read arrays with illegal keys. This method changes the
+     * keys.
+     *
+     * @param string $content
+     *
+     * @return string
+     */
+    public function sanitizeIniContent($content)
+    {
+        $illegalKeys = array_keys($this->illegalKeyReplacements);
+        $legalReplacements = array_values($this->illegalKeyReplacements);
+        return str_ireplace($illegalKeys, $legalReplacements, $content);
     }
 
     /**
