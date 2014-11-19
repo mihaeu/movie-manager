@@ -59,12 +59,12 @@ class Html
         $posters = [];
         foreach ($fileSets as $fileSet) {
             /** @var FileSet $fileset */
-            $infoFile = $fileSet->getInfoFile()->getRealPath();
+            $infoFile = $fileSet->getInfoFile();
             if (null === $infoFile) {
                 continue;
             }
 
-            $movie = $this->movieFactory->createFromIni($infoFile);
+            $movie = $this->movieFactory->createFromIni($infoFile->getRealPath());
             $movies[] = $movie;
             $posters[$movie->getId()] = $this->getBase64Poster($fileSet);
         }

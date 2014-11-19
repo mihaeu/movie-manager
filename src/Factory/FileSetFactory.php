@@ -47,7 +47,7 @@ class FileSetFactory
      */
     public function create($movieFilename)
     {
-        $movieFile = new \SplFileObject($movieFilename);
+        $movieFile = new \SplFileInfo($movieFilename);
         $fileSet = new FileSet();
         $fileSet->setMovieFile($movieFile);
         $fileSet->setRootFolder($this->root);
@@ -71,17 +71,17 @@ class FileSetFactory
 
         $posterFilename = sprintf(self::POSTER_FORMAT, $basePath);
         if (file_exists($posterFilename)) {
-            $fileSet->setPosterFile(new \SplFileObject($posterFilename));
+            $fileSet->setPosterFile(new \SplFileInfo($posterFilename));
         }
 
         $infoFileFilename = sprintf(self::INFO_FILE_FORMAT, $basePath);
         if (file_exists($infoFileFilename)) {
-            $fileSet->setInfoFile(new \SplFileObject($infoFileFilename));
+            $fileSet->setInfoFile(new \SplFileInfo($infoFileFilename));
         }
 
         $imdbScreenshotFilename = sprintf(self::IMDB_SCREENSHOT_FORMAT, $basePath);
         if (file_exists($imdbScreenshotFilename)) {
-            $fileSet->setImdbScreenshotFile(new \SplFileObject($imdbScreenshotFilename));
+            $fileSet->setImdbScreenshotFile(new \SplFileInfo($imdbScreenshotFilename));
         }
 
         $fileSet->setMoviePartFiles(array_filter($allFiles, function (\SplFileInfo $file) use ($movieFile) {

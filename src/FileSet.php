@@ -13,12 +13,12 @@ class FileSet
     const KB_TO_MB = 1024;
 
     /**
-     * @var \SplFileObject
+     * @var \SplFileInfo
      */
     private $movieFile;
 
     /**
-     * @var array|\SplFileObject[]
+     * @var array|\SplFileInfo[]
      */
     private $moviePartFiles;
 
@@ -33,22 +33,22 @@ class FileSet
     private $rootFolder;
 
     /**
-     * @var \SplFileObject
+     * @var \SplFileInfo
      */
     private $infoFile;
 
     /**
-     * @var \SplFileObject
+     * @var \SplFileInfo
      */
     private $posterFile;
 
     /**
-     * @var \SplFileObject
+     * @var \SplFileInfo
      */
     private $imdbScreenshotFile;
 
     /**
-     * @var array|\SplFileObject[]
+     * @var array|\SplFileInfo[]
      */
     private $subtitleFiles;
 
@@ -77,7 +77,7 @@ class FileSet
     }
 
     /**
-     * @return \SplFileObject
+     * @return \SplFileInfo
      */
     public function getImdbScreenshotFile()
     {
@@ -85,7 +85,7 @@ class FileSet
     }
 
     /**
-     * @param \SplFileObject $imdbScreenshotFile
+     * @param \SplFileInfo $imdbScreenshotFile
      */
     public function setImdbScreenshotFile($imdbScreenshotFile)
     {
@@ -93,7 +93,7 @@ class FileSet
     }
 
     /**
-     * @return \SplFileObject
+     * @return \SplFileInfo
      */
     public function getInfoFile()
     {
@@ -101,7 +101,7 @@ class FileSet
     }
 
     /**
-     * @param \SplFileObject $infoFile
+     * @param \SplFileInfo $infoFile
      */
     public function setInfoFile($infoFile)
     {
@@ -109,7 +109,7 @@ class FileSet
     }
 
     /**
-     * @return \SplFileObject
+     * @return \SplFileInfo
      */
     public function getMovieFile()
     {
@@ -117,7 +117,7 @@ class FileSet
     }
 
     /**
-     * @param \SplFileObject $movieFile
+     * @param \SplFileInfo $movieFile
      */
     public function setMovieFile($movieFile)
     {
@@ -125,7 +125,7 @@ class FileSet
     }
 
     /**
-     * @return array|\SplFileObject[]
+     * @return array|\SplFileInfo[]
      */
     public function getMoviePartFiles()
     {
@@ -133,7 +133,7 @@ class FileSet
     }
 
     /**
-     * @param array|\SplFileObject[] $moviePartFiles
+     * @param array|\SplFileInfo[] $moviePartFiles
      */
     public function setMoviePartFiles($moviePartFiles)
     {
@@ -157,7 +157,7 @@ class FileSet
     }
 
     /**
-     * @return \SplFileObject
+     * @return \SplFileInfo
      */
     public function getPosterFile()
     {
@@ -165,7 +165,7 @@ class FileSet
     }
 
     /**
-     * @param \SplFileObject $posterFile
+     * @param \SplFileInfo $posterFile
      */
     public function setPosterFile($posterFile)
     {
@@ -189,7 +189,7 @@ class FileSet
     }
 
     /**
-     * @return array|\SplFileObject[]
+     * @return array|\SplFileInfo[]
      */
     public function getSubtitleFiles()
     {
@@ -197,7 +197,7 @@ class FileSet
     }
 
     /**
-     * @param array|\SplFileObject[] $subtitleFiles
+     * @param array|\SplFileInfo[] $subtitleFiles
      */
     public function setSubtitleFiles($subtitleFiles)
     {
