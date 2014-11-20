@@ -102,7 +102,7 @@ class ListCommand extends Command
 
         if (empty($matchedMovies)) {
             $output->writeln('<error>No movies found or no movies matched the filters.</error>');
-            exit;
+            return;
         }
 
         if ($this->options['print0']) {
