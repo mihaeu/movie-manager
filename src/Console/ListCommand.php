@@ -76,6 +76,17 @@ class ListCommand extends Command
             $matchedMovies = array_reverse($matchedMovies);
         }
 
+        if ($this->options['max-size-movie']) {
+            $movies = [];
+            foreach ($matchedMovies as $movieDir) {
+                $movieSize = $this->getMovieSizeInMb($movieDir);
+                if ($movieSize < $this->options['max-size-movie']) {
+                    $movies[] = $movieDir;
+                }
+            }
+            $matchedMovies = $movies;
+        }
+
         if ($this->options['max-size']) {
             $movies = [];
             $totalSize = 0;
@@ -87,6 +98,11 @@ class ListCommand extends Command
                 }
             }
             $matchedMovies = $movies;
+        }
+
+        if (empty($matchedMovies)) {
+            $output->writeln('<error>No movies found or no movies matched the filters.</error>');
+            exit;
         }
 
         if ($this->options['print0']) {

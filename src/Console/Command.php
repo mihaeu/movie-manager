@@ -63,6 +63,12 @@ class Command extends BaseCommand
                 InputOption::VALUE_NONE,
                 'Sort in descending order.'
             )
+          ->addOption(
+                'max-size-movie',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'List only movies smaller than x MB.'
+          )
         ;
     }
 
