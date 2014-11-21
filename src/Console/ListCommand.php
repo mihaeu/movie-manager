@@ -36,8 +36,7 @@ class ListCommand extends Command
 
     /**
      * Lists movies from a directory which have been previously parsed by
-     * movie manager. The filters and sorts etc. have to be applied in the
-     * right order to achieve the right results.
+     * movie manager.
      *
      * @param InputInterface   $input
      * @param OutputInterface $output

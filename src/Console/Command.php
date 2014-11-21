@@ -3,7 +3,6 @@
 namespace Mihaeu\MovieManager\Console;
 
 use Mihaeu\MovieManager\Factory\MovieFactory;
-use Mihaeu\MovieManager\FileSet;
 use Mihaeu\MovieManager\IO\Filesystem;
 use Mihaeu\MovieManager\IO\Ini;
 use Mihaeu\MovieManager\Movie;

@@ -12,6 +12,7 @@ class Application extends BaseApplication
     protected function getDefaultCommands()
     {
         $commands = parent::getDefaultCommands();
+        $commands[] = new CopyCommand();
         $commands[] = new ListCommand();
         $commands[] = new BuildCommand();
         $commands[] = new ManageCommand();

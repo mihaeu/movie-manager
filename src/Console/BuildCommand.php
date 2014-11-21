@@ -19,7 +19,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BuildCommand extends BaseCommand
+class BuildCommand extends Command
 {
     /**
      * {@inheritdoc}
@@ -30,22 +30,10 @@ class BuildCommand extends BaseCommand
             ->setName('build')
             ->setDescription('Builds a nice collection file in HTML.')
             ->addArgument(
-                'path',
-                InputArgument::REQUIRED,
-                'Path to your movie folder.'
-            )
-            ->addArgument(
                 'save',
                 InputArgument::OPTIONAL,
                 'Save the result to a file.',
                 'php://output'
-            )
-            ->addOption(
-                'limit',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Limit the number of movies.',
-                -1
             )
             ->addOption(
                 'no-posters',
