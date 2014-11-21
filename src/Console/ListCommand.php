@@ -2,8 +2,6 @@
 
 namespace Mihaeu\MovieManager\Console;
 
-use Mihaeu\MovieManager\IO\Filesystem;
-use Mihaeu\MovieManager\IO\Ini;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -48,23 +46,27 @@ class ListCommand extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->options = $input->getOptions();
-        $this->options['path'] = realpath($input->getArgument('path'));
-        if (!$this->options['path']) {
+        $path = realpath($input->getArgument('path'));
+        if (!$path) {
             $output->writeln('<error>Directory doesn\'t exist or is not readable.</error>');
-            return 1;
+            return self::RETURN_CODE_BAD_DIRECTORY;
         }
 
-        $movies = $this->getFilteredMovies($this->options['path'], $this->options);
+        $movies = $this->getFilteredMovies($path, $input->getOptions());
 
         if (empty($movies)) {
             $output->writeln('<error>No movies found or no movies matched the filters.</error>');
-        } else if ($this->options['print0']) {
-            $output->write(implode("\0", $movies));
-        } else {
-            $output->writeln(implode("\n", $movies));
+            return self::RETURN_CODE_NO_MATCHES;
         }
 
-        return 0;
+        $eol = "\n";
+        if ($input->getOption('print0')) {
+            $eol = "\0";
+        }
+        foreach ($movies as $movieDirectory => $movie) {
+            $output->write($movieDirectory.$eol);
+        }
+
+        return self::RETURN_CODE_OK;
     }
 }

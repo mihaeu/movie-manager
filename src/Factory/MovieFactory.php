@@ -80,6 +80,11 @@ class MovieFactory
      */
     public function createFromIni($iniFilename)
     {
+        $iniFilename = realpath($iniFilename);
+        if (!$iniFilename) {
+            return null;
+        }
+
         $data = $this->ini->read($iniFilename);
         $movie = new Movie();
         foreach ($data as $key => $value) {

@@ -33,19 +33,6 @@ class ListCommandTest extends BaseTestCase
         $this->assertRegExp('/.*is not readable\./', $commandTester->getDisplay());
     }
 
-    public function testComputesFilesizeOfDirectory()
-    {
-        $testDir = $this->testDirectory.'/filesizeTest';
-        mkdir($testDir, 0777, true);
-        file_put_contents($testDir.'/movie.mp4', str_repeat('1', 2 * 1024 * 1024));
-
-        $listCommand = new ListCommand();
-        $this->assertEquals(2, $listCommand->getMovieSizeInMb($testDir));
-
-        unlink($testDir.'/movie.mp4');
-        rmdir($testDir);
-    }
-
     public function testAllowsOnlyFilesWithTheRightSize()
     {
         $listCommand = \Mockery::mock('Mihaeu\MovieManager\Console\ListCommand[getMovieSizeInMb]');
@@ -82,9 +69,50 @@ class ListCommandTest extends BaseTestCase
         $commandTester->execute([
             'path' => __DIR__.'/../../../demo/movies',
             '--max-size' => 1700
-          ]);
+        ]);
 
         $this->assertContains('Avatar', $commandTester->getDisplay());          // 500 MB so valid
         $this->assertNotContains('Godfather', $commandTester->getDisplay());    // 1500 MB so invalid
+    }
+
+    public function testSortsMoviesByRating()
+    {
+        // Godfather has a higher rating than Avatar
+        $this->assertRegExp('/Godfather.*Avatar/ms', $this->getSortOutput('imdb_rating'));
+    }
+
+    public function testSortsMoviesByYear()
+    {
+        // Godfather is older than Avatar
+        $this->assertRegExp('/Godfather.*Avatar/ms', $this->getSortOutput('year'));
+    }
+
+    public function testSortsDescending()
+    {
+        // Avatar has a lower rating than Godfather
+        $this->assertRegExp('/Avatar.*Godfather/ms', $this->getSortOutput('imdb_rating', ['--desc' => true]));
+    }
+
+    /**
+     * Helper method to keep tests DRY
+     *
+     * @param string $sortBy
+     * @param array $otherOptions
+     *
+     * @return string Command output
+     */
+    public function getSortOutput($sortBy, array $otherOptions = [])
+    {
+        $app = new Application();
+        $app->add(new ListCommand());
+
+        $command = $app->find('list');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([
+          'path' => __DIR__.'/../../../demo/movies',
+          '--sort-by' => $sortBy,
+        ] + $otherOptions);
+
+        return $commandTester->getDisplay();
     }
 }
