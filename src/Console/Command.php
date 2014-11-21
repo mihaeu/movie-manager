@@ -142,6 +142,10 @@ class Command extends BaseCommand
             $this->movies = $movies;
         }
 
+        if ($this->options['limit']) {
+            $this->movies = array_slice($this->movies, 0, $this->options['limit']);
+        }
+
         return $this->movies;
     }
 
