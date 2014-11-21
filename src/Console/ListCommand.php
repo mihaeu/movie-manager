@@ -18,16 +18,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ListCommand extends Command
 {
     /**
-     * @var array
-     */
-    private $movies = [];
-
-    /**
-     * @var array
-     */
-    private $options;
-
-    /**
      * {@inheritdoc}
      */
     public function configure()
@@ -54,7 +44,7 @@ class ListCommand extends Command
      * @param InputInterface   $input
      * @param OutputInterface $output
      *
-     * @return int|null|void
+     * @return int|null
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -65,150 +55,16 @@ class ListCommand extends Command
             return 1;
         }
 
-        $this->movies = $this->parseMovies();
+        $movies = $this->getFilteredMovies($this->options['path'], $this->options);
 
-        if ($this->options['sort-by']) {
-            $this->sortMovies();
-        }
-
-        $matchedMovies = array_keys($this->movies);
-        if ($this->options['desc']) {
-            $matchedMovies = array_reverse($matchedMovies);
-        }
-
-        if ($this->options['max-size-movie']) {
-            $movies = [];
-            foreach ($matchedMovies as $movieDir) {
-                $movieSize = $this->getMovieSizeInMb($movieDir);
-                if ($movieSize < $this->options['max-size-movie']) {
-                    $movies[] = $movieDir;
-                }
-            }
-            $matchedMovies = $movies;
-        }
-
-        if ($this->options['max-size']) {
-            $movies = [];
-            $totalSize = 0;
-            foreach ($matchedMovies as $movieDir) {
-                $movieSize = $this->getMovieSizeInMb($movieDir);
-                if ($totalSize + $movieSize <= $this->options['max-size']) {
-                    $totalSize += $movieSize;
-                    $movies[] = $movieDir;
-                }
-            }
-            $matchedMovies = $movies;
-        }
-
-        if (empty($matchedMovies)) {
+        if (empty($movies)) {
             $output->writeln('<error>No movies found or no movies matched the filters.</error>');
-            return;
-        }
-
-        if ($this->options['print0']) {
-            $output->write(implode("\0", $matchedMovies));
+        } else if ($this->options['print0']) {
+            $output->write(implode("\0", $movies));
         } else {
-            $output->writeln(implode("\n", $matchedMovies));
-        }
-    }
-
-    /**
-     * Tests all filters for a movie and returns true only when all filters pass.
-     *
-     * @param array $movieInfo
-     *
-     * @return bool
-     */
-    public function passesFilters($movieInfo)
-    {
-        $yearFrom =
-            // if the filter has not been set, then it passes
-            !$this->options['year-from']
-            // if the information does not exist, we cannot filter it
-            || isset($movieInfo['release_date'])
-            // check the condition
-            && $movieInfo['release_date'] >= $this->options['year-from'];
-
-        $yearTo =
-            !$this->options['year-to']
-            || isset($movieInfo['release_date'])
-            && $movieInfo['release_date'] <= $this->options['year-to'];
-
-        $rating =
-            !$this->options['rating']
-            || isset($movieInfo['imdb_rating'])
-            && $movieInfo['imdb_rating'] >= $this->options['rating'];
-
-        return $yearFrom && $yearTo && $rating;
-    }
-
-    /**
-     * Calculate the total size of a movie folder.
-     *
-     * @param string $dir Movie Directory
-     *
-     * @return int
-     */
-    public function getMovieSizeInMb($dir)
-    {
-        if (!is_dir($dir)) {
-           return 0;
+            $output->writeln(implode("\n", $movies));
         }
 
-        $files = array_diff(scandir($dir), ['.', '..']);
-        $totalSize = 0;
-        foreach ($files as $file) {
-            $totalSize += filesize($dir.DIRECTORY_SEPARATOR.$file) / 1024 / 1024;
-        }
-        return (int) $totalSize;
-    }
-
-    /**
-     * Sorts movies using the key supplied in the options.
-     */
-    public function sortMovies()
-    {
-        $sortBy = $this->options['sort-by'];
-        uasort($this->movies, function ($arrayA, $arrayB) use ($sortBy) {
-            if (!isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
-                return 0;
-            } elseif (isset($arrayA['info'][$sortBy]) && !isset($arrayB['info'][$sortBy])) {
-                return 1;
-            } elseif (!isset($arrayA['info'][$sortBy]) && isset($arrayB['info'][$sortBy])) {
-                return -1;
-            }
-
-            if ($arrayA['info'][$sortBy] === $arrayB['info'][$sortBy]) {
-                return 0;
-            } elseif ($arrayA['info'][$sortBy] > $arrayB['info'][$sortBy]) {
-                return 1;
-            } else {
-                return -1;
-            }
-        });
-    }
-
-    /**
-     * Parses all properly formatted movies in the directory.
-     *
-     * @return array
-     */
-    public function parseMovies()
-    {
-        $movies = [];
-        $movieFolders = array_diff(scandir($this->options['path']), ['.', '..']);
-        $ini = new Ini(new Filesystem());
-        foreach ($movieFolders as $movieFolder) {
-            $linkFile = $this->options['path']."/$movieFolder/$movieFolder - IMDb.url";
-            $movieInfo = $ini->read($linkFile);
-
-            // don't process files which have not been parsed or which don't pass the filters
-            if (!isset($movieInfo['info']) || !$this->passesFilters($movieInfo['info'])) {
-                continue;
-            }
-
-            $movies[$this->options['path'].DIRECTORY_SEPARATOR.$movieFolder] = $movieInfo;
-        }
-        return $movies;
+        return 0;
     }
 }
