@@ -2,7 +2,7 @@
 
 namespace Mihaeu\MovieManager\Console;
 
-use Mihaeu\MovieManager\Builder\Html;
+use Mihaeu\MovieManager\Builder\HtmlBuilder;
 
 use Mihaeu\MovieManager\Config;
 use Mihaeu\MovieManager\Factory\FileSetFactory;
@@ -53,15 +53,13 @@ class BuildCommand extends Command
     {
         $movieFactory = new MovieFactory(null, null, null, new Ini(new Filesystem()));
         $buildWithPosters = !$input->getOption('no-posters');
-        $builder = new Html($movieFactory, $buildWithPosters);
+        $builder = new HtmlBuilder($movieFactory, $buildWithPosters);
 
         $path = realpath($input->getArgument('path'));
-        $config = new Config();
-        $movieFinder = new MovieFinder(new FileSetFactory($path), $config->get('allowed-movie-formats'));
-
-        $movies = $movieFinder->findMoviesInDir();
-        if ($input->getOption('limit')) {
-            $movies = array_slice($movies, 0, $input->getOption('limit'));
+        $movies = $this->findParsedMovies($path);
+        if (empty($movies)) {
+            $output->writeln('<error>No movies found or no movies matched the filters.</error>');
+            return self::RETURN_CODE_NO_MATCHES;
         }
 
         file_put_contents(

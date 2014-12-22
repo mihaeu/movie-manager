@@ -228,7 +228,7 @@ class Command extends BaseCommand
      *
      * @param string $path
      *
-     * @return array
+     * @return array|Movie[]
      */
     public function findParsedMovies($path)
     {

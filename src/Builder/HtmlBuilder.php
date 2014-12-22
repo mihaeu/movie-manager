@@ -7,13 +7,13 @@ use Mihaeu\MovieManager\FileSet;
 use Mihaeu\MovieManager\Movie;
 
 /**
- * Class Html
+ * Class HtmlBuilder
  *
  * @package Mihaeu\MovieManager
  *
  * @author Michael Haeuslmann (haeuslmann@gmail.com)
  */
-class Html
+class HtmlBuilder implements Builder
 {
     /**
      * @var \Twig_Environment
@@ -49,24 +49,16 @@ class Html
     }
 
     /**
-     * @param array|FileSet[] $fileSets
+     * @param array|Movie[] $movies
      *
      * @return string
      */
-    public function build(array $fileSets)
+    public function build(array $movies)
     {
-        $movies = [];
         $posters = [];
-        foreach ($fileSets as $fileSet) {
-            /** @var FileSet $fileset */
-            $infoFile = $fileSet->getInfoFile();
-            if (null === $infoFile) {
-                continue;
-            }
-
-            $movie = $this->movieFactory->createFromIni($infoFile->getRealPath());
-            $movies[] = $movie;
-            $posters[$movie->getId()] = $this->getBase64Poster($fileSet);
+        foreach ($movies as $movieDirectory => $movie) {
+            /** @var Movie $movie */
+            $posters[$movie->getId()] = $this->getBase64Poster($movieDirectory);
         }
         return $this->templating->render('collection.html.twig', [
             'movies'    => $movies,
@@ -214,17 +206,20 @@ class Html
     }
 
     /**
-     * @param FileSet $fileSet
+     * @param string $movieDirectory
      *
      * @return string|null
      */
-    public function getBase64Poster(FileSet $fileSet)
+    public function getBase64Poster($movieDirectory)
     {
         if (!$this->buildWithPosters) {
             return null;
         }
-
-        return base64_encode($this->getScaledPoster($fileSet->getPosterFile()->getRealPath(), 400, 266));
+        $posterFile = $movieDirectory.'/'.basename($movieDirectory).' - Poster.jpg';
+        if (!file_exists($posterFile)) {
+            return null;
+        }
+        return base64_encode($this->getScaledPoster($posterFile, 400, 266));
     }
 
     /**
