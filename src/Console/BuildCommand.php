@@ -26,6 +26,8 @@ class BuildCommand extends Command
      */
     public function configure()
     {
+        parent::configure();
+
         $this
             ->setName('build')
             ->setDescription('Builds a nice collection file in HTML.')
