@@ -56,7 +56,7 @@ class BuildCommand extends Command
         $builder = new HtmlBuilder($movieFactory, $buildWithPosters);
 
         $path = realpath($input->getArgument('path'));
-        $movies = $this->findParsedMovies($path);
+        $movies = $this->getFilteredMovies($path, $input->getOptions());
         if (empty($movies)) {
             $output->writeln('<error>No movies found or no movies matched the filters.</error>');
             return self::RETURN_CODE_NO_MATCHES;
