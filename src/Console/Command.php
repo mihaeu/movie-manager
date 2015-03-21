@@ -103,7 +103,7 @@ class Command extends BaseCommand
      * @param string $path
      * @param array  $options Command line options and arguments.
      *
-     * @return array
+     * @return array|Movie[]
      */
     public function getFilteredMovies($path, $options)
     {
@@ -224,7 +224,7 @@ class Command extends BaseCommand
      *
      * @param string $path
      *
-     * @return array
+     * @return array|Movie[]
      */
     public function findParsedMovies($path)
     {

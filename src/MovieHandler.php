@@ -26,25 +26,6 @@ class MovieHandler
     }
 
     /**
-     * @param string $originalTitle
-     *
-     * @return mixed
-     */
-    public function convertMovieTitle($originalTitle)
-    {
-        // : is not allowed in most OS, replace with - and add spaces
-        $movieTitle = str_replace(':', ' - ', $originalTitle);
-
-        // replace other illegal characters with spaces
-        $movieTitle = str_replace(['/', '*', '?', '"', '\\', '<', '>', '|'], ' ', $movieTitle);
-
-        // trim spaces to one space max
-        $movieTitle = preg_replace('/  +/', ' ', $movieTitle);
-
-        return $movieTitle;
-    }
-
-    /**
      * @param string $originalReleaseDate
      *
      * @return bool|string
@@ -179,15 +160,13 @@ class MovieHandler
     /**
      * @param Movie          $movie
      * @param \SplFileInfo   $movieFile
-     * @param string         $suffix
+     * @param string         $suffix        Including . dot
      *
      * @return string
      */
     public function generateFileName(Movie $movie, \SplFileInfo $movieFile, $suffix = '')
     {
-        return $movieFile->getPath()
-            .DIRECTORY_SEPARATOR
-            .$this->convertMovieTitle($movie->getTitle()).' ('.$movie->getYear().')'.$suffix;
+        return $movieFile->getPath().'/'.$movie.$suffix;
     }
 
     /**

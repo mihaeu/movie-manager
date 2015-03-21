@@ -614,4 +614,32 @@ class Movie
         }
         return $result;
     }
+
+    /**
+     * Prints a readable representation of the Movie.
+     */
+    public function __toString()
+    {
+        return $this->getFilesystemCompatibleTitle().' ('.$this->getYear().')';
+    }
+
+    /**
+     * Movies occasionally contain characters which aren't allowed in filenames.
+     * This method prints a title with only valid characters.
+     *
+     * @return string
+     */
+    public function getFilesystemCompatibleTitle()
+    {
+        // : is not allowed in most OS, replace with - and add spaces
+        $movieTitle = str_replace(':', ' - ', $this->getTitle());
+
+        // replace other illegal characters with spaces
+        $movieTitle = str_replace(['/', '*', '?', '"', '\\', '<', '>', '|'], ' ', $movieTitle);
+
+        // trim spaces to one space max
+        $movieTitle = preg_replace('/  +/', ' ', $movieTitle);
+
+        return $movieTitle;
+    }
 }

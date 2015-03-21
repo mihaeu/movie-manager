@@ -26,47 +26,35 @@ class Html
     private $templateDir;
 
     /**
-     * @var MovieFactory
-     */
-    private $movieFactory;
-
-    /**
      * @var bool
      */
     private $buildWithPosters;
 
     /**
-     * @param MovieFactory  $movieFactory
      * @param bool          $buildWithPosters
      */
-    public function __construct(MovieFactory $movieFactory, $buildWithPosters = true)
+    public function __construct($buildWithPosters = true)
     {
         $this->templateDir = realpath(__DIR__.'/../../templates');
         $this->setUpTemplating();
 
-        $this->movieFactory = $movieFactory;
         $this->buildWithPosters = $buildWithPosters;
     }
 
     /**
-     * @param array|FileSet[] $fileSets
+     * @param array|Movie[] $movies
+     * @param string        $movieRootPath
      *
      * @return string
      */
-    public function build(array $fileSets)
+    public function build(array $movies, $movieRootPath)
     {
-        $movies = [];
         $posters = [];
-        foreach ($fileSets as $fileSet) {
-            /** @var FileSet $fileset */
-            $infoFile = $fileSet->getInfoFile();
-            if (null === $infoFile) {
-                continue;
+        if ($this->buildWithPosters) {
+            foreach ($movies as $movie) {
+                $posterPath = "$movieRootPath/$movie/$movie - Poster.jpg";
+                $posters[$movie->getId()] = $this->getBase64Poster($posterPath);
             }
-
-            $movie = $this->movieFactory->createFromIni($infoFile->getRealPath());
-            $movies[] = $movie;
-            $posters[$movie->getId()] = $this->getBase64Poster($fileSet);
         }
         return $this->templating->render('collection.html.twig', [
             'movies'    => $movies,
@@ -214,17 +202,13 @@ class Html
     }
 
     /**
-     * @param FileSet $fileSet
+     * @param string $posterPath
      *
      * @return string|null
      */
-    public function getBase64Poster(FileSet $fileSet)
+    public function getBase64Poster($posterPath)
     {
-        if (!$this->buildWithPosters) {
-            return null;
-        }
-
-        return base64_encode($this->getScaledPoster($fileSet->getPosterFile()->getRealPath(), 400, 266));
+        return base64_encode($this->getScaledPoster($posterPath, 400, 266));
     }
 
     /**
