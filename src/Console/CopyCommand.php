@@ -92,13 +92,13 @@ class CopyCommand extends Command
     /**
      * Copy a file, or recursively copy a folder and its contents
      *
-     * @param       string   $source    Source path
-     * @param       string   $dest      Destination path
-     * @param       int      $permissions New folder creation permissions
+     * @param  string   $source      Source path
+     * @param  string   $dest        Destination path
+     * @param  int      $permissions New folder creation permissions
      *
-     * @return      bool     Returns true on success, false on failure
+     * @return bool     Returns true on success, false on failure
      */
-    function xcopy($source, $dest, $permissions = 0755)
+    private function xcopy($source, $dest, $permissions = 0755)
     {
         // Check for symlinks
         if (is_link($source)) {

@@ -2,18 +2,16 @@
 
 namespace Mihaeu\MovieManager\Builder;
 
-use Mihaeu\MovieManager\Factory\MovieFactory;
-use Mihaeu\MovieManager\FileSet;
 use Mihaeu\MovieManager\Movie;
 
 /**
- * Class Html
+ * Class HtmlBuilder
  *
  * @package Mihaeu\MovieManager
  *
  * @author Michael Haeuslmann (haeuslmann@gmail.com)
  */
-class Html
+class HtmlBuilder implements Builder
 {
     /**
      * @var \Twig_Environment
@@ -42,10 +40,7 @@ class Html
     }
 
     /**
-     * @param array|Movie[] $movies
-     * @param string        $movieRootPath
-     *
-     * @return string
+     * @inheritdoc
      */
     public function build(array $movies, $movieRootPath)
     {
