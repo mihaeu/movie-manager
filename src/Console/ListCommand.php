@@ -23,7 +23,7 @@ class ListCommand extends Command
         parent::configure();
 
         $this
-            ->setName('list')
+            ->setName('print-list')
             ->setDescription('Lists all the (correctly formatted) movies in a directory.')
             ->addOption(
                 'print0',
