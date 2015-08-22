@@ -102,6 +102,11 @@ class MovieFactory
                 call_user_func([$movie, $setterName], $value);
             }
         }
+
+        if ($movie->getYear() === null) {
+            $movie->setYear(substr($movie->getReleaseDate(), 0, 4));
+        }
+
         return $movie;
     }
 
@@ -138,9 +143,10 @@ class MovieFactory
      *
      * @return string $str translated into camel caps
      */
-    private function convertToCamelcase($str, $capitalise_first_char = false) {
-        if($capitalise_first_char) {
-            $str[0] = strtoupper($str[0]);
+    private function convertToCamelcase($str, $capitalise_first_char = false)
+    {
+        if ($capitalise_first_char) {
+            $str = strtoupper(substr($str, 0, 1)).substr($str, 1);
         }
         $func = create_function('$c', 'return strtoupper($c[1]);');
         return preg_replace_callback('/_([a-z])/', $func, $str);
