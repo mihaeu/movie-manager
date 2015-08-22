@@ -14,7 +14,7 @@ class ListCommandTest extends BaseTestCase
         $app = new Application();
         $app->add(new ListCommand());
 
-        $command = $app->find('list');
+        $command = $app->find('print-list');
         $commandTester = new CommandTester($command);
         $commandTester->execute(['path' => __DIR__.'/../../../demo/movies']);
 
@@ -26,7 +26,7 @@ class ListCommandTest extends BaseTestCase
         $app = new Application();
         $app->add(new ListCommand());
 
-        $command = $app->find('list');
+        $command = $app->find('print-list');
         $commandTester = new CommandTester($command);
         $commandTester->execute(['path' => 'does-not-exist']);
 
@@ -43,7 +43,7 @@ class ListCommandTest extends BaseTestCase
         $app = new Application();
         $app->add($listCommand);
 
-        $command = $app->find('list');
+        $command = $app->find('print-list');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
             'path' => __DIR__.'/../../../demo/movies',
@@ -64,7 +64,7 @@ class ListCommandTest extends BaseTestCase
         $app = new Application();
         $app->add($listCommand);
 
-        $command = $app->find('list');
+        $command = $app->find('print-list');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
             'path' => __DIR__.'/../../../demo/movies',
@@ -106,7 +106,7 @@ class ListCommandTest extends BaseTestCase
         $app = new Application();
         $app->add(new ListCommand());
 
-        $command = $app->find('list');
+        $command = $app->find('print-list');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
           'path' => __DIR__.'/../../../demo/movies',
