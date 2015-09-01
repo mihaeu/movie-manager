@@ -162,7 +162,7 @@ class Command extends BaseCommand
           // if the filter has not been set, then it passes
           !$this->options['year-from']
           // check the condition
-          && $movie->getReleaseDate() >= $this->options['year-from'];
+          || $movie->getReleaseDate() >= $this->options['year-from'];
 
         $yearTo =
           !$this->options['year-to']
