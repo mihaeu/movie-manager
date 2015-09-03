@@ -26,11 +26,6 @@ class IniTest extends BaseTestCase
         $this->assertEquals($expected, file_get_contents($this->testDirectory.'/test.ini'));
     }
 
-    public function testProperlyEscapesValues()
-    {
-
-    }
-
     public function testWritesPlainString()
     {
         $ini = new Ini(new Filesystem());
@@ -51,26 +46,5 @@ class IniTest extends BaseTestCase
         mkdir($this->testDirectory);
         touch($this->testDirectory.'/empty-test.ini');
         $this->assertEmpty($ini->read($this->testDirectory.'/empty-test.ini'));
-    }
-
-    public function testWritesDeepArray()
-    {
-        $this->markTestSkipped('Nested array handling is not yet implemented, but should probably be there? YAGNI?');
-
-        $ini = new Ini(new Filesystem());
-        $ini->write($this->testDirectory.'/test.ini',
-            [
-                'info' => [
-                    'test' => [
-                        'test' => [
-                            1 => 'test']
-                    ]
-                ]
-            ]
-        );
-        $expected = "[info]\r\n"
-            ."test=\"test\"\r\n"
-            ."\r\n";
-        $this->assertEquals($expected, file_get_contents($this->testDirectory.'/test.ini'));
     }
 }

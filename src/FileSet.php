@@ -69,14 +69,6 @@ class FileSet
     }
 
     /**
-     * @param int $filesize
-     */
-    public function setFilesize($filesize)
-    {
-        $this->filesize = $filesize;
-    }
-
-    /**
      * @return \SplFileInfo
      */
     public function getImdbScreenshotFile()
