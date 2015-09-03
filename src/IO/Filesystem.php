@@ -32,7 +32,11 @@ class Filesystem implements FilesystemInterface
     {
         $adapter = new Local(dirname($filename));
         $differentFilesystem = new \League\Flysystem\Filesystem($adapter);
-        return $differentFilesystem->read(basename($filename));
+        $fileContent = $differentFilesystem->read(basename($filename));
+        if (!is_string($fileContent)) {
+            $fileContent = '';
+        }
+        return $fileContent;
     }
 
     /**

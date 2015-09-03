@@ -42,17 +42,17 @@ class Ini
      * @param  string $file
      * @param  bool   $sections
      *
-     * @return array|false
+     * @return array
      */
     public function read($file, $sections = true)
     {
         if (!file_exists($file)) {
-            return false;
+            return [];
         }
 
         $iniContent = $this->filesystem->read($file);
-        if (false === $iniContent) {
-            return false;
+        if (empty($iniContent)) {
+            return [];
         }
 
         $sanitizedIniContent = $this->sanitizeIniContent($iniContent);
@@ -87,40 +87,36 @@ class Ini
      *
      * @return bool
      */
-    public function write($file, $data)
+    public function write($file, array $data)
     {
         $content = '';
-        if (is_array($data)) {
-            foreach ($data as $key => $value) {
-                if (is_array($value)) {
-                    if (!empty($value)) {
-                        $key = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $key));
-                        $content .= "[$key]\r\n";
-                    }
-                    foreach ($value as $subkey => $subvalue) {
-                        // ignore deep nesting
-                        if (!is_array($subvalue) && null !== $subvalue) {
-                            $subkey = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $subkey));
-                            if (is_numeric($subvalue)) {
-                                $content .= "$subkey=$subvalue\r\n";
-                            } else {
-                                $subvalue = str_replace('"', "'", $subvalue);
-                                $content .= "$subkey=\"$subvalue\"\r\n";
-                            }
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                if (!empty($value)) {
+                    $key = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $key));
+                    $content .= "[$key]\r\n";
+                }
+                foreach ($value as $subkey => $subvalue) {
+                    // ignore deep nesting
+                    if (!is_array($subvalue) && null !== $subvalue) {
+                        $subkey = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $subkey));
+                        if (is_numeric($subvalue)) {
+                            $content .= "$subkey=$subvalue\r\n";
+                        } else {
+                            $subvalue = str_replace('"', "'", $subvalue);
+                            $content .= "$subkey=\"$subvalue\"\r\n";
                         }
                     }
-                    $content .= "\r\n";
+                }
+                $content .= "\r\n";
+            } else {
+                if (is_numeric($value)) {
+                    $content .= "$key=$value\r\n";
                 } else {
-                    if (is_numeric($value)) {
-                        $content .= "$key=$value\r\n";
-                    } else {
-                        $value = str_replace('"', "'", $value);
-                        $content .= "$key=\"$value\"\r\n";
-                    }
+                    $value = str_replace('"', "'", $value);
+                    $content .= "$key=\"$value\"\r\n";
                 }
             }
-        } else {
-            return false;
         }
 
         return false !== $this->filesystem->write($file, $content);

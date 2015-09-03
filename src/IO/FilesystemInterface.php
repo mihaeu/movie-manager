@@ -9,8 +9,8 @@ interface FilesystemInterface
      *
      * @return string
      */
-
     public function read($filename);
+
     /**
      * @param string $filename
      * @param mixed  $data
