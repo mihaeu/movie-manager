@@ -3,16 +3,8 @@
 namespace Mihaeu\MovieManager\Console;
 
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * Lists all the (correctly formatted) movies in a directory.
- *
- * @package Mihaeu\MovieManager\Console
- *
- * @author Michael Haeuslmann (haeuslmann@gmail.com)
- */
 class ListCommand extends Command
 {
     /**
@@ -20,22 +12,14 @@ class ListCommand extends Command
      */
     public function configure()
     {
-        parent::configure();
-
         $this
-            ->setName('print-list')
-            ->setDescription('Lists all the (correctly formatted) movies in a directory.')
-            ->addOption(
-                'print0',
-                null,
-                InputOption::VALUE_NONE,
-                'Prints the movies with a null character instead of new lines (e.g. for xargs -0).'
-            )
+            ->setName('list')
+            ->setDescription('Describes the application and lists all available commands.')
         ;
     }
 
     /**
-     * Lists movies from a directory which have been previously parsed by
+     * Copies movies from a directory which have been previously parsed by
      * movie manager.
      *
      * @param InputInterface   $input
@@ -45,27 +29,37 @@ class ListCommand extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $path = realpath($input->getArgument('path'));
-        if (!$path) {
-            $output->writeln('<error>Directory doesn\'t exist or is not readable.</error>');
-            return self::RETURN_CODE_BAD_DIRECTORY;
-        }
+        $output->write('<info> __  __  _____  _  _  ____  ____
+(  \/  )(  _  )( \/ )(_  _)( ___)
+ )    (  )(_)(  \  /  _)(_  )__)
+(_/\/\_)(_____)  \/  (____)(____)
+ __  __    __    _  _    __    ___  ____  ____
+(  \/  )  /__\  ( \( )  /__\  / __)( ___)(  _ \
+ )    (  /(__)\  )  (  /(__)\( (_-. )__)  )   /
+(_/\/\_)(__)(__)(_)\_)(__)(__)\___/(____)(_)\_)</info>
 
-        $movies = $this->getFilteredMovies($path, $input->getOptions());
+Movie manager for nerds (and people who suffer from OCD).
 
-        if (empty($movies)) {
-            $output->writeln('<error>No movies found or no movies matched the filters.</error>');
-            return self::RETURN_CODE_NO_MATCHES;
-        }
+Usage: moviemanager [command] [options]
 
-        $eol = "\n";
-        if ($input->getOption('print0')) {
-            $eol = "\0";
-        }
-        foreach ($movies as $movieDirectory => $movie) {
-            $output->write($movieDirectory.$eol);
-        }
+Commands:
 
-        return self::RETURN_CODE_OK;
+    manage        Identify movies, rename and move them to a proper folder
+                  structure, download official poster and trailer and save the
+                  movie information
+
+    build         Build a movie collection in a single HTML file
+
+    copy          Copy all movies that match your filters to
+                  somewhere else
+
+    print-list    List movies on the console
+                  (e.g. for processing with xargs)
+
+    list          This command
+
+    help          Print further help for a command
+
+If you experience any issues, please submit them at https://github.com/mihaeu/movie-manager/issues');
     }
 }

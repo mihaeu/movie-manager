@@ -29,7 +29,7 @@ class HtmlBuilder implements Builder
     private $buildWithPosters;
 
     /**
-     * @param bool          $buildWithPosters
+     * @param bool $buildWithPosters
      */
     public function __construct($buildWithPosters = true)
     {

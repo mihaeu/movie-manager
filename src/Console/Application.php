@@ -13,6 +13,7 @@ class Application extends BaseApplication
     {
         $commands = parent::getDefaultCommands();
         $commands[] = new CopyCommand();
+        $commands[] = new PrintListCommand();
         $commands[] = new ListCommand();
         $commands[] = new BuildCommand();
         $commands[] = new ManageCommand();

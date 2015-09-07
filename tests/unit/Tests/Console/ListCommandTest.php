@@ -35,7 +35,7 @@ class ListCommandTest extends BaseTestCase
 
     public function testAllowsOnlyFilesWithTheRightSize()
     {
-        $listCommand = \Mockery::mock('Mihaeu\MovieManager\Console\ListCommand[getMovieSizeInMb]');
+        $listCommand = \Mockery::mock('Mihaeu\MovieManager\Console\PrintListCommand[getMovieSizeInMb]');
         $listCommand
             ->shouldReceive('getMovieSizeInMb')
             ->twice()
@@ -56,7 +56,7 @@ class ListCommandTest extends BaseTestCase
 
     public function testLimitsTotalFilesizeOfAllMovies()
     {
-        $listCommand = \Mockery::mock('Mihaeu\MovieManager\Console\ListCommand[getMovieSizeInMb]');
+        $listCommand = \Mockery::mock('Mihaeu\MovieManager\Console\PrintListCommand[getMovieSizeInMb]');
         $listCommand
           ->shouldReceive('getMovieSizeInMb')
           ->twice()
