@@ -94,6 +94,11 @@ class PrintListCommandTest extends BaseTestCase
         $this->assertRegExp('/Godfather.*Avatar/ms', $this->getSortOutput('year'));
     }
 
+    public function testSortingByNonExistingAttributeDoesNothing()
+    {
+        $this->assertRegExp('/Avatar.*Godfather/ms', $this->getSortOutput('fdfsfsdfsd'));
+    }
+
     /**
      * Helper method to keep tests DRY
      *

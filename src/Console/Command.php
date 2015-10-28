@@ -206,17 +206,16 @@ class Command extends BaseCommand
         uasort($this->movies, function ($movieA, $movieB) use ($sortBy) {
 
             $methodName = 'get'.implode('', array_map('ucfirst', explode('_', $sortBy)));
-            $valueA = call_user_func([$movieA, $methodName]);
-            $valueB = call_user_func([$movieB, $methodName]);
-            if (!isset($valueA) && !isset($valueB)) {
+            if (!method_exists($movieA, $methodName) && !method_exists($movieB, $methodName)) {
                 return 0;
-            } elseif (isset($valueA) && !isset($valueB)) {
+            } elseif (method_exists($movieA, $methodName) && !method_exists($movieB, $methodName)) {
                 return 1;
-            } elseif (!isset($valueA) && isset($valueB)) {
+            } elseif (!method_exists($movieA, $methodName) && method_exists($movieB, $methodName)) {
                 return -1;
             }
 
-
+            $valueA = call_user_func([$movieA, $methodName]);
+            $valueB = call_user_func([$movieB, $methodName]);
             if ($valueA === $valueB) {
               return 0;
             } elseif ($valueA > $valueB) {
