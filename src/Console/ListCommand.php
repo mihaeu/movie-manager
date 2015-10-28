@@ -25,7 +25,7 @@ class ListCommand extends Command
      * @param InputInterface   $input
      * @param OutputInterface $output
      *
-     * @return int|null
+     * @return void
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
