@@ -3,16 +3,15 @@
 namespace Mihaeu\MovieManager\Tests\Console;
 
 use Mihaeu\MovieManager\Console\Application;
-use Mihaeu\MovieManager\Console\ListCommand;
+use Mihaeu\MovieManager\Console\PrintListCommand;
 use Mihaeu\MovieManager\Tests\BaseTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class ListCommandTest extends BaseTestCase
+class PrintListCommandTest extends BaseTestCase
 {
     public function testListsSingle()
     {
         $app = new Application();
-        $app->add(new ListCommand());
 
         $command = $app->find('print-list');
         $commandTester = new CommandTester($command);
@@ -24,7 +23,6 @@ class ListCommandTest extends BaseTestCase
     public function testFailsGracefullyOnBadInput()
     {
         $app = new Application();
-        $app->add(new ListCommand());
 
         $command = $app->find('print-list');
         $commandTester = new CommandTester($command);
@@ -75,25 +73,25 @@ class ListCommandTest extends BaseTestCase
         $this->assertNotContains('Godfather', $commandTester->getDisplay());    // 1500 MB so invalid
     }
 
-    public function testSortsMoviesByRating()
+    public function testSortsMoviesByRatingAscending()
     {
         // Godfather has a higher rating than Avatar
         // ASC sort: Avatar, Godfather
         $this->assertRegExp('/Avatar.*Godfather/ms', $this->getSortOutput('imdb_rating'));
     }
 
-    public function testSortsMoviesByYear()
-    {
-        // Godfather is older (year is lower) than Avatar
-        // ASC sort: Godfather, Avatar
-        $this->assertRegExp('/Godfather.*Avatar/ms', $this->getSortOutput('year'));
-    }
-
-    public function testSortsDescending()
+    public function testSortsMoviesByRatingDescending()
     {
         // Avatar has a lower rating than Godfather
         // DESC sort: Godfather, Avatar
         $this->assertRegExp('/Godfather.*Avatar/ms', $this->getSortOutput('imdb_rating', ['--desc' => true]));
+    }
+
+    public function testSortsMoviesByYearAscending()
+    {
+        // Godfather is older (year is lower) than Avatar
+        // ASC sort: Godfather, Avatar
+        $this->assertRegExp('/Godfather.*Avatar/ms', $this->getSortOutput('year'));
     }
 
     /**
@@ -107,7 +105,7 @@ class ListCommandTest extends BaseTestCase
     public function getSortOutput($sortBy, array $otherOptions = [])
     {
         $app = new Application();
-        $app->add(new ListCommand());
+        $app->add(new PrintListCommand());
 
         $command = $app->find('print-list');
         $commandTester = new CommandTester($command);

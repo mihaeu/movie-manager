@@ -204,18 +204,22 @@ class Command extends BaseCommand
     public function sortMovies($sortBy)
     {
         uasort($this->movies, function ($movieA, $movieB) use ($sortBy) {
-            $getValue = 'get'.implode('', array_map('ucfirst', explode('_', $sortBy))).'()';
-            if (!isset($movieA->$getValue) && !isset($movieB->$getValue)) {
-              return 0;
-            } elseif (isset($movieA->$getValue) && !isset($movieB->$getValue)) {
-              return 1;
-            } elseif (!isset($movieA->$getValue) && isset($movieB->$getValue)) {
-              return -1;
+
+            $methodName = 'get'.implode('', array_map('ucfirst', explode('_', $sortBy)));
+            $valueA = call_user_func([$movieA, $methodName]);
+            $valueB = call_user_func([$movieB, $methodName]);
+            if (!isset($valueA) && !isset($valueB)) {
+                return 0;
+            } elseif (isset($valueA) && !isset($valueB)) {
+                return 1;
+            } elseif (!isset($valueA) && isset($valueB)) {
+                return -1;
             }
 
-            if ($movieA->$getValue === $movieB->$getValue) {
+
+            if ($valueA === $valueB) {
               return 0;
-            } elseif ($movieA->$getValue > $movieB->$getValue) {
+            } elseif ($valueA > $valueB) {
               return 1;
             } else {
               return -1;
