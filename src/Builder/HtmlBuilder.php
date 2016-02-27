@@ -41,12 +41,15 @@ class HtmlBuilder implements Builder
 
     /**
      * @inheritdoc
+     *
+     * @throws \Exception
      */
-    public function build(array $movies, $movieRootPath)
+    public function build(array $movies, string $movieRootPath)
     {
         $posters = [];
         if ($this->buildWithPosters) {
             foreach ($movies as $movie) {
+                /** @var Movie $movie */
                 $posterPath = "$movieRootPath/$movie/$movie - Poster.jpg";
                 $posters[$movie->getId()] = $this->getBase64Poster($posterPath);
             }
@@ -173,27 +176,37 @@ class HtmlBuilder implements Builder
      *
      * @return string
      */
-    public function getScaledPoster($file, $newHeight = 400, $newWidth = 0)
+    public function getScaledPoster($file, $newHeight = 400, $newWidth = 0) : string
     {
-        list($width, $height) = getimagesize($file);
-        if ($newWidth === 0) {
-            $newWidth = $width / ($height / $newHeight);
+        if ($this->imageMagickIsInstalled()) {
+            $tempFile = sys_get_temp_dir().'/'.uniqid('asda', true);
+            $command = "convert '$file' -resize ".$newWidth."x"."$newHeight '$tempFile'";
+            exec($command);
+            return file_get_contents($tempFile);
         }
 
-        $original = imagecreatefromjpeg($file);
-        if ($original === false) {
-            return '';
+        if ($this->gdLibraryIsInstalled()) {
+            if ($newWidth === 0) {
+                $newWidth = (int) ($width / ($height / $newHeight));
+            }
+            list($width, $height) = getimagesize($file);
+
+            $original = imagecreatefromjpeg($file);
+            if ($original === false) {
+                return '';
+            }
+            $thumb = imagecreatetruecolor($newWidth, $newHeight);
+
+            imagecopyresized($thumb, $original, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+            // buffer output
+            ob_start();
+            imagejpeg($thumb);
+
+            return ob_get_clean();
         }
-        $thumb = imagecreatetruecolor($newWidth, $newHeight);
 
-        imagecopyresized($thumb, $original, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-
-        // buffer output
-        ob_start();
-        imagejpeg($thumb);
-        $img = ob_get_clean();
-
-        return $img;
+        return '';
     }
 
     /**
@@ -238,5 +251,22 @@ class HtmlBuilder implements Builder
                 }
             )
         );
+    }
+
+    /**
+     * @return bool
+     */
+    private function gdLibraryIsInstalled() : bool
+    {
+        return function_exists('imagecreatefromjpeg');
+    }
+
+    /**
+     * @return bool
+     */
+    private function imageMagickIsInstalled() : bool
+    {
+        exec('convert -version', $output, $returnVar);
+        return $returnVar === 0;
     }
 }

@@ -237,7 +237,7 @@ class MovieHandler
         }
 
         $filesBefore = scandir($movieFile->getPath());
-        $cmd = 'youtube-dl "'.$movie->getTrailer().'" --output "'
+        $cmd = 'youtube-dl --format 22 "'.$movie->getTrailer().'" --output "'
             .$this->generateFileName($movie, $movieFile).' - Trailer.%(ext)s"';
         $returnVal = false;
         system($cmd, $returnVal);
