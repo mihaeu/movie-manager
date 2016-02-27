@@ -3,7 +3,7 @@
     "description": "Organize, list, search and filter your movie collection.",
     "keywords": ["movie", "organizer", "film", "collection"],
     "require": {
-        "php":                          ">=5.4",
+        "php":                          ">=7",
         "twig/twig":                    "1.*",
         "guzzlehttp/guzzle":            "4.*",
         "wtfzdotnet/php-tmdb-api":      "1.*",
@@ -16,7 +16,7 @@
         "composer/composer":            "1.*@dev"
     },
     "require-dev": {
-        "phpunit/phpunit":                   "4.*",
+        "phpunit/phpunit":                   "5.*",
         "mockery/mockery":                   "0.*",
         "mikey179/vfsStream":                "1.*",
         "lstrojny/phpunit-clever-and-smart": "0.*",
