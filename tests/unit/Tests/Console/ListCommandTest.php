@@ -77,20 +77,20 @@ class ListCommandTest extends BaseTestCase
 
     public function testSortsMoviesByRating()
     {
-        // Godfather has a higher rating than Avatar
-        $this->assertRegExp('/Godfather.*Avatar/ms', $this->getSortOutput('imdb_rating'));
+        // Avatar has a lower rating than Godfather (ascending by default)
+        $this->assertRegExp('/Avatar.*Godfather/ms', $this->getSortOutput('imdb_rating'));
     }
 
     public function testSortsMoviesByYear()
     {
         // Godfather is older than Avatar
-        $this->assertRegExp('/Godfather.*Avatar/ms', $this->getSortOutput('year'));
+        $this->assertRegExp('/Godfather.*Avatar/ms', $this->getSortOutput('year', ['--desc' => true]));
     }
 
     public function testSortsDescending()
     {
         // Avatar has a lower rating than Godfather
-        $this->assertRegExp('/Avatar.*Godfather/ms', $this->getSortOutput('imdb_rating', ['--desc' => true]));
+        $this->assertRegExp('/Godfather.*Avatar/ms', $this->getSortOutput('imdb_rating', ['--desc' => true]));
     }
 
     /**

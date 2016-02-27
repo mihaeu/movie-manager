@@ -21,11 +21,6 @@ class IniTest extends BaseTestCase
         $this->assertEquals($expected, file_get_contents($this->testDirectory.'/test.ini'));
     }
 
-    public function testProperlyEscapesValues()
-    {
-
-    }
-
     public function testWritesPlainString()
     {
         $ini = new Ini(new Filesystem());

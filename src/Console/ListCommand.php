@@ -17,6 +17,8 @@ class ListCommand extends Command
 {
     /**
      * {@inheritdoc}
+     *
+     * @throws \Exception
      */
     public function configure()
     {
@@ -38,6 +40,8 @@ class ListCommand extends Command
      * Lists movies from a directory which have been previously parsed by
      * movie manager.
      *
+     * @throws \Exception
+     *
      * @param InputInterface   $input
      * @param OutputInterface $output
      *
@@ -53,12 +57,12 @@ class ListCommand extends Command
 
         $movies = $this->getFilteredMovies($path, $input->getOptions());
 
-        if (empty($movies)) {
+        if (0 === count($movies)) {
             $output->writeln('<error>No movies found or no movies matched the filters.</error>');
             return self::RETURN_CODE_NO_MATCHES;
         }
 
-        $eol = "\n";
+        $eol = PHP_EOL;
         if ($input->getOption('print0')) {
             $eol = "\0";
         }
