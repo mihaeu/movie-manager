@@ -12,5 +12,5 @@ interface Builder
      *
      * @return string
      */
-    public function build(array $movies, $path);
+    public function build(array $movies, string $path);
 }
