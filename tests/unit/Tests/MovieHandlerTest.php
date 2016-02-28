@@ -2,12 +2,29 @@
 
 namespace Mihaeu\MovieManager\Tests;
 
+use Mihaeu\MovieManager\Console\PhantomJsWrapper;
+use Mihaeu\MovieManager\Console\YoutubeDlWrapper;
 use Mihaeu\MovieManager\IO\Filesystem;
 use Mihaeu\MovieManager\Movie;
 use Mihaeu\MovieManager\MovieHandler;
 
 class MovieHandlerTest extends BaseTestCase
 {
+    private $youtubeDlMock;
+    private $phantomJsMock;
+
+    public function setUp()
+    {
+        $this->youtubeDlMock = $this
+            ->getMockBuilder(YoutubeDlWrapper::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->phantomJsMock = $this
+            ->getMockBuilder(PhantomJsWrapper::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
     public function tearDown()
     {
         $this->destroyTestStructure();
@@ -23,7 +40,11 @@ class MovieHandlerTest extends BaseTestCase
         $movieFile = new \SplFileInfo($this->testDirectory.'/avatar.mkv');
 
         $mockFilesystem = \Mockery::mock('Mihaeu\MovieManager\IO\Filesystem'); /** @var Filesystem $mockFilesystem */
-        $handler = new MovieHandler($mockFilesystem);
+        $handler = new MovieHandler(
+            $mockFilesystem,
+            $this->youtubeDlMock,
+            $this->phantomJsMock
+        );
         $filename = $handler->generateFileName($movie, $movieFile);
         $this->assertEquals($this->testDirectory.'/Avatar (2009)', $filename);
 
@@ -34,13 +55,21 @@ class MovieHandlerTest extends BaseTestCase
     public function testGeneratesIMDbLinkFromId()
     {
         $mockFilesystem = \Mockery::mock('Mihaeu\MovieManager\IO\Filesystem');  /** @var Filesystem $mockFilesystem */
-        $handler = new MovieHandler($mockFilesystem);
+        $handler = new MovieHandler(
+            $mockFilesystem,
+            $this->youtubeDlMock,
+            $this->phantomJsMock
+        );
         $this->assertEquals('http://www.imdb.com/title/tt123456', $handler->getIMDbLink('tt123456'));
     }
 
     public function testExtractsReleaseYearFromReleaseDate()
     {
-        $handler = new MovieHandler(new Filesystem());
+        $handler = new MovieHandler(
+            new Filesystem(),
+            $this->youtubeDlMock,
+            $this->phantomJsMock
+        );
         $this->assertEquals('2020', $handler->convertMovieYear('10-10-2020'));
     }
 
@@ -53,7 +82,11 @@ class MovieHandlerTest extends BaseTestCase
         $this->createTestStructure(['avatar.mkv']);
         $movieFile = new \SplFileInfo($this->testDirectory.'/avatar.mkv');
 
-        $handler = new MovieHandler(new Filesystem());
+        $handler = new MovieHandler(
+            new Filesystem(),
+            $this->youtubeDlMock,
+            $this->phantomJsMock
+        );
         $handler->renameMovie($movie, $movieFile);
 
         $this->assertTrue(file_exists($this->testDirectory.'/Avatar (2009).mkv'));
@@ -69,7 +102,11 @@ class MovieHandlerTest extends BaseTestCase
         $this->createTestStructure(['avatar/avatar.mkv']);
         $movieFile = new \SplFileInfo($this->testDirectory.'/avatar/avatar.mkv');
 
-        $handler = new MovieHandler(new Filesystem());
+        $handler = new MovieHandler(
+            new Filesystem(),
+            $this->youtubeDlMock,
+            $this->phantomJsMock
+        );
         $handler->renameMovieFolder($movie, $movieFile);
 
         $this->assertTrue(file_exists($this->testDirectory.'/Avatar (2009)/avatar.mkv'));
@@ -87,7 +124,11 @@ class MovieHandlerTest extends BaseTestCase
         $movie->setImdbId('tt123456');
         $movie->setDirectors(['Michael Bay']);
 
-        $handler = new MovieHandler(new Filesystem());
+        $handler = new MovieHandler(
+            new Filesystem(),
+            $this->youtubeDlMock,
+            $this->phantomJsMock
+        );
         $handler->createMovieInfo($movie, $movieFile);
 
         $movieInfo = $this->testDirectory.'/avatar/Avatar (2009) - IMDb.url';
@@ -101,7 +142,11 @@ class MovieHandlerTest extends BaseTestCase
         $this->createTestStructure(['avatar/avatar.mkv']);
         $movieFile = new \SplFileInfo($this->testDirectory.'/avatar/avatar.mkv');
 
-        $handler = new MovieHandler(new Filesystem());
+        $handler = new MovieHandler(
+            new Filesystem(),
+            $this->youtubeDlMock,
+            $this->phantomJsMock
+        );
         $handler->moveTo($movieFile, $this->testDirectory.'/target');
 
         $this->assertTrue(file_exists($this->testDirectory.'/target/avatar/avatar.mkv'));
@@ -113,7 +158,11 @@ class MovieHandlerTest extends BaseTestCase
         $movieFileInSeparateFolder = new \SplFileInfo($this->testDirectory.'/avatar/avatar.mkv');
         $movieFileNotInSeparateFolder = new \SplFileInfo($this->testDirectory.'/the godfather.avi');
 
-        $handler = new MovieHandler(new Filesystem());
+        $handler = new MovieHandler(
+            new Filesystem(),
+            $this->youtubeDlMock,
+            $this->phantomJsMock
+        );
         $root = new \SplFileInfo($this->testDirectory);
         $this->assertTrue($handler->movieIsNotInSeparateFolder($root, $movieFileNotInSeparateFolder));
         $this->assertFalse($handler->movieIsNotInSeparateFolder($root, $movieFileInSeparateFolder));
@@ -124,7 +173,11 @@ class MovieHandlerTest extends BaseTestCase
         $this->createTestStructure(['the godfather.avi']);
         $movieFile = new \SplFileInfo($this->testDirectory.'/the godfather.avi');
 
-        $handler = new MovieHandler(new Filesystem());
+        $handler = new MovieHandler(
+            new Filesystem(),
+            $this->youtubeDlMock,
+            $this->phantomJsMock
+        );
         $root = new \SplFileInfo($this->testDirectory);
         $newDestination = $handler->moveMovieToSeparateFolder($root, $movieFile);
         $this->assertTrue(file_exists($newDestination));

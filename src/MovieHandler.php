@@ -2,6 +2,8 @@
 
 namespace Mihaeu\MovieManager;
 
+use Mihaeu\MovieManager\Console\PhantomJsWrapper;
+use Mihaeu\MovieManager\Console\YoutubeDlWrapper;
 use Mihaeu\MovieManager\IO\Filesystem;
 use Mihaeu\MovieManager\IO\FilesystemInterface;
 use Mihaeu\MovieManager\IO\Ini;
@@ -15,14 +17,24 @@ use Mihaeu\MovieManager\IO\Ini;
  */
 class MovieHandler
 {
-    /**
-     * @var FilesystemInterface
-     */
+    /** @var FilesystemInterface */
     private $filesystem;
 
-    public function __construct(FilesystemInterface $filesystem)
+    /** @var YoutubeDlWrapper */
+    private $youtubeDl;
+
+    /** @var PhantomJsWrapper */
+    private $phantomJs;
+
+    public function __construct(
+        FilesystemInterface $filesystem,
+        YoutubeDlWrapper $youtubeDl,
+        PhantomJsWrapper $phantomJsWrapper
+    )
     {
         $this->filesystem = $filesystem;
+        $this->youtubeDl = $youtubeDl;
+        $this->phantomJs = $phantomJsWrapper;
     }
 
     /**

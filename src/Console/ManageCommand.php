@@ -174,7 +174,11 @@ class ManageCommand extends BaseCommand
     public function manageMoviesInteractively(array $fileSets)
     {
         $movieTitleQuestion =  new Question(self::QUESTION_TITLE);
-        $movieHandler = new MovieHandler(new Filesystem());
+        $movieHandler = new MovieHandler(
+            new Filesystem(),
+            new YoutubeDlWrapper(),
+            new PhantomJsWrapper()
+        );
 
         $index = 0;
         foreach ($fileSets as $fileSet) {
