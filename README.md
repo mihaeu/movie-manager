@@ -1,3 +1,5 @@
+# DEPRECATED: This app sort of works, but I'm not happy with the internal workings and I don't have the time to fix it
+
 # Movie-Manager
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mihaeu/movie-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mihaeu/movie-manager/?branch=master)
 [![Build Status](https://scrutinizer-ci.com/g/mihaeu/movie-manager/badges/build.png?b=master)](https://scrutinizer-ci.com/g/mihaeu/movie-manager/build-status/master)
