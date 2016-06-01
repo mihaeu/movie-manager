@@ -81,6 +81,6 @@ class MovieFinder
      */
     public function isNotTrailer($name)
     {
-        return 1 !== preg_match('/[tT]railer\.[\w\d]+$/', $name);
+        return 1 !== preg_match('/[tT]railer\.\w+$/', $name);
     }
 }
