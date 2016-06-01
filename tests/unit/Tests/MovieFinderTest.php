@@ -29,6 +29,7 @@ class MovieFinderTest extends BaseTestCase
             'Avatar' => [
                 'Amour (2009).mkv',
             ],
+            'Benghazi (2016)- Trailer.mp4',
             'awesome-movie.mp4',
             'illegal-format.mpeg',
             'a' => [
