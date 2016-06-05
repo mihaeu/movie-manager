@@ -1,0 +1,14 @@
+{
+  "main": "bin/moviemanager",
+  "output": "moviemanager.phar",
+  "stub": true,
+  "directories": [
+    "src",
+    "vendor",
+    "bin"
+  ],
+  "blacklist": [
+    "vendor/wtfzdotnet/php-tmdb-api/examples/phpunit"
+  ]
+}
+

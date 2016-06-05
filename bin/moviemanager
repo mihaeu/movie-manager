@@ -1,16 +1,17 @@
 #!/usr/bin/env php
 <?php
 
-chdir(__DIR__.'/..');
-
 // this approach is needed, because the dependencies are loaded from
 // different directories, depending on the type of install (library or global)
-// 1) is for git clones
-// 2) is for libraries and global requires
-if (is_file(__DIR__ . '/../vendor/autoload.php')) {
+// 1) phar
+// 2) is for git clones
+// 3) is for libraries and global requires
+if (is_file(__DIR__ . '/vendor/autoload.php')) {
+    require(__DIR__ . '/vendor/autoload.php');
+} elseif (is_file(__DIR__ . '/../vendor/autoload.php')) {
     require(__DIR__ . '/../vendor/autoload.php');
-} elseif (is_file(__DIR__ . '/../../../autoload.php')) {
-    require(__DIR__ . '/../../../autoload.php');
+} elseif (is_file(__DIR__ . '/../../autoload.php')) {
+    require(__DIR__ . '/../../autoload.php');
 } else {
     exit(
         'You must set up the dependencies first. Please run the following commands:'.PHP_EOL.
