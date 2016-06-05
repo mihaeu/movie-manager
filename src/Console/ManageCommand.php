@@ -63,18 +63,18 @@ class ManageCommand extends BaseCommand
      */
     private $io;
 
-    /** @var YoutubeDlWrapper */
-    private $youtubeDlWrapper;
-
-    /** @var PhantomJsWrapper */
-    private $phantomJsWrapper;
+    /** @var MovieHandler */
+    private $movieHandler;
 
     public function __construct(YoutubeDlWrapper $youtubeDlWrapper, PhantomJsWrapper $phantomJsWrapper)
     {
         parent::__construct();
 
-        $this->youtubeDlWrapper = $youtubeDlWrapper;
-        $this->phantomJsWrapper = $phantomJsWrapper;
+        $this->movieHandler = new MovieHandler(
+            new Filesystem(),
+            $youtubeDlWrapper,
+            $phantomJsWrapper
+        );
     }
 
     /**
@@ -137,7 +137,7 @@ class ManageCommand extends BaseCommand
             $this->formatMoviesForTable($movieFiles)
         );
 
-        $this->manageMoviesInteractively($movieFiles, $input, $output);
+        $this->manageMoviesInteractively($movieFiles);
     }
 
     /**
@@ -189,11 +189,6 @@ class ManageCommand extends BaseCommand
     public function manageMoviesInteractively(array $fileSets)
     {
         $movieTitleQuestion =  new Question(self::QUESTION_TITLE);
-        $movieHandler = new MovieHandler(
-            new Filesystem(),
-            $this->youtubeDlWrapper,
-            $this->phantomJsWrapper
-        );
 
         $index = 0;
         foreach ($fileSets as $fileSet) {
@@ -249,15 +244,15 @@ class ManageCommand extends BaseCommand
                 $titleChoice = $this->io->askQuestion($suggestionQuestion);
                 $tmdbId = preg_replace('/^.*\/movie\/(\d+)$/', '$1', $titleChoice);
 
-                if ($movieHandler->movieIsNotInSeparateFolder($this->movieRoot, $movieFile)) {
-                    $newFilename = $movieHandler->moveMovieToSeparateFolder($this->movieRoot, $movieFile);
+                if ($this->movieHandler->movieIsNotInSeparateFolder($this->movieRoot, $movieFile)) {
+                    $newFilename = $this->movieHandler->moveMovieToSeparateFolder($this->movieRoot, $movieFile);
                     $movieFile = new \SplFileObject($newFilename);
                     $this->io->write(sprintf(self::MSG_MOVE_SEPARATE_DIRECTORY, self::CLI_OK));
                 }
 
                 $this->io->write(sprintf(self::MSG_CREATE_INFO, ' '), false);
                 $parsedMovie = $this->movieFactory->create($tmdbId);
-                $result = $movieHandler->createMovieInfo($parsedMovie, $movieFile);
+                $result = $this->movieHandler->createMovieInfo($parsedMovie, $movieFile);
                 $this->io->overwrite(sprintf(self::MSG_CREATE_INFO, $result ? self::CLI_OK : self::CLI_NOK));
             } else {
                 $infoFile = $movieFile->getPath().'/'.$movieFile->getBasename('.'.$movieFile->getExtension()).' - IMDb.url';
@@ -266,19 +261,19 @@ class ManageCommand extends BaseCommand
 
             if (null === $fileSet->getImdbScreenshotFile()) {
                 $this->io->write(sprintf(self::MSG_CREATE_SCREENY, ' '), false);
-                $result = $movieHandler->downloadIMDbScreenshot($parsedMovie, $movieFile);
+                $result = $this->movieHandler->downloadIMDbScreenshot($parsedMovie, $movieFile);
                 $this->io->overwrite(sprintf(self::MSG_CREATE_SCREENY, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
             if (null === $fileSet->getPosterFile()) {
                 $this->io->write(sprintf(self::MSG_CREATE_POSTER, ' '), false);
-                $result = $movieHandler->downloadMoviePoster($parsedMovie, $movieFile);
+                $result = $this->movieHandler->downloadMoviePoster($parsedMovie, $movieFile);
                 $this->io->overwrite(sprintf(self::MSG_CREATE_POSTER, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
             if (!$fileSet->hasCorrectName()) {
                 $this->io->write(sprintf(self::MSG_MOVE_FILE, ' '), false);
-                $newFilename = $movieHandler->renameMovie($parsedMovie, $movieFile);
+                $newFilename = $this->movieHandler->renameMovie($parsedMovie, $movieFile);
                 if ($newFilename) {
                     $movieFile = new \SplFileObject($newFilename);
                     $this->io->overwrite(sprintf(self::MSG_MOVE_FILE, self::CLI_OK));
@@ -287,21 +282,21 @@ class ManageCommand extends BaseCommand
 
             if (!$fileSet->hasCorrectParentFolder()) {
                 $this->io->write(sprintf(self::MSG_MOVE_DIRECTORY, ' '), false);
-                $newDirectory = $movieHandler->renameMovieFolder($parsedMovie, $movieFile);
+                $newDirectory = $this->movieHandler->renameMovieFolder($parsedMovie, $movieFile);
                 if ($newDirectory) {
                     $movieFile = new \SplFileObject($newDirectory.'/'.$movieFile->getBasename());
                     $this->io->overwrite(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_OK));
                 }
             }
 
-            if (!file_exists($movieHandler->generateFileName($parsedMovie, $movieFile, ' - Trailer.mp4'))) {
-                $result = $movieHandler->downloadTrailer($parsedMovie, $movieFile);
+            if (!file_exists($this->movieHandler->generateFileName($parsedMovie, $movieFile, ' - Trailer.mp4'))) {
+                $result = $this->movieHandler->downloadTrailer($parsedMovie, $movieFile);
                 $this->io->write(sprintf(PHP_EOL.self::MSG_CREATE_TRAILER, $result ? self::CLI_OK : self::CLI_NOK));
             }
 
             if ($this->io->getOption('move-to')) {
                 $this->io->write(sprintf(self::MSG_MOVE_TO_ROOT, ''), false);
-                $movieHandler->moveTo($movieFile, $this->io->getOption('move-to'));
+                $this->movieHandler->moveTo($movieFile, $this->io->getOption('move-to'));
                 $this->io->overwrite(sprintf(self::MSG_MOVE_TO_ROOT, self::CLI_OK));
             }
         }
