@@ -19,7 +19,8 @@
         "mockery/mockery":                   "0.*",
         "mikey179/vfsStream":                "1.*",
         "lstrojny/phpunit-clever-and-smart": "0.*",
-        "johnkary/phpunit-speedtrap":        "~1.0@dev"
+        "johnkary/phpunit-speedtrap":        "~1.0@dev",
+        "phpunit/phpunit": "^5.4"
     },
     "license": "MIT",
     "authors": [

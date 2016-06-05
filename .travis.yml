@@ -4,10 +4,10 @@ php:
  - 7.0
 
 before_script:
- - composer install
+    - composer install --prefer-dist
  - cp config.sample.json config.json
 
-script: php phpunit.phar --coverage-text  --coverage-clover=coverage.clover
+script: vendor/bin/phpunit --coverage-text  --coverage-clover=coverage.clover
 
 after_script:
   - wget https://scrutinizer-ci.com/ocular.phar
