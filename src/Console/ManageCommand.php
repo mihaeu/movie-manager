@@ -63,6 +63,20 @@ class ManageCommand extends BaseCommand
      */
     private $io;
 
+    /** @var YoutubeDlWrapper */
+    private $youtubeDlWrapper;
+
+    /** @var PhantomJsWrapper */
+    private $phantomJsWrapper;
+
+    public function __construct(YoutubeDlWrapper $youtubeDlWrapper, PhantomJsWrapper $phantomJsWrapper)
+    {
+        parent::__construct();
+
+        $this->youtubeDlWrapper = $youtubeDlWrapper;
+        $this->phantomJsWrapper = $phantomJsWrapper;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -177,8 +191,8 @@ class ManageCommand extends BaseCommand
         $movieTitleQuestion =  new Question(self::QUESTION_TITLE);
         $movieHandler = new MovieHandler(
             new Filesystem(),
-            new YoutubeDlWrapper(),
-            new PhantomJsWrapper()
+            $this->youtubeDlWrapper,
+            $this->phantomJsWrapper
         );
 
         $index = 0;

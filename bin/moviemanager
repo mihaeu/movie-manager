@@ -1,6 +1,12 @@
 #!/usr/bin/env php
 <?php
 
+use Symfony\Component\Console\Application;
+use Mihaeu\MovieManager\Console\BuildCommand;
+use Mihaeu\MovieManager\Console\CopyCommand;
+use Mihaeu\MovieManager\Console\ListCommand;
+use Mihaeu\MovieManager\Console\ManageCommand;
+
 // this approach is needed, because the dependencies are loaded from
 // different directories, depending on the type of install (library or global)
 // 1) phar
@@ -21,5 +27,9 @@ if (is_file(__DIR__ . '/vendor/autoload.php')) {
 }
 
 ini_set('memory_limit', '512M');
-$app = new \Mihaeu\MovieManager\Console\Application();
+$app = new Application();
+$app->add(new CopyCommand());
+$app->add(new ListCommand());
+$app->add(new BuildCommand());
+$app->add(new ManageCommand($this->youtubeDlWrapper, $this->phantomJsWrapper));
 $app->run();

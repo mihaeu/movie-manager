@@ -2,35 +2,41 @@
 
 namespace Mihaeu\MovieManager\Tests\Console;
 
-use Mihaeu\MovieManager\Console\Application;
+use Mihaeu\MovieManager\Console\Command;
 use Mihaeu\MovieManager\Console\ListCommand;
 use Mihaeu\MovieManager\Tests\BaseTestCase;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class ListCommandTest extends BaseTestCase
 {
+    /** @var Application */
+    private $application;
+
+    /** @var Command */
+    private $command;
+
+    /** @var CommandTester */
+    private $commandTester;
+
+    public function setUp()
+    {
+        $this->application = new Application();
+        $this->application->add(new ListCommand());
+        $this->command = $this->application->find('print-list');
+        $this->commandTester = new CommandTester($this->command);
+    }
+
     public function testListsSingle()
     {
-        $app = new Application();
-        $app->add(new ListCommand());
-
-        $command = $app->find('print-list');
-        $commandTester = new CommandTester($command);
-        $commandTester->execute(['path' => __DIR__.'/../../../demo/movies']);
-
-        $this->assertRegExp('/.*Avatar.*/', $commandTester->getDisplay());
+        $this->commandTester->execute(['path' => __DIR__.'/../../../demo/movies']);
+        $this->assertRegExp('/.*Avatar.*/', $this->commandTester->getDisplay());
     }
 
     public function testFailsGracefullyOnBadInput()
     {
-        $app = new Application();
-        $app->add(new ListCommand());
-
-        $command = $app->find('print-list');
-        $commandTester = new CommandTester($command);
-        $commandTester->execute(['path' => 'does-not-exist']);
-
-        $this->assertRegExp('/.*is not readable\./', $commandTester->getDisplay());
+        $this->commandTester->execute(['path' => 'does-not-exist']);
+        $this->assertRegExp('/.*is not readable\./', $this->commandTester->getDisplay());
     }
 
     public function testAllowsOnlyFilesWithTheRightSize()
@@ -61,9 +67,9 @@ class ListCommandTest extends BaseTestCase
           ->shouldReceive('getMovieSizeInMb')
           ->twice()
           ->andReturn(500, 1500);
+
         $app = new Application();
         $app->add($listCommand);
-
         $command = $app->find('print-list');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
@@ -103,10 +109,7 @@ class ListCommandTest extends BaseTestCase
      */
     public function getSortOutput($sortBy, array $otherOptions = [])
     {
-        $app = new Application();
-        $app->add(new ListCommand());
-
-        $command = $app->find('print-list');
+        $command = $this->application->find('print-list');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
           'path' => __DIR__.'/../../../demo/movies',
