@@ -14,9 +14,15 @@ class ConfigTest extends BaseTestCase
         new Config('/doesnotexist/config.yml');
     }
 
-    public function testGetsCorrectEntry()
+    public function testTmdbApiKey()
     {
         $config = new Config();
         $this->assertNotEmpty($config->tmdbApiKey());
+    }
+
+    public function testAllowedMovieFormats()
+    {
+        $config = new Config();
+        $this->assertNotEmpty($config->allowedMovieFormats());
     }
 }
