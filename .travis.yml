@@ -4,7 +4,7 @@ php:
  - 7.0
 
 before_script:
-    - composer install --prefer-dist
+ - composer install --prefer-dist
  - cp config.sample.json config.json
 
 script: vendor/bin/phpunit --coverage-text  --coverage-clover=coverage.clover
