@@ -16,7 +16,7 @@ class ManageCommandTest extends BaseTestCase
 
         $command = $app->find('manage');
         $commandTester = new CommandTester($command);
-        $commandTester->execute(['path' => __DIR__.'/../../../demo/movies', '--show-all' => true]);
+        $commandTester->execute(['path' => __DIR__.'/../../../demo/movies', '--show-all --no-trailer' => true]);
 
         $this->assertRegExp('/.*Avatar \(2009\).mkv.*/m', $commandTester->getDisplay());
     }
