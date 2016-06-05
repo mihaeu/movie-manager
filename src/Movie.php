@@ -159,10 +159,12 @@ class Movie
 
     /**
      * @param boolean $adult
+     * @return Movie
      */
-    public function setAdult($adult)
+    public function setAdult($adult) : Movie
     {
         $this->adult = $adult;
+        return $this;
     }
 
     /**
@@ -175,10 +177,12 @@ class Movie
 
     /**
      * @param string $backdropUrl
+     * @return Movie
      */
-    public function setBackdropUrl($backdropUrl)
+    public function setBackdropUrl($backdropUrl) : Movie
     {
         $this->backdropUrl = $backdropUrl;
+        return $this;
     }
 
     /**
@@ -191,10 +195,12 @@ class Movie
 
     /**
      * @param int $budget
+     * @return Movie
      */
-    public function setBudget($budget)
+    public function setBudget($budget) : Movie
     {
         $this->budget = $budget;
+        return $this;
     }
 
     /**
@@ -207,10 +213,12 @@ class Movie
 
     /**
      * @param array $genres
+     * @return Movie
      */
-    public function setGenres($genres)
+    public function setGenres($genres) : Movie
     {
         $this->genres = $genres;
+        return $this;
     }
 
     /**
@@ -223,10 +231,12 @@ class Movie
 
     /**
      * @param string $homepage
+     * @return Movie
      */
-    public function setHomepage($homepage)
+    public function setHomepage($homepage) : Movie
     {
         $this->homepage = $homepage;
+        return $this;
     }
 
     /**
@@ -239,10 +249,12 @@ class Movie
 
     /**
      * @param int $id
+     * @return Movie
      */
-    public function setId($id)
+    public function setId($id) : Movie
     {
         $this->id = $id;
+        return $this;
     }
 
     /**
@@ -255,10 +267,12 @@ class Movie
 
     /**
      * @param string $imdbId
+     * @return Movie
      */
-    public function setImdbId($imdbId)
+    public function setImdbId($imdbId) : Movie
     {
         $this->imdbId = $imdbId;
+        return $this;
     }
 
     /**
@@ -271,10 +285,12 @@ class Movie
 
     /**
      * @param float $imdbRating
+     * @return Movie
      */
-    public function setImdbRating($imdbRating)
+    public function setImdbRating($imdbRating) : Movie
     {
         $this->imdbRating = $imdbRating;
+        return $this;
     }
 
     /**
@@ -287,10 +303,12 @@ class Movie
 
     /**
      * @param string $originalTitle
+     * @return Movie
      */
-    public function setOriginalTitle($originalTitle)
+    public function setOriginalTitle($originalTitle) : Movie
     {
         $this->originalTitle = $originalTitle;
+        return $this;
     }
 
     /**
@@ -303,10 +321,12 @@ class Movie
 
     /**
      * @param string $overview
+     * @return Movie
      */
-    public function setOverview($overview)
+    public function setOverview($overview) : Movie
     {
         $this->overview = $overview;
+        return $this;
     }
 
     /**
@@ -319,10 +339,12 @@ class Movie
 
     /**
      * @param float $popularity
+     * @return Movie
      */
-    public function setPopularity($popularity)
+    public function setPopularity($popularity) : Movie
     {
         $this->popularity = $popularity;
+        return $this;
     }
 
     /**
@@ -335,10 +357,12 @@ class Movie
 
     /**
      * @param string $posterUrl
+     * @return Movie
      */
-    public function setPosterUrl($posterUrl)
+    public function setPosterUrl($posterUrl) : Movie
     {
         $this->posterUrl = $posterUrl;
+        return $this;
     }
 
     /**
@@ -351,10 +375,12 @@ class Movie
 
     /**
      * @param array $productionCompanies
+     * @return Movie
      */
-    public function setProductionCompanies($productionCompanies)
+    public function setProductionCompanies($productionCompanies) : Movie
     {
         $this->productionCompanies = $productionCompanies;
+        return $this;
     }
 
     /**
@@ -367,10 +393,12 @@ class Movie
 
     /**
      * @param array $productionCountries
+     * @return Movie
      */
-    public function setProductionCountries($productionCountries)
+    public function setProductionCountries($productionCountries) : Movie
     {
         $this->productionCountries = $productionCountries;
+        return $this;
     }
 
     /**
@@ -383,10 +411,12 @@ class Movie
 
     /**
      * @param string $releaseDate
+     * @return Movie
      */
-    public function setReleaseDate($releaseDate)
+    public function setReleaseDate($releaseDate) : Movie
     {
         $this->releaseDate = $releaseDate;
+        return $this;
     }
 
     /**
@@ -399,10 +429,12 @@ class Movie
 
     /**
      * @param int $revenue
+     * @return Movie
      */
-    public function setRevenue($revenue)
+    public function setRevenue($revenue) : Movie
     {
         $this->revenue = $revenue;
+        return $this;
     }
 
     /**
@@ -415,10 +447,12 @@ class Movie
 
     /**
      * @param int $runtime
+     * @return Movie
      */
-    public function setRuntime($runtime)
+    public function setRuntime($runtime) : Movie
     {
         $this->runtime = $runtime;
+        return $this;
     }
 
     /**
@@ -431,10 +465,12 @@ class Movie
 
     /**
      * @param array $spokenLanguages
+     * @return Movie
      */
-    public function setSpokenLanguages($spokenLanguages)
+    public function setSpokenLanguages($spokenLanguages) : Movie
     {
         $this->spokenLanguages = $spokenLanguages;
+        return $this;
     }
 
     /**
@@ -447,10 +483,12 @@ class Movie
 
     /**
      * @param string $status
+     * @return Movie
      */
-    public function setStatus($status)
+    public function setStatus($status) : Movie
     {
         $this->status = $status;
+        return $this;
     }
 
     /**
@@ -463,10 +501,12 @@ class Movie
 
     /**
      * @param string $tagline
+     * @return Movie
      */
-    public function setTagline($tagline)
+    public function setTagline($tagline) : Movie
     {
         $this->tagline = $tagline;
+        return $this;
     }
 
     /**
@@ -479,10 +519,12 @@ class Movie
 
     /**
      * @param string $title
+     * @return Movie
      */
-    public function setTitle($title)
+    public function setTitle($title) : Movie
     {
         $this->title = $title;
+        return $this;
     }
 
     /**
@@ -495,10 +537,12 @@ class Movie
 
     /**
      * @param float $voteAverage
+     * @return Movie
      */
-    public function setVoteAverage($voteAverage)
+    public function setVoteAverage($voteAverage) : Movie
     {
         $this->voteAverage = $voteAverage;
+        return $this;
     }
 
     /**
@@ -511,10 +555,12 @@ class Movie
 
     /**
      * @param int $voteCount
+     * @return Movie
      */
-    public function setVoteCount($voteCount)
+    public function setVoteCount($voteCount) : Movie
     {
         $this->voteCount = $voteCount;
+        return $this;
     }
 
     /**
@@ -527,10 +573,12 @@ class Movie
 
     /**
      * @param int $year
+     * @return Movie
      */
-    public function setYear($year)
+    public function setYear($year) : Movie
     {
         $this->year = $year;
+        return $this;
     }
 
     /**
@@ -543,10 +591,12 @@ class Movie
 
     /**
      * @param array $cast
+     * @return Movie
      */
-    public function setCast($cast)
+    public function setCast($cast) : Movie
     {
         $this->cast = $cast;
+        return $this;
     }
 
     /**
@@ -559,10 +609,12 @@ class Movie
 
     /**
      * @param array $character
+     * @return Movie
      */
-    public function setCharacter($character)
+    public function setCharacter($character) : Movie
     {
         $this->character = $character;
+        return $this;
     }
 
     /**
@@ -575,10 +627,12 @@ class Movie
 
     /**
      * @param array $directors
+     * @return Movie
      */
-    public function setDirectors($directors)
+    public function setDirectors($directors) : Movie
     {
         $this->directors = $directors;
+        return $this;
     }
 
     /**
@@ -591,10 +645,12 @@ class Movie
 
     /**
      * @param string $trailer
+     * @return Movie
      */
-    public function setTrailer($trailer)
+    public function setTrailer($trailer) : Movie
     {
         $this->trailer = $trailer;
+        return $this;
     }
 
     /**

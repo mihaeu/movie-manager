@@ -4,25 +4,41 @@ namespace Mihaeu\MovieManager\Tests;
 
 use Mihaeu\MovieManager\Console\PhantomJsWrapper;
 use Mihaeu\MovieManager\Console\YoutubeDlWrapper;
+use Mihaeu\MovieManager\IO\Downloader;
 use Mihaeu\MovieManager\IO\Filesystem;
 use Mihaeu\MovieManager\Movie;
 use Mihaeu\MovieManager\MovieHandler;
 
 class MovieHandlerTest extends BaseTestCase
 {
+    /** @var Filesystem|\PHPUnit_Framework_MockObject_MockObject */
+    private $mockFileSystem;
+
+    /** @var YoutubeDlWrapper|\PHPUnit_Framework_MockObject_MockObject */
     private $youtubeDlMock;
+
+    /** @var PhantomJsWrapper|\PHPUnit_Framework_MockObject_MockObject */
     private $phantomJsMock;
+
+    /** @var Downloader|\PHPUnit_Framework_MockObject_MockObject */
+    private $downloader;
+
+    /** @var MovieHandler */
+    private $movieHandler;
 
     public function setUp()
     {
-        $this->youtubeDlMock = $this
-            ->getMockBuilder(YoutubeDlWrapper::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->phantomJsMock = $this
-            ->getMockBuilder(PhantomJsWrapper::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->youtubeDlMock = $this->createMock(YoutubeDlWrapper::class);
+        $this->phantomJsMock = $this->createMock(PhantomJsWrapper::class);
+        $this->mockFileSystem = $this->createMock(Filesystem::class);
+        $this->downloader = $this->createMock(Downloader::class);
+
+        $this->movieHandler = new MovieHandler(
+            $this->mockFileSystem,
+            $this->youtubeDlMock,
+            $this->phantomJsMock,
+            $this->downloader
+        );
     }
 
     public function tearDown()
@@ -32,85 +48,71 @@ class MovieHandlerTest extends BaseTestCase
 
     public function testGeneratesProperMovieName()
     {
-        $movie = new Movie();
-        $movie->setTitle('Avatar');
-        $movie->setYear(2009);
+        $movie = (new Movie())
+            ->setTitle('Avatar')
+            ->setYear(2009);
 
         $this->createTestStructure(['avatar.mkv']);
         $movieFile = new \SplFileInfo($this->testDirectory.'/avatar.mkv');
 
-        $mockFilesystem = \Mockery::mock('Mihaeu\MovieManager\IO\Filesystem'); /** @var Filesystem $mockFilesystem */
-        $handler = new MovieHandler(
-            $mockFilesystem,
-            $this->youtubeDlMock,
-            $this->phantomJsMock
-        );
-        $filename = $handler->generateFileName($movie, $movieFile);
+         /** @var Filesystem $mockFilesystem */
+        $filename = $this->movieHandler->generateFileName($movie, $movieFile);
         $this->assertEquals($this->testDirectory.'/Avatar (2009)', $filename);
 
-        $filename = $handler->generateFileName($movie, $movieFile, '.mkv');
+        $filename = $this->movieHandler->generateFileName($movie, $movieFile, '.mkv');
         $this->assertEquals($this->testDirectory.'/Avatar (2009).mkv', $filename);
     }
 
     public function testGeneratesIMDbLinkFromId()
     {
-        $mockFilesystem = \Mockery::mock('Mihaeu\MovieManager\IO\Filesystem');  /** @var Filesystem $mockFilesystem */
-        $handler = new MovieHandler(
-            $mockFilesystem,
-            $this->youtubeDlMock,
-            $this->phantomJsMock
-        );
-        $this->assertEquals('http://www.imdb.com/title/tt123456', $handler->getIMDbLink('tt123456'));
+        $this->assertEquals('http://www.imdb.com/title/tt123456', $this->movieHandler->getIMDbLink('tt123456'));
     }
 
     public function testExtractsReleaseYearFromReleaseDate()
     {
-        $handler = new MovieHandler(
-            new Filesystem(),
-            $this->youtubeDlMock,
-            $this->phantomJsMock
-        );
-        $this->assertEquals('2020', $handler->convertMovieYear('10-10-2020'));
+        $this->assertEquals('2020', $this->movieHandler->convertMovieYear('10-10-2020'));
     }
 
     public function testRenameMovie()
     {
-        $movie = new Movie();
-        $movie->setTitle('Avatar');
-        $movie->setYear(2009);
+        $movie = (new Movie())
+            ->setTitle('Avatar')
+            ->setYear(2009);
 
         $this->createTestStructure(['avatar.mkv']);
         $movieFile = new \SplFileInfo($this->testDirectory.'/avatar.mkv');
 
-        $handler = new MovieHandler(
+        $this->movieHandler = new MovieHandler(
             new Filesystem(),
             $this->youtubeDlMock,
-            $this->phantomJsMock
+            $this->phantomJsMock,
+            $this->downloader
         );
-        $handler->renameMovie($movie, $movieFile);
+        $this->movieHandler->renameMovie($movie, $movieFile);
 
-        $this->assertTrue(file_exists($this->testDirectory.'/Avatar (2009).mkv'));
-        $this->assertFalse($handler->renameMovie($movie, $movieFile));
+        $this->assertFileExists($this->testDirectory . '/Avatar (2009).mkv');
+        $this->assertFalse($this->movieHandler->renameMovie($movie, $movieFile));
     }
 
     public function testRenameMovieDirectory()
     {
-        $movie = new Movie();
-        $movie->setTitle('Avatar');
-        $movie->setYear(2009);
+        $movie = (new Movie())
+            ->setTitle('Avatar')
+            ->setYear(2009);
 
         $this->createTestStructure(['avatar/avatar.mkv']);
         $movieFile = new \SplFileInfo($this->testDirectory.'/avatar/avatar.mkv');
 
-        $handler = new MovieHandler(
+        $this->movieHandler = new MovieHandler(
             new Filesystem(),
             $this->youtubeDlMock,
-            $this->phantomJsMock
+            $this->phantomJsMock,
+            $this->downloader
         );
-        $handler->renameMovieFolder($movie, $movieFile);
+        $this->movieHandler->renameMovieFolder($movie, $movieFile);
 
-        $this->assertTrue(file_exists($this->testDirectory.'/Avatar (2009)/avatar.mkv'));
-        $this->assertFalse($handler->renameMovieFolder($movie, $movieFile));
+        $this->assertFileExists($this->testDirectory . '/Avatar (2009)/avatar.mkv');
+        $this->assertFalse($this->movieHandler->renameMovieFolder($movie, $movieFile));
     }
 
     public function testCreatesMovieInfo()
@@ -118,21 +120,22 @@ class MovieHandlerTest extends BaseTestCase
         $this->createTestStructure(['avatar/avatar.mkv']);
         $movieFile = new \SplFileInfo($this->testDirectory.'/avatar/avatar.mkv');
 
-        $movie = new Movie();
-        $movie->setTitle('Avatar');
-        $movie->setYear(2009);
-        $movie->setImdbId('tt123456');
-        $movie->setDirectors(['Michael Bay']);
+        $movie = (new Movie())
+            ->setTitle('Avatar')
+            ->setYear(2009)
+            ->setImdbId('tt123456')
+            ->setDirectors(['Michael Bay']);
 
-        $handler = new MovieHandler(
+        $this->movieHandler = new MovieHandler(
             new Filesystem(),
             $this->youtubeDlMock,
-            $this->phantomJsMock
+            $this->phantomJsMock,
+            $this->downloader
         );
-        $handler->createMovieInfo($movie, $movieFile);
+        $this->movieHandler->createMovieInfo($movie, $movieFile);
 
         $movieInfo = $this->testDirectory.'/avatar/Avatar (2009) - IMDb.url';
-        $this->assertTrue(file_exists($movieInfo));
+        $this->assertFileExists($movieInfo);
         $movieInfoContent = file_get_contents($movieInfo);
         $this->assertRegExp('/year=2009.*title="Avatar".*\[directors\]/sm', $movieInfoContent);
     }
@@ -142,12 +145,13 @@ class MovieHandlerTest extends BaseTestCase
         $this->createTestStructure(['avatar/avatar.mkv']);
         $movieFile = new \SplFileInfo($this->testDirectory.'/avatar/avatar.mkv');
 
-        $handler = new MovieHandler(
+        $this->movieHandler = new MovieHandler(
             new Filesystem(),
             $this->youtubeDlMock,
-            $this->phantomJsMock
+            $this->phantomJsMock,
+            $this->downloader
         );
-        $handler->moveTo($movieFile, $this->testDirectory.'/target');
+        $this->movieHandler->moveTo($movieFile, $this->testDirectory.'/target');
 
         $this->assertFileExists($this->testDirectory . '/target/avatar/avatar.mkv');
     }
@@ -158,14 +162,9 @@ class MovieHandlerTest extends BaseTestCase
         $movieFileInSeparateFolder = new \SplFileInfo($this->testDirectory.'/avatar/avatar.mkv');
         $movieFileNotInSeparateFolder = new \SplFileInfo($this->testDirectory.'/the godfather.avi');
 
-        $handler = new MovieHandler(
-            new Filesystem(),
-            $this->youtubeDlMock,
-            $this->phantomJsMock
-        );
         $root = new \SplFileInfo($this->testDirectory);
-        $this->assertTrue($handler->movieIsNotInSeparateFolder($root, $movieFileNotInSeparateFolder));
-        $this->assertFalse($handler->movieIsNotInSeparateFolder($root, $movieFileInSeparateFolder));
+        $this->assertTrue($this->movieHandler->movieIsNotInSeparateFolder($root, $movieFileNotInSeparateFolder));
+        $this->assertFalse($this->movieHandler->movieIsNotInSeparateFolder($root, $movieFileInSeparateFolder));
     }
 
     public function testMovesMovieToSeparateDirectory()
@@ -173,28 +172,66 @@ class MovieHandlerTest extends BaseTestCase
         $this->createTestStructure(['the godfather.avi']);
         $movieFile = new \SplFileInfo($this->testDirectory.'/the godfather.avi');
 
-        $handler = new MovieHandler(
-            new Filesystem(),
-            $this->youtubeDlMock,
-            $this->phantomJsMock
-        );
         $root = new \SplFileInfo($this->testDirectory);
-        $newDestination = $handler->moveMovieToSeparateFolder($root, $movieFile);
+        $newDestination = $this->movieHandler->moveMovieToSeparateFolder($root, $movieFile);
         $this->assertFileExists($newDestination);
     }
 
     public function testDownloadsMoviePoster()
     {
-        $this->markTestIncomplete('Method needs to be refactored to avoid expensive network access.');
+        $movie = (new Movie())
+            ->setTitle('Avatar')
+            ->setYear(2009)
+            ->setImdbId('tt123456')
+            ->setDirectors(['Michael Bay'])
+            ->setPosterUrl('http://example.com');
+
+        $this->createTestStructure(['the godfather.avi']);
+        $movieFile = new \SplFileInfo($this->testDirectory.'/the godfather.avi');
+
+        $this->downloader->expects($this->once())
+            ->method('download')
+            ->with('http://example.com', $this->stringContains('Avatar'))
+            ->willReturn(true);
+        $this->movieHandler->downloadMoviePoster($movie, $movieFile);
     }
 
     public function testDownloadsScreenshotOfImdbPage()
     {
-        $this->markTestIncomplete('Method needs to be refactored to avoid expensive network access.');
+        $movie = (new Movie())
+            ->setTitle('Avatar')
+            ->setYear(2009)
+            ->setImdbId('tt123456')
+            ->setDirectors(['Michael Bay'])
+            ->setPosterUrl('http://example.com');
+
+        $this->createTestStructure(['the godfather.avi']);
+        $movieFile = new \SplFileInfo($this->testDirectory.'/the godfather.avi');
+
+        $this->phantomJsMock->expects($this->once())
+            ->method('downloadScreenshot')
+            ->with('http://www.imdb.com/title/tt123456', $this->stringContains('Avatar'))
+            ->willReturn(true);
+        $this->movieHandler->downloadIMDbScreenshot($movie, $movieFile);
     }
 
     public function testDownloadTrailer()
     {
-        $this->markTestIncomplete('Method needs to be refactored to avoid expensive network access.');
+        $movie = (new Movie())
+            ->setTitle('Avatar')
+            ->setYear(2009)
+            ->setImdbId('tt123456')
+            ->setDirectors(['Michael Bay'])
+            ->setPosterUrl('http://example.com')
+            ->setTrailer('Trailer');
+
+        $this->createTestStructure(['the godfather.avi']);
+        $movieFile = new \SplFileInfo($this->testDirectory.'/the godfather.avi');
+
+        $this->youtubeDlMock->expects($this->once())
+            ->method('download')
+            ->with('Trailer', $this->stringContains('Avatar'))
+            ->willReturn(true);
+        $this->movieHandler->downloadTrailer($movie, $movieFile);
     }
 }

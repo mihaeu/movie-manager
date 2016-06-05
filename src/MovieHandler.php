@@ -4,6 +4,7 @@ namespace Mihaeu\MovieManager;
 
 use Mihaeu\MovieManager\Console\PhantomJsWrapper;
 use Mihaeu\MovieManager\Console\YoutubeDlWrapper;
+use Mihaeu\MovieManager\IO\Downloader;
 use Mihaeu\MovieManager\IO\Filesystem;
 use Mihaeu\MovieManager\IO\FilesystemInterface;
 use Mihaeu\MovieManager\IO\Ini;
@@ -26,15 +27,20 @@ class MovieHandler
     /** @var PhantomJsWrapper */
     private $phantomJs;
 
+    /** @var Downloader */
+    private $downloader;
+
     public function __construct(
         FilesystemInterface $filesystem,
         YoutubeDlWrapper $youtubeDl,
-        PhantomJsWrapper $phantomJsWrapper
+        PhantomJsWrapper $phantomJsWrapper,
+        Downloader $downloader
     )
     {
         $this->filesystem = $filesystem;
         $this->youtubeDl = $youtubeDl;
         $this->phantomJs = $phantomJsWrapper;
+        $this->downloader = $downloader;
     }
 
     /**
@@ -102,9 +108,7 @@ class MovieHandler
     {
         $srcExtension = substr(strrchr($movie->getPosterUrl(), '.'), 1);
         $destination = $this->generateFileName($movie, $movieFile, ' - Poster.'.$srcExtension);
-        file_put_contents($destination, file_get_contents($movie->getPosterUrl()));
-
-        return file_exists($destination);
+        return $this->downloader->download($movie->getPosterUrl(), $destination);
     }
 
     /**
@@ -117,20 +121,10 @@ class MovieHandler
      */
     public function downloadIMDbScreenshot(Movie $movie, \SplFileInfo $movieFile)
     {
-        // check if phantomjs exists in the right version
-        if (exec('phantomjs --version') < 1) {
-            return false;
-        }
-
-        $url = $this->getIMDbLink($movie->getImdbId());
-        $script = __DIR__.'/../rasterize.js';
-        $target = $this->generateFileName($movie, $movieFile, ' - IMDb.png');
-        $cmd = "phantomjs $script \"$url\" \"$target\"";
-        $returnVal = 1;
-        $output = [];
-        exec($cmd, $output, $returnVal);
-
-        return 0 === $returnVal;
+        return $this->phantomJs->downloadScreenshot(
+            $this->getIMDbLink($movie->getImdbId()),
+            $this->generateFileName($movie, $movieFile, ' - IMDb.png')
+        );
     }
 
     /**
@@ -248,8 +242,8 @@ class MovieHandler
         }
 
         return $this->youtubeDl->download(
-            $this->generateFileName($movie, $movieFile),
-            $movie->getTrailer()
+            $movie->getTrailer(),
+            $this->generateFileName($movie, $movieFile)
         );
     }
 }

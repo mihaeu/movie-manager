@@ -1,6 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+use Mihaeu\MovieManager\Console\PhantomJsWrapper;
+use Mihaeu\MovieManager\Console\YoutubeDlWrapper;
+use Mihaeu\MovieManager\IO\Downloader;
 use Symfony\Component\Console\Application;
 use Mihaeu\MovieManager\Console\BuildCommand;
 use Mihaeu\MovieManager\Console\CopyCommand;
@@ -31,5 +34,9 @@ $app = new Application();
 $app->add(new CopyCommand());
 $app->add(new ListCommand());
 $app->add(new BuildCommand());
-$app->add(new ManageCommand($this->youtubeDlWrapper, $this->phantomJsWrapper));
+$app->add(new ManageCommand(
+    new YoutubeDlWrapper(),
+    new PhantomJsWrapper(),
+    new Downloader()
+));
 $app->run();

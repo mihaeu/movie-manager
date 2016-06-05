@@ -9,10 +9,10 @@ class YoutubeDlWrapper
         $this->ensureYoutubeDlIsInstalled();
     }
 
-    public function download(string $movieFilenameWithoutExt, string $youtubeUrl)
+    public function download(string $youtubeUrl, string $movieFilenameWithoutExt) : bool
     {
-        $cmd = "youtube-dl "
-            . "--format 22 '$youtubeUrl' "
+        $cmd = 'youtube-dl '
+            . "--format 18 '$youtubeUrl' "
             . "--output '$movieFilenameWithoutExt- Trailer.%(ext)s'";
         exec($cmd);
 

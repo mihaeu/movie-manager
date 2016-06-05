@@ -7,6 +7,7 @@ use Mihaeu\MovieManager\Config;
 use Mihaeu\MovieManager\Factory\FileSetFactory;
 use Mihaeu\MovieManager\Factory\MovieFactory;
 use Mihaeu\MovieManager\FileSet;
+use Mihaeu\MovieManager\IO\Downloader;
 use Mihaeu\MovieManager\IO\Filesystem;
 use Mihaeu\MovieManager\IO\Ini;
 use Mihaeu\MovieManager\MovieDatabase\IMDb;
@@ -66,14 +67,15 @@ class ManageCommand extends BaseCommand
     /** @var MovieHandler */
     private $movieHandler;
 
-    public function __construct(YoutubeDlWrapper $youtubeDlWrapper, PhantomJsWrapper $phantomJsWrapper)
+    public function __construct(YoutubeDlWrapper $youtubeDlWrapper, PhantomJsWrapper $phantomJsWrapper, Downloader $downloader)
     {
         parent::__construct();
 
         $this->movieHandler = new MovieHandler(
             new Filesystem(),
             $youtubeDlWrapper,
-            $phantomJsWrapper
+            $phantomJsWrapper,
+            $downloader
         );
     }
 
