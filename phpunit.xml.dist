@@ -4,7 +4,7 @@
          beStrictAboutTestsThatDoNotTestAnything="true"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTodoAnnotatedTests="true"
-         checkForUnintentionallyCoveredCode="true"
+         beStrictAboutCoversAnnotation="true"
          colors="true"
          verbose="true">
     <testsuite name="tests">
