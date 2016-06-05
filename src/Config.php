@@ -24,28 +24,32 @@ class Config
         if (null === $configFile) {
             $configFile = __DIR__ . '/../config.json';
         }
-        if (!file_exists($configFile)) {
-            throw new \Exception($configFile . ' does not exist, please create it or rename config.sample.json.'.PHP_EOL);
-        }
+        $this->ensureFileIsReadable($configFile);
 
         $this->config = json_decode(file_get_contents($configFile), true);
     }
 
+    public function tmdbApiKey() : string
+    {
+        return $this->config['tmdb-api-key'];
+    }
+
     /**
-     * Get a value from the configuration.
-     *
-     * @param string  $key
-     *
-     * @return mixed
-     *
+     * @return string[]
+     */
+    public function allowedMovieFormats() : array
+    {
+        return $this->config['allowed-movie-formats'];
+    }
+
+    /**
+     * @param $configFile
      * @throws \Exception
      */
-    public function get($key)
+    private function ensureFileIsReadable($configFile)
     {
-        if (!isset($this->config[$key])) {
-            throw new \Exception("Key $key is not in your configuration file.".PHP_EOL);
+        if (!is_readable($configFile)) {
+            throw new \Exception($configFile . ' does not exist, please create it or rename config.sample.json.' . PHP_EOL);
         }
-
-        return $this->config[$key];
     }
 }

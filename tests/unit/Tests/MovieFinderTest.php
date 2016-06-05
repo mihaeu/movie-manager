@@ -5,6 +5,12 @@ namespace Mihaeu\MovieManager\Tests;
 use Mihaeu\MovieManager\Factory\FileSetFactory;
 use Mihaeu\MovieManager\MovieFinder;
 
+/**
+ * @covers Mihaeu\MovieManager\MovieFinder
+ *
+ * @covers Mihaeu\MovieManager\Factory\FileSetFactory
+ * @covers Mihaeu\MovieManager\FileSet
+ */
 class MovieFinderTest extends BaseTestCase
 {
     /**

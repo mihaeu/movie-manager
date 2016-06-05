@@ -17,15 +17,6 @@ class ConfigTest extends BaseTestCase
     public function testGetsCorrectEntry()
     {
         $config = new Config();
-        $this->assertNotEmpty($config->get('tmdb-api-key'));
-    }
-
-    /**
-     * @expectedException \Exception
-     */
-    public function testFailsOnIncorrectEntry()
-    {
-        $config = new Config();
-        $this->assertNotEmpty($config->get('give-me-some-sugar'));
+        $this->assertNotEmpty($config->tmdbApiKey());
     }
 }

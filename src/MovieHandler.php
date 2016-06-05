@@ -243,18 +243,13 @@ class MovieHandler
      */
     public function downloadTrailer(Movie $movie, \SplFileInfo $movieFile)
     {
-        // check if youtube-dl exists in the right version
-        if (exec('youtube-dl --version') < 1 || null === $movie->getTrailer()) {
+        if (null === $movie->getTrailer()) {
             return false;
         }
 
-        $filesBefore = scandir($movieFile->getPath());
-        $cmd = 'youtube-dl --format 22 "'.$movie->getTrailer().'" --output "'
-            .$this->generateFileName($movie, $movieFile).' - Trailer.%(ext)s"';
-        $returnVal = false;
-        system($cmd, $returnVal);
-        $filesAfter = scandir($movieFile->getPath());
-        $trailerFilename = $movieFile->getPath().'/'.array_pop(array_diff($filesAfter, $filesBefore));
-        return file_exists($trailerFilename);
+        return $this->youtubeDl->download(
+            $this->generateFileName($movie, $movieFile),
+            $movie->getTrailer()
+        );
     }
 }

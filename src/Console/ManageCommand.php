@@ -93,6 +93,7 @@ class ManageCommand extends BaseCommand
 
     /**
      * {@inheritdoc}
+     * @throws \Exception
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -100,10 +101,10 @@ class ManageCommand extends BaseCommand
         $this->io = new IO($input, $output, $this->getHelperSet());
 
         $this->movieRoot = new \SplFileInfo($input->getArgument('path'));
-        $finder = new MovieFinder(new FileSetFactory($this->movieRoot), $config->get('allowed-movie-formats'));
+        $finder = new MovieFinder(new FileSetFactory($this->movieRoot), $config->allowedMovieFormats());
         $movieFiles = $finder->findMoviesInDir();
 
-        $this->tmdb = new TMDb($config->get('tmdb-api-key'));
+        $this->tmdb = new TMDb($config->tmdbApiKey());
         $client = new Client();
         $ini = new Ini(new Filesystem());
         $this->movieFactory = new MovieFactory($this->tmdb, new IMDb($client), new OMDb($client), $ini);

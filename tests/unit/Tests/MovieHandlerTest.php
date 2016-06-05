@@ -149,7 +149,7 @@ class MovieHandlerTest extends BaseTestCase
         );
         $handler->moveTo($movieFile, $this->testDirectory.'/target');
 
-        $this->assertTrue(file_exists($this->testDirectory.'/target/avatar/avatar.mkv'));
+        $this->assertFileExists($this->testDirectory . '/target/avatar/avatar.mkv');
     }
 
     public function testDetectsIfMovieIsInSeparateDirectory()
@@ -180,7 +180,7 @@ class MovieHandlerTest extends BaseTestCase
         );
         $root = new \SplFileInfo($this->testDirectory);
         $newDestination = $handler->moveMovieToSeparateFolder($root, $movieFile);
-        $this->assertTrue(file_exists($newDestination));
+        $this->assertFileExists($newDestination);
     }
 
     public function testDownloadsMoviePoster()
