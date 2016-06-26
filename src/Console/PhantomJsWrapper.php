@@ -11,7 +11,7 @@ class PhantomJsWrapper
 
     public function downloadScreenshot(string $url, string $destination) : bool
     {
-        $script = __DIR__.'/../rasterize.js';
+        $script = __DIR__.'/../../rasterize.js';
         $cmd = "phantomjs $script \"$url\" \"$destination\"";
         $returnVal = 1;
         $output = [];
