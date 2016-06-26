@@ -39,7 +39,7 @@ class ManageCommand extends BaseCommand
     const MSG_MOVE_DIRECTORY            = '[%s] Renaming movie directory ... ';
     const MSG_MOVE_SEPARATE_DIRECTORY   = '[%s] Moving to separate movie directory ... ';
     const MSG_MOVE_TO_ROOT              = '[%s] Moving to new destination ... ';
-    const MSG_NO_MOVIES                 = '<info>Couldn\'t find any movies.</info>';
+    const MSG_NO_MOVIES                 = '<info>No movies to process.</info>';
     const MSG_NO_MATCHES                = '<error>No matches for your query.</error>';
 
     const QUESTION_TITLE = 'Please enter the movie title [or hit ENTER to skip, p to play, q to quit]: ';
@@ -104,6 +104,12 @@ class ManageCommand extends BaseCommand
                 InputOption::VALUE_REQUIRED,
                 'Moves the parsed file to another directory.'
             )
+            ->addOption(
+                'trailer',
+                null,
+                InputOption::VALUE_NONE,
+                'Download the trailer for the movie.'
+            )
         ;
     }
 
@@ -139,7 +145,7 @@ class ManageCommand extends BaseCommand
             $this->formatMoviesForTable($movieFiles)
         );
 
-        $this->manageMoviesInteractively($movieFiles);
+        $this->manageMoviesInteractively($movieFiles, $input->getOption('trailer'));
     }
 
     /**
@@ -188,7 +194,7 @@ class ManageCommand extends BaseCommand
      *
      * @throws \Exception
      */
-    public function manageMoviesInteractively(array $fileSets)
+    public function manageMoviesInteractively(array $fileSets, bool $downloadTrailer)
     {
         $movieTitleQuestion =  new Question(self::QUESTION_TITLE);
 
@@ -223,7 +229,7 @@ class ManageCommand extends BaseCommand
 
                 $suggestions = $this->tmdb->getMovieSuggestionsFromQuery($query);
 
-                if (empty($suggestions)) {
+                if (count($suggestions) === 0) {
                     $this->io->write(self::MSG_NO_MATCHES);
                     continue;
                 }
@@ -288,10 +294,13 @@ class ManageCommand extends BaseCommand
                 if ($newDirectory) {
                     $movieFile = new \SplFileObject($newDirectory.'/'.$movieFile->getBasename());
                     $this->io->overwrite(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_OK));
+                } else {
+                    $this->io->overwrite(sprintf(self::MSG_MOVE_DIRECTORY, self::CLI_NOK));
                 }
             }
 
-            if (!file_exists($this->movieHandler->generateFileName($parsedMovie, $movieFile, ' - Trailer.mp4'))) {
+            if ($downloadTrailer
+                && !file_exists($this->movieHandler->generateFileName($parsedMovie, $movieFile, ' - Trailer.mp4'))) {
                 $result = $this->movieHandler->downloadTrailer($parsedMovie, $movieFile);
                 $this->io->write(sprintf(PHP_EOL.self::MSG_CREATE_TRAILER, $result ? self::CLI_OK : self::CLI_NOK));
             }
