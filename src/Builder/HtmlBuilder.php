@@ -180,16 +180,16 @@ class HtmlBuilder implements Builder
     {
         if ($this->imageMagickIsInstalled()) {
             $tempFile = sys_get_temp_dir().'/'.uniqid('asda', true);
-            $command = "convert '$file' -resize ".$newWidth."x"."$newHeight '$tempFile'";
+            $command = 'convert "'.$file.'" -resize '.$newWidth.'x'.$newHeight.' "'.$tempFile.'"';
             exec($command);
             return file_get_contents($tempFile);
         }
 
         if ($this->gdLibraryIsInstalled()) {
+            list($width, $height) = getimagesize($file);
             if ($newWidth === 0) {
                 $newWidth = (int) ($width / ($height / $newHeight));
             }
-            list($width, $height) = getimagesize($file);
 
             $original = imagecreatefromjpeg($file);
             if ($original === false) {
