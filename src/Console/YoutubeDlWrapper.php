@@ -4,13 +4,10 @@ namespace Mihaeu\MovieManager\Console;
 
 class YoutubeDlWrapper
 {
-    public function __construct()
-    {
-        $this->ensureYoutubeDlIsInstalled();
-    }
-
     public function download(string $youtubeUrl, string $movieFilenameWithoutExt) : bool
     {
+        $this->ensureYoutubeDlIsInstalled();
+
         $cmd = 'youtube-dl '
             . "--format 18 '$youtubeUrl' "
             . "--output '$movieFilenameWithoutExt- Trailer.%(ext)s'";

@@ -4,13 +4,10 @@ namespace Mihaeu\MovieManager\Console;
 
 class PhantomJsWrapper
 {
-    public function __construct()
-    {
-        $this->ensurePhantomJsIsInstalled();
-    }
-
     public function downloadScreenshot(string $url, string $destination) : bool
     {
+        $this->ensurePhantomJsIsInstalled();
+
         $script = __DIR__.'/../../rasterize.js';
         $cmd = "phantomjs $script \"$url\" \"$destination\"";
         $returnVal = 1;
