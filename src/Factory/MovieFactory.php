@@ -90,6 +90,9 @@ class MovieFactory
         foreach ($data as $key => $value) {
             if ('info' === $key) {
                 foreach ($value as $infoKey => $infoValue) {
+                    if (!is_string($infoKey)) {
+                        continue;
+                    }
                     $setterName = 'set'.$this->convertToCamelcase($infoKey, true);
                     if (method_exists($movie, $setterName)) {
                         call_user_func([$movie, $setterName], $infoValue);
@@ -143,7 +146,7 @@ class MovieFactory
      *
      * @return string $str translated into camel caps
      */
-    private function convertToCamelcase($str, $capitalise_first_char = false)
+    private function convertToCamelcase(string $str, bool $capitalise_first_char = false)
     {
         if ($capitalise_first_char) {
             $str = strtoupper(substr($str, 0, 1)).substr($str, 1);
