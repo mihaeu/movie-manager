@@ -33,6 +33,12 @@ class PrintListCommand extends Command
                 InputOption::VALUE_NONE,
                 'Prints the movies with a null character instead of new lines (e.g. for xargs -0).'
             )
+            ->addOption(
+                'print-total',
+                null,
+                InputOption::VALUE_NONE,
+                'Print the total size of all matched movies.'
+            )
         ;
     }
 
@@ -68,6 +74,9 @@ class PrintListCommand extends Command
         }
         foreach ($movies as $movieDirectory => $movie) {
             $output->write($movieDirectory.$eol);
+        }
+        if ($input->getOption('print-total')) {
+            $output->writeln('<info>Total size '.($this->totalSize / 1000).' GB</info>');
         }
 
         return self::RETURN_CODE_OK;

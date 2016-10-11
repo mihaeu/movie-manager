@@ -24,6 +24,9 @@ class Command extends BaseCommand
     const RETURN_CODE_BAD_DIRECTORY = 1;
     const RETURN_CODE_NO_MATCHES    = 2;
 
+    /** @var int */
+    protected $totalSize;
+
     /**
      * @var array
      */
@@ -56,13 +59,13 @@ class Command extends BaseCommand
                 'year-from',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'List only movies from a certain year (e.g. -yf 2000 list movies between 2000-2014).'
+                'List only movies from a certain year (e.g. --year-from 2000 list movies between 2000-now inclusive).'
             )
             ->addOption(
                 'year-to',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'List only movies up to a certain year (e.g. -yt 2000 list movies between 1900-2000).'
+                'List only movies up to a certain year (e.g. --year-to 2000 list movies between 1900-2000 inclusive).'
             )
             ->addOption(
                 'rating',
@@ -131,15 +134,22 @@ class Command extends BaseCommand
 
         if ($this->options['max-size']) {
             $movies = [];
-            $totalSize = 0;
+            $this->totalSize = 0;
             foreach ($this->movies as $movieDirectory => $movie) {
                 $movieSize = $this->getMovieSizeInMb($movieDirectory);
-                if ($totalSize + $movieSize <= $this->options['max-size']) {
-                    $totalSize += $movieSize;
+                if ($this->totalSize + $movieSize <= $this->options['max-size']) {
+                    $this->totalSize += $movieSize;
                     $movies[$movieDirectory] = $movie;
                 }
             }
             $this->movies = $movies;
+        }
+
+        if ($this->options['print-total']) {
+            $this->totalSize = 0;
+            foreach ($this->movies as $movieDirectory => $movie) {
+                $this->totalSize += $this->getMovieSizeInMb($movieDirectory);
+            }
         }
 
         if ($this->options['limit'] && -1 !== $this->options['limit']) {
