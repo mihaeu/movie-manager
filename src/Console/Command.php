@@ -158,19 +158,17 @@ class Command extends BaseCommand
      */
     public function passesFilters(Movie $movie)
     {
-        $yearFrom =
-          // if the filter has not been set, then it passes
-          !$this->options['year-from']
-          // check the condition
-          && $movie->getReleaseDate() >= $this->options['year-from'];
+        $yearFrom = $this->options['year-from']
+            ? (int) $movie->getYear() >= (int) $this->options['year-from']
+            : true;
 
-        $yearTo =
-          !$this->options['year-to']
-          || $movie->getReleaseDate() <= $this->options['year-to'];
+        $yearTo = $this->options['year-to']
+            ? $movie->getYear() <= $this->options['year-to']
+            : true;
 
-        $rating =
-          !$this->options['rating']
-          && $movie->getImdbRating() >= $this->options['rating'];
+        $rating = $this->options['rating']
+            ? $movie->getImdbRating() >= $this->options['rating']
+            : true;
 
         return $yearFrom && $yearTo && $rating;
     }
