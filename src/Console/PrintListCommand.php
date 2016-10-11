@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Mihaeu\MovieManager\Console;
 
@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @author Michael Haeuslmann (haeuslmann@gmail.com)
  */
-class ListCommand extends Command
+class PrintListCommand extends Command
 {
     /**
      * {@inheritdoc}

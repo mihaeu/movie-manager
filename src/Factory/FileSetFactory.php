@@ -1,8 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Mihaeu\MovieManager\Factory;
 
 use Mihaeu\MovieManager\FileSet;
+use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * Class FileSetFactory
@@ -25,11 +26,13 @@ class FileSetFactory
     const IMDB_SCREENSHOT_FORMAT    = '%s - IMDb.png';
 
     /**
-     * @param string $rootFolder
+     * @param string|\SplFileInfo $rootFolder
      */
     public function __construct($rootFolder)
     {
-        $this->root = new \SplFileInfo($rootFolder);
+        $this->root = is_string($rootFolder)
+            ? new \SplFileInfo($rootFolder)
+            : $rootFolder;
     }
 
     /**

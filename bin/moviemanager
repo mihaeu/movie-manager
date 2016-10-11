@@ -8,7 +8,7 @@ use Mihaeu\MovieManager\Console\PhantomJsWrapper;
 use Mihaeu\MovieManager\Console\YoutubeDlWrapper;
 use Mihaeu\MovieManager\Console\BuildCommand;
 use Mihaeu\MovieManager\Console\CopyCommand;
-use Mihaeu\MovieManager\Console\ListCommand;
+use Mihaeu\MovieManager\Console\PrintListCommand;
 use Mihaeu\MovieManager\Console\ManageCommand;
 use Symfony\Component\Console\Application;
 
@@ -33,7 +33,7 @@ if (is_file(__DIR__ . '/vendor/autoload.php')) {
 
 $app = new Application();
 $app->add(new CopyCommand());
-$app->add(new ListCommand());
+$app->add(new PrintListCommand());
 $app->add(new BuildCommand());
 $app->add(new ManageCommand(
     new YoutubeDlWrapper(),

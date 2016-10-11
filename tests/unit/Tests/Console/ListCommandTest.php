@@ -1,9 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Mihaeu\MovieManager\Tests\Console;
 
 use Mihaeu\MovieManager\Console\Command;
-use Mihaeu\MovieManager\Console\ListCommand;
+use Mihaeu\MovieManager\Console\PrintListCommand;
 use Mihaeu\MovieManager\Tests\BaseTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -22,7 +22,7 @@ class ListCommandTest extends BaseTestCase
     public function setUp()
     {
         $this->application = new Application();
-        $this->application->add(new ListCommand());
+        $this->application->add(new PrintListCommand());
         $this->command = $this->application->find('print-list');
         $this->commandTester = new CommandTester($this->command);
     }
@@ -41,7 +41,7 @@ class ListCommandTest extends BaseTestCase
 
     public function testAllowsOnlyFilesWithTheRightSize()
     {
-        $listCommand = \Mockery::mock('Mihaeu\MovieManager\Console\ListCommand[getMovieSizeInMb]');
+        $listCommand = \Mockery::mock('Mihaeu\MovieManager\Console\PrintListCommand[getMovieSizeInMb]');
         $listCommand
             ->shouldReceive('getMovieSizeInMb')
             ->twice()
@@ -62,7 +62,7 @@ class ListCommandTest extends BaseTestCase
 
     public function testLimitsTotalFilesizeOfAllMovies()
     {
-        $listCommand = \Mockery::mock('Mihaeu\MovieManager\Console\ListCommand[getMovieSizeInMb]');
+        $listCommand = \Mockery::mock('Mihaeu\MovieManager\Console\PrintListCommand[getMovieSizeInMb]');
         $listCommand
           ->shouldReceive('getMovieSizeInMb')
           ->twice()
